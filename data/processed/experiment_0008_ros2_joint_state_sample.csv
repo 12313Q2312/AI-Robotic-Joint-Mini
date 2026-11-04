@@ -1,0 +1,2 @@
+stamp_sec,stamp_nanosec,joint_name,target_angle_rad,actual_angle_rad,velocity_rad_s,effort_nm
+1790154629,296196653,joint_axis,0.5235990000000001,0.5235990000000001,3.469446951953614e-15,6.036837696399289e-16

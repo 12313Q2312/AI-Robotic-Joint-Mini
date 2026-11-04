@@ -1,0 +1,42 @@
+# Generated environments and builds
+build/
+install/
+log/
+.cache/
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+
+# Credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local outputs; reviewed small historical evidence is versioned
+data/raw/local/
+data/verification/local-check.json
+data/verification/ci-check.json
+output/rebuild/
+*.zip
+*.wbproj
+
+# Editor and OS state
+.idea/
+.vs/
+.vscode/
+*.swp
+*.tmp
+Thumbs.db
+.DS_Store
+
+# Optional local adapters and private runtime logs
+local/
+data/verification/local-*.json

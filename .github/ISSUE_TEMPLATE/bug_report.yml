@@ -1,0 +1,24 @@
+name: 缺陷报告
+description: 用可复现步骤和证据报告问题
+title: "[Bug] "
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 预期行为与实际行为
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤、提交版本与环境
+      description: 附配置、单位、最小输入和脱敏日志；不要提交密钥。
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 证据范围
+      description: 区分离线计算、合成测试、实际 Webots 反馈和硬件结果。
+    validations:
+      required: true

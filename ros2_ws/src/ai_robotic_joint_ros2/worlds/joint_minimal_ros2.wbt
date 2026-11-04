@@ -1,0 +1,121 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation -0.3500836948134843 0.3643762802146438 0.8629434124220884 1.6779899188959724
+  position -0.018677419007787483 -0.6189523708778376 0.6668781470793778
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+}
+Robot {
+  translation 0 0 0.02
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.15 0.45 0.8
+        roughness 1
+        metalness 0
+      }
+      geometry DEF BASE_GEOMETRY Box {
+        size 0.12 0.12 0.04
+      }
+    }
+    # Static visual/mechanical envelope: motor, gearbox and bearing supports.
+    Transform {
+      translation -0.035 0 0.085
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.18 0.18 0.20 roughness 0.7 }
+          geometry Box { size 0.07 0.07 0.09 }
+        }
+      ]
+    }
+    Transform {
+      translation 0.005 0 0.075
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.65 0.65 0.68 roughness 0.45 metalness 0.7 }
+          geometry Cylinder { height 0.035 radius 0.045 }
+        }
+      ]
+    }
+    Transform {
+      translation 0 0 0.052
+      children [
+        Shape {
+          appearance PBRAppearance { baseColor 0.08 0.08 0.08 roughness 0.5 }
+          geometry Cylinder { height 0.025 radius 0.018 }
+        }
+      ]
+    }
+    DEF JOINT_AXIS HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 0 0 1
+        anchor 0 0 0.02
+        minStop -1.5708
+        maxStop 1.5708
+        dampingConstant 0.02
+      }
+      device [
+        RotationalMotor {
+          name "joint_motor"
+          maxTorque 2
+        }
+        PositionSensor {
+          name "joint_sensor"
+        }
+      ]
+      endPoint DEF OUTPUT_LINK Solid {
+        translation 0.07 0 0.02
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.85 0.25 0.15
+              roughness 1
+              metalness 0
+            }
+            geometry DEF LINK_GEOMETRY Box {
+              size 0.14 0.04 0.04
+            }
+          }
+          Transform {
+            translation 0.105 0 0
+            children [
+              Shape {
+                appearance PBRAppearance { baseColor 0.95 0.55 0.08 roughness 0.65 }
+                geometry Box { size 0.05 0.05 0.06 }
+              }
+            ]
+          }
+        ]
+        name "output_link"
+        boundingObject Group {
+          children [
+            Shape { geometry USE LINK_GEOMETRY }
+            Transform {
+              translation 0.105 0 0
+              children [Box { size 0.05 0.05 0.06 }]
+            }
+          ]
+        }
+        physics Physics {
+          density -1
+          mass 1.2
+          # Approximate center of mass and inertia from boundingObject until CAD mass properties are available.
+        }
+      }
+    }
+  ]
+  name "joint_base"
+  boundingObject USE BASE_GEOMETRY
+  controller "<extern>"
+}

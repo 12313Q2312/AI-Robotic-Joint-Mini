@@ -1,0 +1,74 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: #f2f6fb;
+  color: #18314d;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top left, #e5efff 0, #f2f6fb 55%, #f7f9fc 100%);
+}
+main { max-width: 1120px; margin: auto; padding: 32px 24px; }
+header { display: flex; justify-content: space-between; gap: 24px; align-items: center; }
+h1 { font-size: 32px; margin: 8px 0; }
+h1 span { font-size: 13px; letter-spacing: 3px; color: #2464a6; }
+h2 { font-size: 22px; margin: 12px 0; }
+p { color: #50627a; line-height: 1.7; }
+button {
+  font: inherit;
+  background: #edf3fb;
+  color: #234563;
+  border: 1px solid #c2d2e6;
+  border-radius: 9px;
+  padding: 12px 18px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: #79a7df; background: #e0edfc; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #2273c9; outline-offset: 3px; }
+button:disabled { background: #f1f4f8; color: #68798e; border-color: #dce3ec; cursor: not-allowed; }
+button small { display: block; font-size: 11px; color: #526983; }
+nav { display: flex; gap: 10px; margin: 28px 0; }
+nav button { flex: 1; }
+nav button.active { background: #dbeafe; border-color: #8bb1e2; color: #123f70; }
+.eyebrow { font-size: 11px; letter-spacing: 2px; color: #2464a6; margin: 0; }
+.connection { display: grid; gap: 10px; text-align: center; }
+.connection span { font-size: 13px; color: #805000; background: #fff5df; border: 1px solid #ecd6a1; border-radius: 8px; padding: 8px 12px; }
+.layout { display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px; }
+.control, aside {
+  background: #fff;
+  border: 1px solid #d8e2ef;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 28px rgba(38, 73, 113, .06);
+}
+.arrows { text-align: center; margin: 24px 0; }
+.arrows > div { display: flex; justify-content: center; align-items: center; gap: 14px; margin: 10px 0; }
+.arrows button { font-size: 27px; min-width: 82px; touch-action: none; user-select: none; }
+.arrows span { font-size: 12px; color: #60728a; }
+.limits { display: flex; gap: 16px; font-size: 12px; color: #446484; margin: 24px 0 14px; }
+.stop { width: 100%; background: #fff0ed; border-color: #e9a49b; color: #a52727; }
+.stop:hover:not(:disabled) { background: #ffe2dc; border-color: #ce7e73; }
+.actual { font-size: 70px; font-variant-numeric: tabular-nums; color: #206ac0; margin: 18px 0; }
+.actual small { font-size: 28px; color: #60728a; }
+dl > div { display: flex; justify-content: space-between; border-bottom: 1px solid #e2e9f2; padding: 12px 0; }
+dt { color: #586d85; }
+dd { margin: 0; font-variant-numeric: tabular-nums; }
+.footnote, footer { font-size: 12px; color: #60728a; }
+.notice { color: #805000; min-height: 24px; }
+.input-row { display: flex; gap: 12px; margin: 12px 0; }
+input, textarea { font: inherit; background: #f8fafd; color: #18314d; border: 1px solid #c2d2e6; border-radius: 8px; padding: 14px; min-width: 0; width: 100%; }
+input::placeholder, textarea::placeholder { color: #64758a; opacity: 1; }
+textarea { height: 110px; margin: 14px 0; }
+textarea:disabled { background: #f3f6fa; color: #60728a; }
+footer { margin-top: 24px; }
+[hidden] { display: none !important; }
+@media (max-width: 720px) {
+  header { align-items: start; }
+  main { padding: 20px 14px; }
+  .layout { grid-template-columns: 1fr; }
+  nav button { font-size: 12px; padding: 10px 5px; }
+  .control, aside { padding: 22px; }
+  .limits { flex-wrap: wrap; }
+}

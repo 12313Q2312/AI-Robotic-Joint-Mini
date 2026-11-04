@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot name="AI Robotic Joint Mini">
+  <webots>
+    <plugin type="ai_robotic_joint_ros2::JointControllerPlugin">
+      <sensorName>joint_sensor</sensorName>
+      <motorName>joint_motor</motorName>
+      <!-- Mechanical abstraction: motor side -> output joint side. -->
+      <gearRatio>10.0</gearRatio>
+      <transmissionEfficiency>0.90</transmissionEfficiency>
+      <motorTorqueLimitNm>0.0111111111</motorTorqueLimitNm>
+      <loadTorqueNm>-0.020000</loadTorqueNm>
+      <outputMassKg>1.0</outputMassKg>
+      <outputInertiaZKgM2>0.0002</outputInertiaZKgM2>
+    </plugin>
+  </webots>
+</robot>

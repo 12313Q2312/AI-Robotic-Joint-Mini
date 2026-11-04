@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="panel-token" content="__PANEL_TOKEN__"><title>Joint Mini · 人工控制</title><link rel="stylesheet" href="/panel.css"></head>
+<body><main>
+<header><div><p class="eyebrow">AI × ROBOTICS × ENGINEERING</p><h1>关节控制台 <span>MINI</span></h1><p>你的操作决定动作，C++ 闭环负责跟踪。</p></div>
+<div class="connection"><span id="connection" role="status">等待反馈</span><button id="connect">连接控制权</button></div></header>
+<nav aria-label="控制模式"><button data-mode="keyboard" class="active">01 · 键盘控制</button><button data-mode="angle">02 · 输入角度</button><button data-mode="ai">03 · AI 任务 <small>后续开放</small></button></nav>
+<section class="layout"><article class="control">
+<div id="keyboard-panel"><p class="eyebrow">MANUAL JOG</p><h2>低速转动，细步调整</h2><p>保持此页面焦点。上下键按住转动；松开后减速保持。</p>
+<div class="arrows"><button data-key="ArrowUp" aria-label="正向转动">↑<small>正向</small></button><div><button data-nudge="-1" aria-label="减小0.25度">←<small>−0.25°</small></button><span>单关节</span><button data-nudge="1" aria-label="增加0.25度">→<small>+0.25°</small></button></div><button data-key="ArrowDown" aria-label="反向转动">↓<small>反向</small></button></div></div>
+<div id="angle-panel" hidden><p class="eyebrow">POSITION COMMAND</p><h2>输入你要到达的角度</h2><p>以低速轨迹到达，不突然跳到目标。</p><form id="angle-form"><label for="angle">目标角度 / °</label><div class="input-row"><input id="angle" type="number" min="-45" max="45" step="any" required placeholder="例如 12.5"><button type="submit" id="execute">执行</button></div><p>范围 −45° ～ +45°。输入不会自动执行。</p></form></div>
+<div id="ai-panel" hidden><p class="eyebrow">FUTURE CAPABILITY</p><h2>任务交给 AI，决定权仍在你</h2><p>后续：任务描述 → 动作规划 → 人工确认 → 执行与接管。</p><textarea disabled placeholder="例如：缓慢抬起连杆，然后保持。"></textarea><button disabled>后续开放 · 本版不执行</button><p>当前没有模型调用，也没有伪装成 AI 的固定动作。</p></div>
+<div class="limits"><span>参考速度 ≤ 3°/s</span><span>参考加速度 ≤ 5°/s²</span></div><button id="stop" class="stop">■ 停止运动 · 减速保持</button><p class="footnote">不是断电或实物急停。需要立即冻结时，请在 Webots 中暂停。</p></article>
+<aside><p class="eyebrow">LIVE FEEDBACK</p><h2>实际角度</h2><div class="actual"><span id="actual">—</span><small>°</small></div><dl><div><dt>请求目标</dt><dd id="requested">—</dd></div><div><dt>轨迹参考</dt><dd id="reference">—</dd></div><div><dt>跟踪误差</dt><dd id="error">—</dd></div><div><dt>实际速度</dt><dd id="velocity">—</dd></div><div><dt>仿真时间</dt><dd id="time">—</dd></div></dl><p id="reason" role="status">未收到反馈，运动操作已禁用。</p><p id="notice" class="notice" role="alert"></p><p class="footnote">Webots 在另一个窗口。此处显示真实控制器数据；没有连接时不会生成假数据。</p></aside></section>
+<footer>人工控制 Demo · AI 尚未接入 · 0.25° 为指令步进，不等于实际定位精度</footer>
+</main><script src="/panel.js"></script></body></html>

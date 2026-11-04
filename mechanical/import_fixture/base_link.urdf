@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!-- Synthetic converter fixture, NOT a SolidWorks export or the final assembly.
+     SI units; 150 mm link, 0.100 kg uniform box; no payload in this fixture. -->
+<robot name="joint_import_fixture">
+  <link name="base">
+    <visual><geometry><box size="0.060 0.060 0.060"/></geometry></visual>
+    <collision><geometry><box size="0.060 0.060 0.060"/></geometry></collision>
+  </link>
+  <link name="link">
+    <inertial>
+      <origin xyz="0.075 0 0" rpy="0 0 0"/>
+      <mass value="0.100"/>
+      <inertia ixx="0.000006666666667" iyy="0.000190833333333" izz="0.000190833333333" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual><origin xyz="0.075 0 0"/><geometry><box size="0.150 0.020 0.020"/></geometry></visual>
+    <collision><origin xyz="0.075 0 0"/><geometry><box size="0.150 0.020 0.020"/></geometry></collision>
+  </link>
+  <joint name="joint_axis" type="revolute">
+    <parent link="base"/><child link="link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/><axis xyz="0 -1 0"/>
+    <limit lower="-1.047197551196598" upper="1.047197551196598" effort="1" velocity="0.05235987755983"/>
+  </joint>
+</robot>

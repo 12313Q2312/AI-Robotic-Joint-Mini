@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="panel-token" content="__PANEL_TOKEN__">
+  <title>可交互重力补偿关节 · 对比体验</title>
+  <link rel="stylesheet" href="panel.css">
+  <script src="panel.js" defer></script>
+</head>
+<body>
+  <header class="masthead"><span class="eyebrow">AI ROBOTIC JOINT MINI · 本机仿真</span><h1>同一个动作，两种机械方案</h1><p>亲自控制关节，观察重力补偿对电机命令和跟踪的影响。</p></header>
+  <nav class="view-nav" aria-label="体验入口"><button data-view="experience" class="active">开始体验</button><button data-view="principle">了解原理</button><button data-view="engineering">工程资料</button></nav>
+  <main>
+    <aside id="model-notice" class="model-notice" role="status">等待模型说明；F-N 是未优化几何夹具，非最终 CAD。</aside>
+    <section id="experience-view">
+      <div class="status-row"><span id="connection" role="status">无新鲜双侧反馈 · 禁止运动</span><button id="connect">取得控制权</button><button id="stop" class="stop" disabled>停止运动</button></div>
+      <p id="reason" class="muted">等待状态服务</p><p id="notice" class="notice" role="status" aria-live="polite">反馈未连接时不会产生演示运动。</p>
+      <section class="shared-reference" aria-label="共同指令"><div><span>人的请求角度</span><strong id="requested">—</strong></div><div><span>两侧共同轨迹参考</span><strong id="reference">—</strong></div><div><span>共同参考速度</span><strong id="reference-speed">—</strong></div></section>
+      <div class="comparison">
+        <article class="arm-card baseline"><span class="case-label">A · R0 基线</span><h2>无重力补偿</h2><canvas id="baseline-canvas" width="480" height="220" role="img" aria-label="无补偿关节实际角度示意"></canvas><div class="metrics"><div>实际角度<strong id="baseline-actual">—</strong></div><div>跟踪误差<strong id="baseline-error">—</strong></div></div><div class="torque-caption">仿真电机命令 <strong id="baseline-torque">—</strong></div><div class="torque-track"><div id="baseline-bar" class="torque-bar"></div></div><p id="baseline-status" class="muted">等待反馈</p></article>
+        <article class="arm-card candidate"><span id="candidate-label" class="case-label">B · F-N 未优化几何夹具</span><h2>有重力补偿</h2><canvas id="candidate-canvas" width="480" height="220" role="img" aria-label="补偿关节实际角度示意"></canvas><div class="metrics"><div>实际角度<strong id="candidate-actual">—</strong></div><div>跟踪误差<strong id="candidate-error">—</strong></div></div><div class="torque-caption">仿真电机命令 <strong id="candidate-torque">—</strong></div><div class="torque-track"><div id="candidate-bar" class="torque-bar"></div></div><p id="candidate-status" class="muted">等待反馈</p></article>
+      </div>
+      <p class="muted">图中的连杆角度只来自双侧实时反馈；不是 Webots 三维窗口，也不是真实触觉。力矩条以 ±1 N·m 显示，超出时标记限幅状态。</p>
+      <section class="controls"><h2>你来决定动作</h2><div class="mode-nav" aria-label="控制方式"><button data-mode="keyboard" aria-pressed="true">键盘 / 点动</button><button data-mode="angle" aria-pressed="false">输入角度</button><button data-mode="ai" aria-pressed="false">AI 任务 · 后续开放</button></div>
+        <div id="keyboard-panel"><p>↑ / ↓ 按住慢速抬升 / 放下；松开后减速保持。← / → 每次微调 0.25°，不是空间四向移动。</p><div class="keypad"><button data-nudge="-1" disabled>← −0.25°</button><button data-key="ArrowUp" disabled>↑ 按住抬升</button><button data-key="ArrowDown" disabled>↓ 按住放下</button><button data-nudge="1" disabled>→ +0.25°</button></div></div>
+        <div id="angle-panel" hidden><form id="angle-form"><label for="angle">目标角度（−45° 至 +45°）</label><div class="input-row"><input id="angle" type="number" min="-45" max="45" step="any" inputmode="decimal" placeholder="例如 30" required><button id="execute" type="submit" disabled>慢速到达并保持</button></div></form></div>
+        <div id="ai-panel" hidden><p>这里暂不调用模型、不执行任务，也不把固定脚本称为 AI。请选择人工控制方式。</p></div>
+        <p class="muted">参考速度上限 3°/s，参考加速度上限 5°/s²；实际速度与精度需要验证。停止是受控减速保持，不是断电或实物急停。要立即冻结仿真，请在 Webots 暂停。</p>
+      </section>
+      <section class="reset-box"><h2>相同条件，重新比较</h2><label for="payload">末端负载（质心距离 150 mm）</label><div class="input-row"><select id="payload"><option value="0">0 kg</option><option value="1">0.125 kg</option><option value="2" selected>0.250 kg</option></select><button id="reset" disabled>重置两侧并更换负载</button></div><p id="reset-status" class="muted">只在服务允许复位时可用；复位不会续跑旧动作。</p></section>
+      <details><summary>展开模型细节与最近趋势</summary><div class="detail-grid"><div>弹簧压缩量<strong id="spring">—</strong></div><div>输出侧被动补偿力矩<strong id="compensation">—</strong></div><div>模型损失力矩<strong id="loss">—</strong></div><div>负载质量<strong id="payload-mass">—</strong></div></div><p id="model-status" class="muted">等待模型状态</p><canvas id="history-plot" width="960" height="220" role="img" aria-label="最近仿真电机命令趋势"></canvas><p class="muted">A / B 电机命令的有限历史，按仿真时间记录；断流与复位后清空。命令不是实测力矩，不据此宣称真实节能。</p></details>
+    </section>
+    <section id="principle-view" hidden class="info-page"><h2>机械补偿改变了什么？</h2><p>水平轴带动连杆升降时，重力会对转轴产生力矩。基线 A 由电机承担；候选 B 通过凸轮几何改变弹簧压缩量，用弹簧储能产生输出侧被动力矩。</p><p>两侧接收同一轨迹参考、采用相同 PID 配置；被动补偿力矩与电机命令分开记录。增加机构的质量也必须纳入模型，不能给候选“减掉”自身重量。</p><p>在不同角度、负载与往返动作中观察：电机是否卸载，误差是否变大，换向时是否出现损失。这是模型内对比，不是已经证明真实装置更省电。</p><p>目前使用 F-N 未优化几何夹具。完整 SolidWorks 总成、五组优化对比、真实制造误差及公众试用仍需分别验收。</p></section>
+    <section id="engineering-view" hidden class="info-page"><h2>工程资料与验证边界</h2><p>资料保存在项目文件夹，当前页面不提供未经服务支持的下载链接。</p><ul><li><code>docs/ENGINEERING_EVIDENCE.md</code>：既有工程、数据与证据范围。</li><li><code>docs/LIMITATIONS.md</code>：模型假设与尚未验收的限制。</li><li><code>research/gravity_compensation/sources.csv</code>：论文与来源台账。</li></ul><button id="report-refresh">读取工程状态</button><pre id="report" aria-live="polite">工程状态尚未读取。软件测试不等于 Webots 联调或真实用户验收。</pre></section>
+  </main>
+  <footer>仅供本机 · 单界面控制权 · 页面失焦后停止续心跳，待旧控制权释放再重新连接 · 没有真实触觉或实物安全认证</footer>
+</body>
+</html>

@@ -1,0 +1,153 @@
+{
+  "date": "2026-11-04",
+  "status": "passed",
+  "evidence_scope": "synthetic_software_checks_not_actual_webots_motion",
+  "source_sha256": "3e2d7030e8e4fc87aff3fff1be01eef6ef6950affe6c5a09c4fae3687043363c",
+  "tools": {
+    "python": {
+      "status": "passed",
+      "version": "Python 3.14.2"
+    },
+    "cpp": {
+      "status": "passed",
+      "version": "g++.EXE (Rev13, Built by MSYS2 project) 15.2.0"
+    },
+    "node": {
+      "status": "passed",
+      "version": "v25.2.1"
+    }
+  },
+  "checks": [
+    {
+      "name": "python_unittest",
+      "status": "passed",
+      "exit_code": 0,
+      "count": 59,
+      "count_unit": "unittest_test_cases"
+    },
+    {
+      "name": "manual_reference_compile",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "manual_reference_run",
+      "status": "passed",
+      "exit_code": 0,
+      "count": 2,
+      "count_unit": "reported_cpp_behavior_groups"
+    },
+    {
+      "name": "study_pair_compile",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "study_pair_run",
+      "status": "passed",
+      "exit_code": 0,
+      "count": 6,
+      "count_unit": "reported_cpp_behavior_groups"
+    },
+    {
+      "name": "study_pid_surrogate",
+      "status": "passed",
+      "exit_code": 0,
+      "count": 12,
+      "count_unit": "ideal_rigid_body_surrogate_cases"
+    },
+    {
+      "name": "manual_frontend",
+      "status": "passed",
+      "exit_code": 0,
+      "count": 8,
+      "count_unit": "reported_boundary_groups"
+    },
+    {
+      "name": "study_frontend",
+      "status": "passed",
+      "exit_code": 0,
+      "count": 22,
+      "count_unit": "synthetic_frontend_behavior_tests"
+    }
+  ],
+  "does_not_verify": [
+    "ROS2 plugin build/runtime",
+    "actual Webots feedback or motion",
+    "native SolidWorks model",
+    "physical friction/hysteresis",
+    "full five-group optimization"
+  ],
+  "counts_are_not_additive": true,
+  "source_manifest_sha256": {
+    "research/__init__.py": "21c55e22e43e75693eeae491889d39396b3149b454a46cb87dd194909290cead",
+    "research/gravity_compensation/__init__.py": "eff8755ac456e3b5990aa0d6733e5e7082ad66819d548e2f2cd75f59d0645cda",
+    "research/gravity_compensation/geometry.py": "48ea9ec5a01fec477144428239895c678fd888a2ab45333571fe0c04f414bba1",
+    "research/gravity_compensation/sources.csv": "0f5ff7f546e93765357d06f9a42913499fde3390be071462885850ff1638e90d",
+    "ros2_ws/src/ai_robotic_joint_ros2/CMakeLists.txt": "8253f724617effc0b7179d47910e728defb69cf19dd3dd68912c349f1336b9c8",
+    "ros2_ws/src/ai_robotic_joint_ros2/include/ai_robotic_joint_ros2/JointControllerPlugin.hpp": "05ed04a996220047a533606cd84e454cb134f8aca81ec690ca3c8e4bcb59b64d",
+    "ros2_ws/src/ai_robotic_joint_ros2/include/ai_robotic_joint_ros2/ManualJointControllerPlugin.hpp": "3c6a1a4915ab2ca0b5f4b053b0901a6f15a3cae8477eeea2fb054a8b95f3f37d",
+    "ros2_ws/src/ai_robotic_joint_ros2/include/ai_robotic_joint_ros2/ManualReference.hpp": "fa8928ca068504e5849e17987ff470239a8b5a35abebe4b922cd4b5e2f8c8992",
+    "ros2_ws/src/ai_robotic_joint_ros2/include/ai_robotic_joint_ros2/StudyJointControllerPlugin.hpp": "03b1d7d37a2831b5c4ded8382824038e462f163a5be23faede96d2b6886aa983",
+    "ros2_ws/src/ai_robotic_joint_ros2/include/ai_robotic_joint_ros2/StudyPair.hpp": "884f6810a30381bf82dc26aed39814ac4e672e8fa21a962e0584bde899fe46a9",
+    "ros2_ws/src/ai_robotic_joint_ros2/launch/joint_launch.py": "ad75a09cfb1dc821590cb16e1a38b2c5de61ee3ad463144f7b1ff1dc8dae8102",
+    "ros2_ws/src/ai_robotic_joint_ros2/launch/manual_demo_launch.py": "d1a22d5601b48a20e516c7ece003b410e7bf2fa6161635c3221a8e437f1b45d5",
+    "ros2_ws/src/ai_robotic_joint_ros2/launch/manual_driver_launch.py": "ab34ec9916f5c5fbe30b7c9385e8fb6a753a09e12f8cebeb58f10a578672c443",
+    "ros2_ws/src/ai_robotic_joint_ros2/launch/study_demo_launch.py": "3d77a58dd57aaa0753a5b422e63e33e3ce9bbde63ff3307ab8a57aa54456b3ad",
+    "ros2_ws/src/ai_robotic_joint_ros2/launch/study_driver_launch.py": "6d6dd8e81132284f204a139bab84af301d9c92d8ce34e1d316f051d05c728ef0",
+    "ros2_ws/src/ai_robotic_joint_ros2/msg/ControlTelemetry.msg": "1130aeb8a67eb319359cbb13cb7c39fbb3d12920273a47ee66fde1a0c533f6fb",
+    "ros2_ws/src/ai_robotic_joint_ros2/msg/ManualCommand.msg": "d286d66d3e32565e6209c72e27926233873c78ccdf3d5c7208d1d824736be451",
+    "ros2_ws/src/ai_robotic_joint_ros2/msg/StudyCommand.msg": "117453a3e1933d0b9d68cb5c818b4195e7803dd03659b2430395aabf52fa0eec",
+    "ros2_ws/src/ai_robotic_joint_ros2/msg/StudyTelemetry.msg": "aa8f157ebb8562217e624b6c4d61c6dfe785c26d3e36b58abaa0de43d943cd5b",
+    "ros2_ws/src/ai_robotic_joint_ros2/package.xml": "4af24f2272ef4034ce59230a14aa2dcc9621b6164c2d2612de3eb3883688bd61",
+    "ros2_ws/src/ai_robotic_joint_ros2/plugin_description.xml": "8d7febab653c017667903f0e19d0672ef2bbd0d64cd7fcd5d71e4276b7e98d6d",
+    "ros2_ws/src/ai_robotic_joint_ros2/resource/joint_controller.urdf": "3ebe8f7fa768cbc12baa0ed013f4147e5c56e25e33201c6c06bb0642503a8313",
+    "ros2_ws/src/ai_robotic_joint_ros2/resource/manual_controller.urdf": "d00e8ee79549c912c631605f586ef622136cd942d58d480282f486c69d2f6c37",
+    "ros2_ws/src/ai_robotic_joint_ros2/resource/study_bodies.csv": "f26dd9199f50ce626bdb1f845280c7c6a20ef14f683845bb398f2f3b02411260",
+    "ros2_ws/src/ai_robotic_joint_ros2/resource/study_controller.urdf": "c7f0b8f0d7a4da2e6ee010f4de7add6a9db32bcab9bb80bd9ddfefb32a94621a",
+    "ros2_ws/src/ai_robotic_joint_ros2/resource/study_energy_0.csv": "4c08d2f26ecb557f22cb642d6f97a82c2ac358cade6614a966e722d234d891ee",
+    "ros2_ws/src/ai_robotic_joint_ros2/resource/study_energy_1.csv": "9adbf4f4f8d4f20408faf9383a06bf758d0ffe1563e18313090e851d0d95e843",
+    "ros2_ws/src/ai_robotic_joint_ros2/resource/study_energy_2.csv": "891cd115c3913f7c7e6e3bd38e087bf112d90d5e081d138fbe07954849066cf8",
+    "ros2_ws/src/ai_robotic_joint_ros2/resource/StudyCamGeometry.proto": "43b37ea23528b5d3829f262df07bc3142b9a34fa1436135fed7707603ae16bcf",
+    "ros2_ws/src/ai_robotic_joint_ros2/scripts/joint_safety_node.py": "05aad888439ff113911cfbb1d04b72fa0e8d21dffd52c5227de93610047b360c",
+    "ros2_ws/src/ai_robotic_joint_ros2/scripts/manual_panel_core.py": "4e1c56d4a79ceda15490935b1be29030bf7637a42f5fae5f7bd8b012b2566265",
+    "ros2_ws/src/ai_robotic_joint_ros2/scripts/manual_panel_server.py": "d8825d4ee83cdd254e848c2945cfce4c8c4cded70a68913bf470a744f2a0064d",
+    "ros2_ws/src/ai_robotic_joint_ros2/scripts/ros2_joint_experiment.py": "af1838ce5b80cb949897cb1226017280ab92cdd7a9b479c78045d2db84d768c0",
+    "ros2_ws/src/ai_robotic_joint_ros2/scripts/study_panel_core.py": "eb2345a3db699e15d4e5d554b7ced7467c5c1a01a6837b5def2ff1e8e2c2d5ba",
+    "ros2_ws/src/ai_robotic_joint_ros2/scripts/study_panel_server.py": "c1ebe714feadb5e8984d8d4431e7d570aff624646b12816be36992212edd3f21",
+    "ros2_ws/src/ai_robotic_joint_ros2/src/JointControllerPlugin.cpp": "a0b1694c37b6005cd54c4322a2cdb9f3040a1894c018e11a33167f4e6ad12f67",
+    "ros2_ws/src/ai_robotic_joint_ros2/src/ManualJointControllerPlugin.cpp": "123289937e7bbd05409e9183b8ec46bdd96170bf439d947d6c9740ba19a8d61f",
+    "ros2_ws/src/ai_robotic_joint_ros2/src/StudyJointControllerPlugin.cpp": "5295ef08777be8b779170de1f8906f36fad9295414cf0abccf47f4476ce32f47",
+    "ros2_ws/src/ai_robotic_joint_ros2/study_web/index.html": "3984b5b2fb3daca319424cfb02ff27e02ab9d98b96239cf7d5e60e6cb61556f7",
+    "ros2_ws/src/ai_robotic_joint_ros2/study_web/panel.css": "3966bf7dacfd9fb571aaa43df2b3fc67df3380443e54a4cc5fb19ad5e59bd85a",
+    "ros2_ws/src/ai_robotic_joint_ros2/study_web/panel.js": "f9f022092c212d429ad9faf4d8d21ec50d5510a67a3e1dfc8c4112c66a56760e",
+    "ros2_ws/src/ai_robotic_joint_ros2/tests/study_pair_test.cpp": "507bcb1e075b9c96b5e4b23e6b2733943d95e16f60bb01eab4aa315aa0cacc22",
+    "ros2_ws/src/ai_robotic_joint_ros2/web/index.html": "57e4365ddae9e574d1e06e8358606ec181cb6bbd445a3c11b7894dfe0cc60a62",
+    "ros2_ws/src/ai_robotic_joint_ros2/web/panel.css": "a57e0166d18f58b55fd203a8e085af58dfb0486c3d7ccd75a67250edb41c1fed",
+    "ros2_ws/src/ai_robotic_joint_ros2/web/panel.js": "dfc7efcc0f04950cab8cfaf643f3a9a3876b6d3fd944dd45ce38f2414672be7d",
+    "ros2_ws/src/ai_robotic_joint_ros2/worlds/joint_manual_demo.wbt": "cab8821e775a97bee04d0b7b8fcd267afa0fcebcdcce2add4c115bb8c5342d14",
+    "ros2_ws/src/ai_robotic_joint_ros2/worlds/joint_minimal_ros2.wbt": "180791d1bd9e5d8dd8fae9ddafcce68cf971b096541437306bac20f616bc0e17",
+    "ros2_ws/src/ai_robotic_joint_ros2/worlds/joint_study.wbt": "b748e5050fada9448afab360e01cefa6d4b74ae28e5cd487b954d2cb252c10bf",
+    "scripts/analyze_study_fixture.py": "a33551441fb9ccae9cde70eb3726dc4524ce59106a8bee8032515ec3c577fa4a",
+    "scripts/cad_import.py": "41e15a6f8c30b32fc89012dec62773d2261469de077d1f87dbe63873e02156de",
+    "scripts/check_repository.py": "ed8b17db28f9275e5c6396fdac6e5836418b99c4b1a1994a0047dfe46a01b3fc",
+    "scripts/generate_test_link_solidworks.py": "73d45375a19c7167d419472a28abe697beabf457aadc5e124de236a0abf294dd",
+    "scripts/generate_test_link_views.py": "1a024b47052f4d6b258a69d756d0de2bf471dfbf4663a5b47faa2023e1b5b88c",
+    "scripts/plot_experiment_001.py": "1bba070bd425a8503bf915199f7b839f3aa6d485bf683c04b3cd17498c655e56",
+    "scripts/prepare_joint_study.py": "f26e167152151afd8414a7944ebc9103b82660236f6df770e1dbfe35493c0ebf",
+    "scripts/verify_joint_study.py": "2c46e62f144d6da198c05bf7d430ad4c107f058179a70d6a61fb944dc0cedc81",
+    "tests/manual_frontend_test.js": "5897cff44d34cf8ebbe12e55f5b22501cfb0e39c0d40d3cadf15a1d2b9eb4b31",
+    "tests/manual_reference_test.cpp": "5bb3be1afff843195738416977e1f8448f80afc34422cff2185645e182051403",
+    "tests/study_frontend_test.js": "7084f3e05308a90b145ff57c1acb9891c8db171a13b13dd6eab367c5ca958192",
+    "tests/test_cad_import.py": "949149e444b1cc227ff02515184c177e8fe1eeeb06040df0bb8686a8aba091f1",
+    "tests/test_gravity_geometry.py": "570db7293bf1deac674bc8cf5feb958701df3c52d3ae400e1636d6c81148ce43",
+    "tests/test_manual_http.py": "48cf3b52a1cf9451edd5392b09e7855480c6e1ed2a3239e3d97e00375e6fe952",
+    "tests/test_manual_panel.py": "04a097701a5ac46bdd0bb04aaab7f7c899e0e74614900a1a311b7707fc413de8",
+    "tests/test_native_link_spec.py": "285872690fb2da68012f0af70feedc02cf248b6b8dd66e62aa9ba43cde8a86b2",
+    "tests/test_study_analysis.py": "3a54b453df5b66d274dce3dec4c386de709c670a846c50191f4b6c000d986031",
+    "tests/test_study_fixture.py": "b08f587aefae0d1c7503dc49ffeba3638db01a79a0d707bc0b2593258985ad19",
+    "tests/test_study_http.py": "6f1215d914f4aaba73d01241dd4b16372c2880ea49801f7e236320f73e9fd069",
+    "tests/test_study_panel.py": "ee001bf89f5c49c5b8282a1046140eeb07ee352fde0786837de902c92a148e75"
+  },
+  "notes": "Public engineering snapshot; private local paths and raw runtime logs excluded."
+}

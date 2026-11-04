@@ -1,0 +1,22 @@
+name: 工程改进
+description: 提出有具体使用场景和验收依据的工程改进
+title: "[Feature] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 使用场景与具体问题
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 预期行为、边界与可复用接口
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: 验证方法与兼容性影响
+    validations:
+      required: true

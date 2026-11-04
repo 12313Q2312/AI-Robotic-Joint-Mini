@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- Controller configuration, NOT an exported SolidWorks structural model. -->
+<robot name="Paired Joint Study">
+  <webots><plugin type="ai_robotic_joint_ros2::StudyJointControllerPlugin">
+    <topicPrefix>/joint_study</topicPrefix>
+    <outputTorqueLimitNm>1.0</outputTorqueLimitNm>
+    <!-- Shared conservative gains screened in an independent ideal rigid-body
+         surrogate at 16/8 ms; NOT Webots or final CAD motion acceptance. -->
+    <kp>4.0</kp><ki>4.0</ki><kd>0.05</kd>
+    <equivalentLossNm>0.0</equivalentLossNm>
+    <energyTablePath>__PACKAGE_SHARE__/resource/study_energy_{payload}.csv</energyTablePath>
+    <bodyTablePath>__PACKAGE_SHARE__/resource/study_bodies.csv</bodyTablePath>
+    <candidateLabel>F-N 几何试算，未优化/非最终 CAD</candidateLabel>
+  </plugin></webots>
+</robot>

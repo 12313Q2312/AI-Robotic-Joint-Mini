@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!-- Controller configuration ONLY, not exported CAD structural URDF. -->
+<robot name="Manual Joint Demo">
+  <webots><plugin type="ai_robotic_joint_ros2::ManualJointControllerPlugin">
+    <sensorName>joint_sensor</sensorName><motorName>joint_motor</motorName>
+    <topicPrefix>/manual_demo/joint</topicPrefix>
+    <!-- Initial UI verification uses legacy vertical-axis geometry, no CAD claim. -->
+    <outputTorqueLimitNm>0.10</outputTorqueLimitNm><loadTorqueNm>0.0</loadTorqueNm>
+    <kp>0.15</kp><ki>0.05</ki><kd>0.04</kd>
+    <gravityFeedforwardEnabled>false</gravityFeedforwardEnabled>
+    <gravityMomentXNm>0.0</gravityMomentXNm><gravityMomentZNm>0.0</gravityMomentZNm>
+  </plugin></webots>
+</robot>

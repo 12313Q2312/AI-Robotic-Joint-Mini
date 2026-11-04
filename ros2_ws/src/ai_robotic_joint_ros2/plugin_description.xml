@@ -1,0 +1,20 @@
+<library path="joint_controller_plugin">
+  <class
+    name="ai_robotic_joint_ros2::JointControllerPlugin"
+    type="ai_robotic_joint_ros2::JointControllerPlugin"
+    base_class_type="webots_ros2_driver::PluginInterface">
+    <description>
+      Receives a ROS 2 target angle, runs the local torque PID, and publishes joint state.
+    </description>
+  </class>
+  <class name="ai_robotic_joint_ros2::ManualJointControllerPlugin"
+    type="ai_robotic_joint_ros2::ManualJointControllerPlugin"
+    base_class_type="webots_ros2_driver::PluginInterface">
+    <description>Human commands, bounded C++ reference, torque PID and watchdog.</description>
+  </class>
+  <class name="ai_robotic_joint_ros2::StudyJointControllerPlugin"
+    type="ai_robotic_joint_ros2::StudyJointControllerPlugin"
+    base_class_type="webots_ros2_driver::PluginInterface">
+    <description>One shared reference, paired torque PID and separate conservative passive mechanics.</description>
+  </class>
+</library>
