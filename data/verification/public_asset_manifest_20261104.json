@@ -16,6 +16,12 @@
       "git_blob_sha1": "7ebebaee553a6282cf1d18496ecd58fc0cd042dd"
     },
     {
+      "path": ".github/branch-protection.json",
+      "bytes": 436,
+      "sha256": "46becf2505dc789f20de0a3cbf7d9dbe265e005ccf5eacba771e1367d5a2e268",
+      "git_blob_sha1": "904b547096aa21e773f4ffabd8b4c6242bbb57a3"
+    },
+    {
       "path": ".github/CODEOWNERS",
       "bytes": 92,
       "sha256": "0c9b5a55ca047e483054c19447183e6368c7bac8549e75a40aa8f53a087c0fce",
@@ -113,9 +119,9 @@
     },
     {
       "path": "CONTRIBUTING.md",
-      "bytes": 1206,
-      "sha256": "00213372f9dada171fb6ff24d1186fc01b46b550fbf7bae17cf9f43dd22f6143",
-      "git_blob_sha1": "db04ce622ede7cd7c4053e080686c49a68395b5a"
+      "bytes": 1277,
+      "sha256": "81fed8351aa57462d0540c55532ed78f5bede8e94c2e88d7d11ca5d53cc794a4",
+      "git_blob_sha1": "adaf03cc5173473ef8ba27dc42b935d1b7b7f15c"
     },
     {
       "path": "data/processed/experiment_0002_p_control.csv",
@@ -196,6 +202,12 @@
       "git_blob_sha1": "4fb9a2dcfce925f3d60baa50c153c6d9019b9db2"
     },
     {
+      "path": "docs/GITHUB_SETTINGS.md",
+      "bytes": 2046,
+      "sha256": "ed45bd847a02d4b2d5346ca583a4ee3f0d39ab1d6003f4a731c3ef0602afc144",
+      "git_blob_sha1": "3dd256b248def9669ee42746ad1b3ddb40edca3e"
+    },
+    {
       "path": "docs/LIMITATIONS.md",
       "bytes": 1214,
       "sha256": "73c19f28fc3a8c46ca49e962f423bcc4a80ef7e5397cb31a077c30a99d2f1205",
@@ -203,9 +215,9 @@
     },
     {
       "path": "docs/REPOSITORY_DELIVERY.md",
-      "bytes": 1198,
-      "sha256": "b388d64f89ae13b49139ab23441e34c785090136cbaae8c402050411e5ac4848",
-      "git_blob_sha1": "73b400f293f6be0ec267392c0e6b71cb5c70e93b"
+      "bytes": 1829,
+      "sha256": "5a2bc77705f4c354c0c85b4e051bd8c78c30cfec6fb90800f79d5a127125a84d",
+      "git_blob_sha1": "15068949c1f1e87b9524611dbfa51033e12975b2"
     },
     {
       "path": "docs/REPRODUCIBILITY.md",
