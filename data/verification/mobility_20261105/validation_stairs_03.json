@@ -1,0 +1,23 @@
+{
+  "scenario": "stairs",
+  "mode": "assist",
+  "run": "validation_stairs_03",
+  "exit_code": 1,
+  "elapsed_wall_s": 25.29053070000009,
+  "evidence": "actual_webots_simulation",
+  "source_sha256": {
+    "controllers/mobility/mobility.cpp": "b3dfcbfaed5375f31e7ee711444dcf49e7298d9f86eee57eee18b2be6d0d999e",
+    "include/AssistPolicy.hpp": "f9f858722970fcee3970d49e45121b8fbfb0c18f81cb04c608ca9b48f4ebb5b3",
+    "include/PlanGate.hpp": "6c0800689e728c04bf1d408c71ddfb2f443562329d89c740aae3186ab1748dec",
+    "include/RiskMonitor.hpp": "f8d809293e89bfc29c4cb5e5e730b8fe65146786b6db542fda9beb42047a1329",
+    "prepare.py": "8e7cb21e55641bc2f7b9baec67b82ad35b1992d4636bbc1a96714b8ee3c23591",
+    "worlds/validation_stairs_03.wbt": "e72d284edb5a1f776b234c534ef08fc2c1be125552373b1810d44e98f88365c3"
+  },
+  "completion": {
+    "completed": false,
+    "fallen": true,
+    "sensor_fault": false,
+    "sim_time_s": 23.682,
+    "mass_kg": 74.24
+  }
+}

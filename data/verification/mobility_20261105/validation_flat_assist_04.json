@@ -1,0 +1,23 @@
+{
+  "scenario": "flat",
+  "mode": "assist",
+  "run": "validation_flat_assist_04",
+  "exit_code": 0,
+  "elapsed_wall_s": 45.99869490000128,
+  "evidence": "actual_webots_simulation",
+  "source_sha256": {
+    "controllers/mobility/mobility.cpp": "2911e10889b5af1f5786030bb14e21986e6babf50888ca27eefa5f50b899332d",
+    "include/AssistPolicy.hpp": "f9f858722970fcee3970d49e45121b8fbfb0c18f81cb04c608ca9b48f4ebb5b3",
+    "include/PlanGate.hpp": "4f2fce228cf723d366d616f0c9ff19dd913ceecc680b98ae1800da12fe96ea5f",
+    "include/RiskMonitor.hpp": "f8d809293e89bfc29c4cb5e5e730b8fe65146786b6db542fda9beb42047a1329",
+    "prepare.py": "262c3ffc773d0867a7ea646405171b373649d990783dc34f382ff2f30185f256",
+    "worlds/validation_flat_assist_04.wbt": "865099cddac4b11bad3f47a486be71ad7fd81b9d6aa6d45452992c8442dc61fd"
+  },
+  "completion": {
+    "completed": true,
+    "fallen": false,
+    "sensor_fault": false,
+    "sim_time_s": 35,
+    "mass_kg": 74.24
+  }
+}

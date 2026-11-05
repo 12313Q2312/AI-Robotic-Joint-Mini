@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-05",
+  "method": "actual_browser_interaction_on_local_review",
+  "passed": true,
+  "checks": [
+    "Loaded ten cases and rendered actual simulator state playback",
+    "Walking metrics, 6 stable touchdowns and boundaries visible",
+    "Selected stair case, moved timeline to end and verified failure label",
+    "Selected finite-stroke failure and verified bottom-out metric",
+    "Changed playback speed and camera view",
+    "Opened per-case reproduction instructions",
+    "Paused and restored default case for user review",
+    "Opened acceptance report and verified explicit overall non-acceptance"
+  ],
+  "server": "http://127.0.0.1:8787/viewer/index.html",
+  "user_acceptance": "pending",
+  "checked_date": "2026-11-05",
+  "selected_walking_cases": 8,
+  "total_cases": 11,
+  "formal_stairs_04_completed_visible": true,
+  "historical_stairs_failure_visible": true,
+  "formal_acceptance_report_visible": true,
+  "javascript_errors_observed": 0
+}
