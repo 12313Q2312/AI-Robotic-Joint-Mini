@@ -1,0 +1,544 @@
+[
+  {
+    "run": "validation_flat_assist_04",
+    "scenario": "flat",
+    "mode": "assist",
+    "duration_s": 35.0,
+    "completed": true,
+    "engine_exit_code": 0,
+    "forward_distance_m": 1.083648549,
+    "stable_touchdown_count": 6,
+    "touchdowns": [
+      {
+        "time_s": 5.812,
+        "side": "r",
+        "x_m": 0.1862353509,
+        "ankle_height_m": 0.07864158502
+      },
+      {
+        "time_s": 9.802,
+        "side": "l",
+        "x_m": 0.3853789402,
+        "ankle_height_m": 0.07833915769
+      },
+      {
+        "time_s": 13.94,
+        "side": "r",
+        "x_m": 0.5832318914,
+        "ankle_height_m": 0.08030770568
+      },
+      {
+        "time_s": 17.816,
+        "side": "l",
+        "x_m": 0.7839245498,
+        "ankle_height_m": 0.07989402123
+      },
+      {
+        "time_s": 21.972,
+        "side": "r",
+        "x_m": 0.9832112546,
+        "ankle_height_m": 0.08151768346
+      },
+      {
+        "time_s": 25.812,
+        "side": "l",
+        "x_m": 1.183327753,
+        "ankle_height_m": 0.08043336693
+      }
+    ],
+    "alternating_touchdowns": true,
+    "mass_kg": 74.24,
+    "min_hip_height_m": 0.8751863987,
+    "final_hip_height_m": 0.8858738542,
+    "max_trunk_tilt_deg": 9.079361991310504,
+    "final_ankle_heights_m": [
+      0.07922162354,
+      0.08645955944
+    ],
+    "human_equivalent_positive_work_j": 677.4767409869664,
+    "device_positive_mechanical_work_j": 76.75282839892897,
+    "last_2s_pelvis_range_m": 2.355593303534974e-05,
+    "last_2s_filtered_speed_p95_m_s": 1.350455912386273e-05,
+    "last_2s_both_feet_contact_fraction": 1.0,
+    "finite_telemetry": true,
+    "simulation_source_sha256": {
+      "controllers/mobility/mobility.cpp": "2911e10889b5af1f5786030bb14e21986e6babf50888ca27eefa5f50b899332d",
+      "include/AssistPolicy.hpp": "f9f858722970fcee3970d49e45121b8fbfb0c18f81cb04c608ca9b48f4ebb5b3",
+      "include/PlanGate.hpp": "4f2fce228cf723d366d616f0c9ff19dd913ceecc680b98ae1800da12fe96ea5f",
+      "include/RiskMonitor.hpp": "f8d809293e89bfc29c4cb5e5e730b8fe65146786b6db542fda9beb42047a1329",
+      "prepare.py": "262c3ffc773d0867a7ea646405171b373649d990783dc34f382ff2f30185f256",
+      "worlds/validation_flat_assist_04.wbt": "865099cddac4b11bad3f47a486be71ad7fd81b9d6aa6d45452992c8442dc61fd"
+    },
+    "evidence": "actual_Webots_telemetry_synthetic_human_not_clinical",
+    "first_warning_s": null,
+    "first_buffer_prepare_signal_s": null,
+    "rejected_cloud_candidates": 3,
+    "local_samples_after_virtual_cloud_offline": 10001
+  },
+  {
+    "run": "validation_flat_off_04",
+    "scenario": "flat",
+    "mode": "off",
+    "duration_s": 35.0,
+    "completed": true,
+    "engine_exit_code": 0,
+    "forward_distance_m": 1.087060376,
+    "stable_touchdown_count": 6,
+    "touchdowns": [
+      {
+        "time_s": 5.796,
+        "side": "r",
+        "x_m": 0.1815340333,
+        "ankle_height_m": 0.07859527019
+      },
+      {
+        "time_s": 9.782,
+        "side": "l",
+        "x_m": 0.3801393746,
+        "ankle_height_m": 0.07830823372
+      },
+      {
+        "time_s": 13.792,
+        "side": "r",
+        "x_m": 0.5782488049,
+        "ankle_height_m": 0.07995196508
+      },
+      {
+        "time_s": 17.8,
+        "side": "l",
+        "x_m": 0.7809828317,
+        "ankle_height_m": 0.07826388072
+      },
+      {
+        "time_s": 21.942,
+        "side": "r",
+        "x_m": 0.9773653046,
+        "ankle_height_m": 0.08205020342
+      },
+      {
+        "time_s": 25.954,
+        "side": "l",
+        "x_m": 1.159564744,
+        "ankle_height_m": 0.07985464543
+      }
+    ],
+    "alternating_touchdowns": true,
+    "mass_kg": 74.24,
+    "min_hip_height_m": 0.8760220968,
+    "final_hip_height_m": 0.8880283388,
+    "max_trunk_tilt_deg": 9.587899108003896,
+    "final_ankle_heights_m": [
+      0.07894384066,
+      0.09024222661
+    ],
+    "human_equivalent_positive_work_j": 802.1545207845747,
+    "device_positive_mechanical_work_j": 0.0,
+    "last_2s_pelvis_range_m": 1.1795273615196635e-05,
+    "last_2s_filtered_speed_p95_m_s": 6.908166849591039e-06,
+    "last_2s_both_feet_contact_fraction": 1.0,
+    "finite_telemetry": true,
+    "simulation_source_sha256": {
+      "controllers/mobility/mobility.cpp": "2911e10889b5af1f5786030bb14e21986e6babf50888ca27eefa5f50b899332d",
+      "include/AssistPolicy.hpp": "f9f858722970fcee3970d49e45121b8fbfb0c18f81cb04c608ca9b48f4ebb5b3",
+      "include/PlanGate.hpp": "4f2fce228cf723d366d616f0c9ff19dd913ceecc680b98ae1800da12fe96ea5f",
+      "include/RiskMonitor.hpp": "f8d809293e89bfc29c4cb5e5e730b8fe65146786b6db542fda9beb42047a1329",
+      "prepare.py": "262c3ffc773d0867a7ea646405171b373649d990783dc34f382ff2f30185f256",
+      "worlds/validation_flat_off_04.wbt": "fe3d7a25dd9fe0a1eba699450b07149e82d0c47dfbf7eee11cf8fc9ca099e0df"
+    },
+    "evidence": "actual_Webots_telemetry_synthetic_human_not_clinical",
+    "first_warning_s": null,
+    "first_buffer_prepare_signal_s": null,
+    "rejected_cloud_candidates": 3,
+    "local_samples_after_virtual_cloud_offline": 10001
+  },
+  {
+    "run": "validation_flat_no_device_04",
+    "scenario": "flat",
+    "mode": "no-device",
+    "duration_s": 35.0,
+    "completed": true,
+    "engine_exit_code": 0,
+    "forward_distance_m": 1.089858578,
+    "stable_touchdown_count": 6,
+    "touchdowns": [
+      {
+        "time_s": 5.804,
+        "side": "r",
+        "x_m": 0.1832167168,
+        "ankle_height_m": 0.07865759186
+      },
+      {
+        "time_s": 9.788,
+        "side": "l",
+        "x_m": 0.3819971672,
+        "ankle_height_m": 0.07855690112
+      },
+      {
+        "time_s": 13.878,
+        "side": "r",
+        "x_m": 0.5726265649,
+        "ankle_height_m": 0.08034703886
+      },
+      {
+        "time_s": 17.81,
+        "side": "l",
+        "x_m": 0.7828377113,
+        "ankle_height_m": 0.07840534304
+      },
+      {
+        "time_s": 21.784,
+        "side": "r",
+        "x_m": 0.9802649376,
+        "ankle_height_m": 0.0797574127
+      },
+      {
+        "time_s": 25.806,
+        "side": "l",
+        "x_m": 1.180149023,
+        "ankle_height_m": 0.07985954687
+      }
+    ],
+    "alternating_touchdowns": true,
+    "mass_kg": 70.24,
+    "min_hip_height_m": 0.8750458292,
+    "final_hip_height_m": 0.8873028233,
+    "max_trunk_tilt_deg": 8.616320724480454,
+    "final_ankle_heights_m": [
+      0.07903772381,
+      0.08909931484
+    ],
+    "human_equivalent_positive_work_j": 764.0525143012906,
+    "device_positive_mechanical_work_j": 0.0,
+    "last_2s_pelvis_range_m": 1.0940751162215117e-05,
+    "last_2s_filtered_speed_p95_m_s": 6.57698207414124e-06,
+    "last_2s_both_feet_contact_fraction": 1.0,
+    "finite_telemetry": true,
+    "simulation_source_sha256": {
+      "controllers/mobility/mobility.cpp": "2911e10889b5af1f5786030bb14e21986e6babf50888ca27eefa5f50b899332d",
+      "include/AssistPolicy.hpp": "f9f858722970fcee3970d49e45121b8fbfb0c18f81cb04c608ca9b48f4ebb5b3",
+      "include/PlanGate.hpp": "4f2fce228cf723d366d616f0c9ff19dd913ceecc680b98ae1800da12fe96ea5f",
+      "include/RiskMonitor.hpp": "f8d809293e89bfc29c4cb5e5e730b8fe65146786b6db542fda9beb42047a1329",
+      "prepare.py": "262c3ffc773d0867a7ea646405171b373649d990783dc34f382ff2f30185f256",
+      "worlds/validation_flat_no_device_04.wbt": "741645b1ba576d90ec77b24efd839b858595cc5dd063c6c9b256d0e9de3bee6d"
+    },
+    "evidence": "actual_Webots_telemetry_synthetic_human_not_clinical",
+    "first_warning_s": null,
+    "first_buffer_prepare_signal_s": null,
+    "rejected_cloud_candidates": 3,
+    "local_samples_after_virtual_cloud_offline": 10001
+  },
+  {
+    "run": "validation_stop_04",
+    "scenario": "stop",
+    "mode": "assist",
+    "duration_s": 19.0,
+    "completed": true,
+    "engine_exit_code": 0,
+    "forward_distance_m": 0.2737285328,
+    "stable_touchdown_count": 2,
+    "touchdowns": [
+      {
+        "time_s": 5.812,
+        "side": "r",
+        "x_m": 0.1862353509,
+        "ankle_height_m": 0.07864158502
+      },
+      {
+        "time_s": 9.802,
+        "side": "l",
+        "x_m": 0.3853789402,
+        "ankle_height_m": 0.07833915769
+      }
+    ],
+    "alternating_touchdowns": false,
+    "mass_kg": 74.24,
+    "min_hip_height_m": 0.8780725874,
+    "final_hip_height_m": 0.8865229612,
+    "max_trunk_tilt_deg": 7.711244879500244,
+    "final_ankle_heights_m": [
+      0.07931361737,
+      0.08919662007
+    ],
+    "human_equivalent_positive_work_j": 208.07656573997699,
+    "device_positive_mechanical_work_j": 25.827771882558828,
+    "last_2s_pelvis_range_m": 2.126786322831205e-05,
+    "last_2s_filtered_speed_p95_m_s": 1.375173994877154e-05,
+    "last_2s_both_feet_contact_fraction": 1.0,
+    "finite_telemetry": true,
+    "simulation_source_sha256": {
+      "controllers/mobility/mobility.cpp": "2911e10889b5af1f5786030bb14e21986e6babf50888ca27eefa5f50b899332d",
+      "include/AssistPolicy.hpp": "f9f858722970fcee3970d49e45121b8fbfb0c18f81cb04c608ca9b48f4ebb5b3",
+      "include/PlanGate.hpp": "4f2fce228cf723d366d616f0c9ff19dd913ceecc680b98ae1800da12fe96ea5f",
+      "include/RiskMonitor.hpp": "f8d809293e89bfc29c4cb5e5e730b8fe65146786b6db542fda9beb42047a1329",
+      "prepare.py": "262c3ffc773d0867a7ea646405171b373649d990783dc34f382ff2f30185f256",
+      "worlds/validation_stop_04.wbt": "cce06e966d8bf22d8f3cccde7fb3861694ce6f965f34a4e6f3273cc0aeee580c"
+    },
+    "evidence": "actual_Webots_telemetry_synthetic_human_not_clinical",
+    "first_warning_s": null,
+    "first_buffer_prepare_signal_s": null,
+    "rejected_cloud_candidates": 3,
+    "local_samples_after_virtual_cloud_offline": 2001
+  },
+  {
+    "run": "validation_push_small_04",
+    "scenario": "push-small",
+    "mode": "assist",
+    "duration_s": 35.0,
+    "completed": true,
+    "engine_exit_code": 0,
+    "forward_distance_m": 1.084676011,
+    "stable_touchdown_count": 6,
+    "touchdowns": [
+      {
+        "time_s": 5.812,
+        "side": "r",
+        "x_m": 0.1862353509,
+        "ankle_height_m": 0.07864158502
+      },
+      {
+        "time_s": 9.802,
+        "side": "l",
+        "x_m": 0.3853789402,
+        "ankle_height_m": 0.07833915769
+      },
+      {
+        "time_s": 13.95,
+        "side": "r",
+        "x_m": 0.5831522685,
+        "ankle_height_m": 0.08045523451
+      },
+      {
+        "time_s": 17.816,
+        "side": "l",
+        "x_m": 0.7850148233,
+        "ankle_height_m": 0.0797937217
+      },
+      {
+        "time_s": 21.972,
+        "side": "r",
+        "x_m": 0.9831482979,
+        "ankle_height_m": 0.08148267229
+      },
+      {
+        "time_s": 25.902,
+        "side": "l",
+        "x_m": 1.175365191,
+        "ankle_height_m": 0.07932746007
+      }
+    ],
+    "alternating_touchdowns": true,
+    "mass_kg": 74.24,
+    "min_hip_height_m": 0.8752120072,
+    "final_hip_height_m": 0.8854878617,
+    "max_trunk_tilt_deg": 9.079361991310504,
+    "final_ankle_heights_m": [
+      0.07928498329,
+      0.08559814492
+    ],
+    "human_equivalent_positive_work_j": 683.1333238800356,
+    "device_positive_mechanical_work_j": 77.45680795907796,
+    "last_2s_pelvis_range_m": 2.9401461690522014e-05,
+    "last_2s_filtered_speed_p95_m_s": 1.6430334311018545e-05,
+    "last_2s_both_feet_contact_fraction": 1.0,
+    "finite_telemetry": true,
+    "simulation_source_sha256": {
+      "controllers/mobility/mobility.cpp": "2911e10889b5af1f5786030bb14e21986e6babf50888ca27eefa5f50b899332d",
+      "include/AssistPolicy.hpp": "f9f858722970fcee3970d49e45121b8fbfb0c18f81cb04c608ca9b48f4ebb5b3",
+      "include/PlanGate.hpp": "4f2fce228cf723d366d616f0c9ff19dd913ceecc680b98ae1800da12fe96ea5f",
+      "include/RiskMonitor.hpp": "f8d809293e89bfc29c4cb5e5e730b8fe65146786b6db542fda9beb42047a1329",
+      "prepare.py": "262c3ffc773d0867a7ea646405171b373649d990783dc34f382ff2f30185f256",
+      "worlds/validation_push_small_04.wbt": "7568fe2b58176c076344d00dbff0c7063d98e59eb91c837562619e3d4733ad24"
+    },
+    "evidence": "actual_Webots_telemetry_synthetic_human_not_clinical",
+    "first_warning_s": null,
+    "first_buffer_prepare_signal_s": null,
+    "rejected_cloud_candidates": 3,
+    "local_samples_after_virtual_cloud_offline": 10001
+  },
+  {
+    "run": "validation_push_large_04",
+    "scenario": "push-large",
+    "mode": "assist",
+    "duration_s": 13.168,
+    "completed": false,
+    "engine_exit_code": 1,
+    "forward_distance_m": 0.6514871336,
+    "stable_touchdown_count": 2,
+    "touchdowns": [
+      {
+        "time_s": 5.812,
+        "side": "r",
+        "x_m": 0.1862353509,
+        "ankle_height_m": 0.07864158502
+      },
+      {
+        "time_s": 9.802,
+        "side": "l",
+        "x_m": 0.3853789402,
+        "ankle_height_m": 0.07833915769
+      }
+    ],
+    "alternating_touchdowns": false,
+    "mass_kg": 74.24,
+    "min_hip_height_m": 0.8780725874,
+    "final_hip_height_m": 0.9264796669,
+    "max_trunk_tilt_deg": 45.97682672406757,
+    "final_ankle_heights_m": [
+      0.1401716697,
+      0.1473700837
+    ],
+    "human_equivalent_positive_work_j": 299.1936842007686,
+    "device_positive_mechanical_work_j": 39.66349247018463,
+    "last_2s_pelvis_range_m": 0.36101286575514335,
+    "last_2s_filtered_speed_p95_m_s": 0.9080677412838145,
+    "last_2s_both_feet_contact_fraction": 0.1038961038961039,
+    "finite_telemetry": true,
+    "simulation_source_sha256": {
+      "controllers/mobility/mobility.cpp": "2911e10889b5af1f5786030bb14e21986e6babf50888ca27eefa5f50b899332d",
+      "include/AssistPolicy.hpp": "f9f858722970fcee3970d49e45121b8fbfb0c18f81cb04c608ca9b48f4ebb5b3",
+      "include/PlanGate.hpp": "4f2fce228cf723d366d616f0c9ff19dd913ceecc680b98ae1800da12fe96ea5f",
+      "include/RiskMonitor.hpp": "f8d809293e89bfc29c4cb5e5e730b8fe65146786b6db542fda9beb42047a1329",
+      "prepare.py": "262c3ffc773d0867a7ea646405171b373649d990783dc34f382ff2f30185f256",
+      "worlds/validation_push_large_04.wbt": "e9b8e46e56963bf3166cdaa9ea9be1dcbc1df90528f43d2084c53c26f69b8b68"
+    },
+    "evidence": "actual_Webots_telemetry_synthetic_human_not_clinical",
+    "first_warning_s": 12.914,
+    "first_buffer_prepare_signal_s": 12.914,
+    "rejected_cloud_candidates": 2,
+    "local_samples_after_virtual_cloud_offline": 0
+  },
+  {
+    "run": "validation_stairs_04",
+    "scenario": "stairs",
+    "mode": "assist",
+    "duration_s": 47.0,
+    "completed": true,
+    "engine_exit_code": 0,
+    "forward_distance_m": 1.170912662,
+    "stable_touchdown_count": 6,
+    "touchdowns": [
+      {
+        "time_s": 7.694,
+        "side": "r",
+        "x_m": 0.3465964117,
+        "ankle_height_m": 0.1790685965
+      },
+      {
+        "time_s": 13.764,
+        "side": "l",
+        "x_m": 0.3466769739,
+        "ankle_height_m": 0.1803074822
+      },
+      {
+        "time_s": 19.678,
+        "side": "r",
+        "x_m": 0.7440249999,
+        "ankle_height_m": 0.2789323435
+      },
+      {
+        "time_s": 25.786,
+        "side": "l",
+        "x_m": 0.7543278948,
+        "ankle_height_m": 0.2805069782
+      },
+      {
+        "time_s": 31.678,
+        "side": "r",
+        "x_m": 1.140560928,
+        "ankle_height_m": 0.3788959064
+      },
+      {
+        "time_s": 39.326,
+        "side": "l",
+        "x_m": 1.152897636,
+        "ankle_height_m": 0.3815168285
+      }
+    ],
+    "alternating_touchdowns": true,
+    "mass_kg": 74.24,
+    "min_hip_height_m": 0.877250954,
+    "final_hip_height_m": 1.179850555,
+    "max_trunk_tilt_deg": 2.903460713807423,
+    "final_ankle_heights_m": [
+      0.3790457876,
+      0.379634705
+    ],
+    "human_equivalent_positive_work_j": 3945.546781839386,
+    "device_positive_mechanical_work_j": 304.3099250375431,
+    "last_2s_pelvis_range_m": 0.006133323005718283,
+    "last_2s_filtered_speed_p95_m_s": 0.010402874351792237,
+    "last_2s_both_feet_contact_fraction": 1.0,
+    "finite_telemetry": true,
+    "simulation_source_sha256": {
+      "controllers/mobility/mobility.cpp": "2911e10889b5af1f5786030bb14e21986e6babf50888ca27eefa5f50b899332d",
+      "include/AssistPolicy.hpp": "f9f858722970fcee3970d49e45121b8fbfb0c18f81cb04c608ca9b48f4ebb5b3",
+      "include/PlanGate.hpp": "4f2fce228cf723d366d616f0c9ff19dd913ceecc680b98ae1800da12fe96ea5f",
+      "include/RiskMonitor.hpp": "f8d809293e89bfc29c4cb5e5e730b8fe65146786b6db542fda9beb42047a1329",
+      "prepare.py": "262c3ffc773d0867a7ea646405171b373649d990783dc34f382ff2f30185f256",
+      "worlds/validation_stairs_04.wbt": "a6b077545a93931752dc30732cb8398f81b01a76e9c7b31acc071375c271f73d"
+    },
+    "evidence": "actual_Webots_telemetry_synthetic_human_not_clinical",
+    "first_warning_s": null,
+    "first_buffer_prepare_signal_s": null,
+    "rejected_cloud_candidates": 3,
+    "local_samples_after_virtual_cloud_offline": 16001
+  },
+  {
+    "run": "validation_stairs_03",
+    "scenario": "stairs",
+    "mode": "assist",
+    "duration_s": 23.682,
+    "completed": false,
+    "engine_exit_code": 1,
+    "forward_distance_m": 0.6367281868,
+    "stable_touchdown_count": 3,
+    "touchdowns": [
+      {
+        "time_s": 7.678,
+        "side": "r",
+        "x_m": 0.3466658487,
+        "ankle_height_m": 0.1790116823
+      },
+      {
+        "time_s": 13.748,
+        "side": "l",
+        "x_m": 0.3365782146,
+        "ankle_height_m": 0.1804880752
+      },
+      {
+        "time_s": 19.638,
+        "side": "r",
+        "x_m": 0.6968892348,
+        "ankle_height_m": 0.278955276
+      }
+    ],
+    "alternating_touchdowns": false,
+    "mass_kg": 74.24,
+    "min_hip_height_m": 0.7593837809,
+    "final_hip_height_m": 0.7593837809,
+    "max_trunk_tilt_deg": 48.763868635232754,
+    "final_ankle_heights_m": [
+      0.3031179722,
+      0.3584504777
+    ],
+    "human_equivalent_positive_work_j": 2708.3693301136113,
+    "device_positive_mechanical_work_j": 136.52088325636225,
+    "last_2s_pelvis_range_m": 0.33511887500452187,
+    "last_2s_filtered_speed_p95_m_s": 0.7656647665299464,
+    "last_2s_both_feet_contact_fraction": 0.2967032967032967,
+    "finite_telemetry": true,
+    "simulation_source_sha256": {
+      "controllers/mobility/mobility.cpp": "b3dfcbfaed5375f31e7ee711444dcf49e7298d9f86eee57eee18b2be6d0d999e",
+      "include/AssistPolicy.hpp": "f9f858722970fcee3970d49e45121b8fbfb0c18f81cb04c608ca9b48f4ebb5b3",
+      "include/PlanGate.hpp": "6c0800689e728c04bf1d408c71ddfb2f443562329d89c740aae3186ab1748dec",
+      "include/RiskMonitor.hpp": "f8d809293e89bfc29c4cb5e5e730b8fe65146786b6db542fda9beb42047a1329",
+      "prepare.py": "8e7cb21e55641bc2f7b9baec67b82ad35b1992d4636bbc1a96714b8ee3c23591",
+      "worlds/validation_stairs_03.wbt": "e72d284edb5a1f776b234c534ef08fc2c1be125552373b1810d44e98f88365c3"
+    },
+    "evidence": "actual_Webots_telemetry_synthetic_human_not_clinical",
+    "first_warning_s": 16.702,
+    "first_buffer_prepare_signal_s": 16.702,
+    "rejected_cloud_candidates": 3,
+    "local_samples_after_virtual_cloud_offline": 4342
+  }
+]

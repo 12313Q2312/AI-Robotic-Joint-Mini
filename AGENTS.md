@@ -1,3 +1,9 @@
+# 2026-11-05 当前仿真交付边界
+
+用户已授权电脑仿真实现和验收材料，覆盖此前“仅规划”的旧限制。保护历史记录；不接真人或真实外骨骼，不采购/付费调用。mobility_demo为合成模型，云端为模拟、本地风险为规则、缓冲为独立一维部件；完整原始包不入公开Git。修改后运行相应软件检查，物理变化需要新编号仿真证据。不得代用户签署验收，不能把助手产物算作用户掌握。
+
+以下为既有工程约定，历史状态以最新报告为准。
+
 # Repository working agreements
 
 - Read README.md, PROJECT_STATUS.md and docs/LIMITATIONS.md before changes.

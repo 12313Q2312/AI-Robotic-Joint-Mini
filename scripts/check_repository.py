@@ -6,7 +6,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-SKIP = {'.git', '__pycache__', '.venv', 'node_modules', 'build', 'install', 'log'}
+SKIP = {'.git', '__pycache__', '.venv', 'node_modules', 'build', 'install', 'log', 'results'}
 BANNED = {'.pem', '.key', '.exe', '.dll', '.so', '.o', '.obj', '.pyc', '.zip'}
 REQUIRED = ('README.md', 'PROJECT_STATUS.md', 'CONTRIBUTING.md', 'SECURITY.md',
             'LICENSE.md', 'THIRD_PARTY_NOTICES.md', 'docs/REPRODUCIBILITY.md',

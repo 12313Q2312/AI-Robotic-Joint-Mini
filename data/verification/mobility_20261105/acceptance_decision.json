@@ -1,0 +1,10 @@
+{
+  "decision": "指定仿真工况可分项验收；全身保护与真人效果仍未验证",
+  "flat_pass": true,
+  "stairs_pass": true,
+  "effort_pass": true,
+  "admission_pass": true,
+  "component_buffer_pass": true,
+  "viewer_qa_pass": true,
+  "user_acceptance": "pending"
+}

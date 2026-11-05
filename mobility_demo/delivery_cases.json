@@ -1,0 +1,40 @@
+[
+  {
+    "run": "validation_flat_assist_04",
+    "title": "平地 · 开启协同助力",
+    "description": "相同人体与设备质量下，执行六次交替迈步并停止；与关闭助力及不穿设备分别对照。"
+  },
+  {
+    "run": "validation_flat_off_04",
+    "title": "平地 · 穿设备但不助力"
+  },
+  {
+    "run": "validation_flat_no_device_04",
+    "title": "平地 · 不穿设备基线"
+  },
+  {
+    "run": "validation_stop_04",
+    "title": "交互 · 行走途中请求停止",
+    "description": "第9秒收到本地停止请求，完成当前步后转入双脚站立。"
+  },
+  {
+    "run": "validation_push_small_04",
+    "title": "扰动 · 60N / 0.15秒",
+    "description": "第12.8秒施加已记录的外部试验扰动，观察是否恢复并完成任务。"
+  },
+  {
+    "run": "validation_push_large_04",
+    "title": "能力边界 · 400N / 0.35秒",
+    "description": "观察告警与失稳阈值；发生失稳即结束试验，不把告警等同于防止跌倒。"
+  },
+  {
+    "run": "validation_stairs_04",
+    "title": "上楼 · 三阶目标验收",
+    "description": "每级0.10m高、0.40m踏面；每次迈步使用实际水平脚位重新接续，采用80Nm上楼助力配置。"
+  },
+  {
+    "run": "validation_stairs_03",
+    "title": "历史失败 · 上楼旧配置",
+    "description": "保留修正前的失稳记录：旧35Nm配置且阶段起点使用累计参考，不能把新旧差异只归因于单个因素。"
+  }
+]

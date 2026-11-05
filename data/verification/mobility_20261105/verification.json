@@ -1,0 +1,57 @@
+{
+  "scope": "offline software, immutable evidence and viewer geometry; not clinical/mechanical certification",
+  "passed": true,
+  "checks": [
+    {
+      "name": "python_behavior_tests",
+      "exit_code": 0,
+      "passed": true,
+      "output": "{\"hard_contact\": {\"peak_contact_force_n\": 9030.859098626443, \"max_compression_m\": 0.008325070370365182, \"bottomed_out\": true, \"max_energy_residual_fraction\": 2.2704919187036335e-06}, \"cushioned\": {\"peak_contact_force_n\": 1084.3105606459458, \"max_compression_m\": 0.07231805342637171, \"bottomed_out\": false, \"max_energy_residual_fraction\": 2.025456016899288e-08}, \"insufficient_stroke\": {\"peak_contact_force_n\": 7871.090163313445, \"max_compression_m\": 0.026761625839758132, \"bottomed_out\": true, \"max_energy_residual_fraction\": 2.0665938211281906e-06}, \"comparison\": {}}\ntest_mass_time_task_and_trajectory_mismatch_are_rejected (test_acceptance_rules.AcceptanceRuleTests.test_mass_time_task_and_trajectory_mismatch_are_rejected) ... ok\ntest_missing_provenance_never_passes_vacuously (test_acceptance_rules.AcceptanceRuleTests.test_missing_provenance_never_passes_vacuously) ... ok\ntest_requires_chronological_alternation (test_acceptance_rules.AcceptanceRuleTests.test_requires_chronological_alternation) ... ok\ntest_valid_pair_can_be_compared (test_acceptance_rules.AcceptanceRuleTests.test_valid_pair_can_be_compared) ... ok\ntest_energy_and_timestep_convergence (test_cushion.ComponentPhysicsTests.test_energy_and_timestep_convergence) ... ok\ntest_existing_experiment_is_never_overwritten (test_cushion.ComponentPhysicsTests.test_existing_experiment_is_never_overwritten) ... ok\ntest_insufficient_stroke_exposes_bottom_out (test_cushion.ComponentPhysicsTests.test_insufficient_stroke_exposes_bottom_out) ... ok\ntest_invalid_mass_is_rejected (test_cushion.ComponentPhysicsTests.test_invalid_mass_is_rejected) ... ok\ntest_unilateral_contact_has_no_force_before_touch (test_cushion.ComponentPhysicsTests.test_unilateral_contact_has_no_force_before_touch) ... ok\ntest_unpacked_and_archived_experiment_ids_are_reserved (test_cushion.ComponentPhysicsTests.test_unpacked_and_archived_experiment_ids_are_reserved) ... ok\ntest_constant_torque_work_has_correct_si_units (test_evidence.WorkEvidenceTests.test_constant_torque_work_has_correct_si_units) ... ok\ntest_corrupt_evidence_is_rejected (test_evidence.WorkEvidenceTests.test_corrupt_evidence_is_rejected) ... ok\ntest_negative_work_is_not_counted_as_positive (test_evidence.WorkEvidenceTests.test_negative_work_is_not_counted_as_positive) ... ok\ntest_uses_command_held_during_actual_angle_increment (test_evidence.WorkEvidenceTests.test_uses_command_held_during_actual_angle_increment) ... ok\n\n----------------------------------------------------------------------\nRan 14 tests in 1.160s\n\nOK\n"
+    },
+    {
+      "name": "cpp_compile",
+      "exit_code": 0,
+      "passed": true,
+      "output": ""
+    },
+    {
+      "name": "cpp_behavior_groups",
+      "exit_code": 0,
+      "passed": true,
+      "output": "PASS assistance magnitude, slew, disable and invalid feedback\nPASS cloud age, sequence, phase and capability admission\nPASS predictive warning, protection preparation, latch and sensor fault\n"
+    },
+    {
+      "name": "javascript_syntax_app.js",
+      "exit_code": 0,
+      "passed": true,
+      "output": ""
+    },
+    {
+      "name": "javascript_syntax_geometry.js",
+      "exit_code": 0,
+      "passed": true,
+      "output": ""
+    },
+    {
+      "name": "javascript_syntax_demo_data.js",
+      "exit_code": 0,
+      "passed": true,
+      "output": ""
+    },
+    {
+      "name": "actual_state_geometry",
+      "exit_code": 0,
+      "passed": true,
+      "output": "PASS actual-state geometry samples=124 max_error_m=0.00036078538062955676\n\n"
+    },
+    {
+      "name": "fresh_evidence_rebuild",
+      "exit_code": 0,
+      "passed": true,
+      "output": "PASS fresh checkout rebuilt metrics, report and viewer from immutable evidence\n"
+    }
+  ],
+  "cpp_available": true,
+  "node_available": true,
+  "counts_are_not_additive": true
+}

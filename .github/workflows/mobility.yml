@@ -1,0 +1,31 @@
+name: Mobility software checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  software:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - run: python -m pip install -r mobility_demo/requirements-analysis.txt
+      - run: python mobility_demo/verify.py --software-only
+      - name: State validation scope
+        if: always()
+        run: echo 'Software behavior and selected recorded-state geometry only; no Webots run, full evidence rebuild, hardware or human validation.' >> "$GITHUB_STEP_SUMMARY"

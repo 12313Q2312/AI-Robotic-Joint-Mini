@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "method": "isolated_directory_no_private_runs",
+  "raw_evidence_bundle_verified": true,
+  "metrics_regenerated": true,
+  "stairs_success_and_prior_failure_preserved": true,
+  "browser_qa_in_fresh_directory": "not_claimed"
+}
