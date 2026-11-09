@@ -62,4 +62,4 @@ The censored timing-error metric is not used.
 - peak_interaction_below_comfort: True
 - comfort_peak_interaction_nm: 15.0
 - saturation_time_fraction_mean: 0.0
-- saturation_time_fraction_below_5_percent: None
+- saturation_time_fraction_below_5_percent: True

@@ -25,7 +25,7 @@
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
-          "saturation_time_fraction_below_5_percent": null,
+          "saturation_time_fraction_below_5_percent": true,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
           "tracking_error_ratio_max": 0.574553667053
@@ -60,7 +60,7 @@
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
-          "saturation_time_fraction_below_5_percent": null,
+          "saturation_time_fraction_below_5_percent": true,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
           "tracking_error_ratio_max": 0.581740746495
@@ -96,7 +96,7 @@
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
-          "saturation_time_fraction_below_5_percent": null,
+          "saturation_time_fraction_below_5_percent": true,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
           "tracking_error_ratio_max": 0.574553667053
@@ -132,7 +132,7 @@
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
-          "saturation_time_fraction_below_5_percent": null,
+          "saturation_time_fraction_below_5_percent": true,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
           "tracking_error_ratio_max": 0.568469730729
@@ -168,7 +168,7 @@
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
-          "saturation_time_fraction_below_5_percent": null,
+          "saturation_time_fraction_below_5_percent": true,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
           "tracking_error_ratio_max": 0.574553667053

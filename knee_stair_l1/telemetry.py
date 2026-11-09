@@ -42,6 +42,13 @@ SECONDARY = (
 )
 METRICS = PRIMARY + SECONDARY
 CONDITIONS = ("off", "admittance", "assist_policy")
+BOOLEAN_CRITERIA = (
+    "human_torque_rms_reduction_ci_excludes_0",
+    "tracking_error_no_more_than_10_percent_worse",
+    "hard_stop_contacts_zero",
+    "peak_interaction_below_comfort",
+    "saturation_time_fraction_below_5_percent",
+)
 T_CRIT_95 = {11: 2.200985160082949, 29: 2.045229642132703}
 
 
@@ -159,13 +166,14 @@ def summarize(trials: list[TrialResult], config: dict) -> dict:
             "peak_interaction_below_comfort": interaction_ok,
             "comfort_peak_interaction_nm": comfort,
             "saturation_time_fraction_mean": _round(sat_mean),
-            "saturation_time_fraction_below_5_percent": bool(sat_mean < sat_max) if condition == "admittance" else None,
+            "saturation_time_fraction_below_5_percent": bool(sat_mean < sat_max),
         }
     config_bytes = Path(config["_config_path"]).read_bytes() if config.get("_config_path") else json.dumps(
         config, sort_keys=True
     ).encode()
     if not _primary_std_positive(absolute):
         raise AssertionError("primary metrics must have std > 0 across seeds")
+    require_boolean_criteria({"criteria": criteria})
     return {
         "evidence_label": "experimental",
         "simulation_only": True,
@@ -191,6 +199,20 @@ def summarize(trials: list[TrialResult], config: dict) -> dict:
         "primary_std_positive": _primary_std_positive(absolute),
         "positive_work_comparison": _work_comparison(reductions),
     }
+
+
+def require_boolean_criteria(summary: dict) -> None:
+    """Pass-criterion flags are booleans for every condition, including AssistPolicy."""
+    criteria = summary.get("criteria")
+    if not isinstance(criteria, dict) or not criteria:
+        raise ValueError("summary criteria must be a non-empty object")
+    for condition, row in criteria.items():
+        if not isinstance(row, dict):
+            raise ValueError(f"{condition} criteria must be an object")
+        for key in BOOLEAN_CRITERIA:
+            value = row.get(key)
+            if not isinstance(value, bool):
+                raise ValueError(f"{condition}.{key} must be a boolean, got {value!r}")
 
 
 def _primary_std_positive(absolute: dict) -> bool:

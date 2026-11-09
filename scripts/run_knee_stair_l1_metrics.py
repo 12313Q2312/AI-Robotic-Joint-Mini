@@ -27,6 +27,7 @@ from knee_stair_l1.telemetry import (
     format_raw_json,
     format_summary_markdown,
     raw_document,
+    require_boolean_criteria,
     run_study,
     summarize,
     trials_to_rows,
@@ -79,6 +80,7 @@ def _sample(trials) -> dict:
 def build_outputs(config):
     trials = run_study(config)
     summary = summarize(trials, config)
+    require_boolean_criteria(summary)
     committed = {
         "metrics_summary.json": json.dumps(summary, indent=2, sort_keys=True) + "\n",
         "metrics_summary.md": format_summary_markdown(summary),
@@ -101,6 +103,12 @@ def main(argv: list[str] | None = None) -> int:
     args.raw_dir.mkdir(parents=True, exist_ok=True)
     (args.raw_dir / "metrics_raw.json").write_text(raw, encoding="utf-8")
     if args.check:
+        on_disk = json.loads((args.output_dir / "metrics_summary.json").read_text(encoding="utf-8"))
+        try:
+            require_boolean_criteria(on_disk)
+        except ValueError as exc:
+            print(f"FAIL: {exc}")
+            return 1
         mismatched = [
             name for name, text in committed.items()
             if not (args.output_dir / name).is_file() or (args.output_dir / name).read_text(encoding="utf-8") != text

@@ -9,7 +9,14 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from knee_stair_l1.bus import TopicBus
 from knee_stair_l1.config import load_config
 from knee_stair_l1.loop import run_trial
-from knee_stair_l1.telemetry import CONDITIONS, percentile, run_study, summarize
+from knee_stair_l1.telemetry import (
+    BOOLEAN_CRITERIA,
+    CONDITIONS,
+    percentile,
+    require_boolean_criteria,
+    run_study,
+    summarize,
+)
 from knee_stair_l1.topics import LAYER1_TOPICS, TOPIC_INTENT_SYNTHETIC, TOPIC_SAFETY_STATE
 from scripts.run_knee_stair_l1_metrics import main
 
@@ -47,6 +54,16 @@ class MetricStudyTests(unittest.TestCase):
             summary["criteria"]["admittance"]["saturation_time_fraction_mean"],
             config["metrics"]["admittance_saturation_fraction_max"],
         )
+        for condition in ("admittance", "assist_policy"):
+            for key in BOOLEAN_CRITERIA:
+                self.assertIsInstance(summary["criteria"][condition][key], bool)
+        require_boolean_criteria(summary)
+
+    def test_null_pass_criterion_is_rejected(self):
+        row = {key: True for key in BOOLEAN_CRITERIA}
+        row["saturation_time_fraction_below_5_percent"] = None
+        with self.assertRaises(ValueError):
+            require_boolean_criteria({"criteria": {"assist_policy": row}})
         self.assertEqual(main(["--check"]), 0)
         self.assertTrue(CONDITIONS)
 
