@@ -11,8 +11,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import logging
 import math
-import random
 
+from knee_stair_l1.randomization import draw_factors
 from knee_stair_l1.topics import TOPIC_INTENT_SYNTHETIC
 
 logger = logging.getLogger("knee_stair_l1.intent")
@@ -41,12 +41,8 @@ class IntentSource(ABC):
 
 
 def depth_scale_for_seed(seed: int, config: dict) -> float:
-    """Paired scale: every condition of this seed uses the same trajectory depth."""
-    intent = config["intent"]
-    draw = random.Random(int(seed)).random()
-    low = float(intent["depth_scale_min"])
-    high = float(intent["depth_scale_max"])
-    return low + draw * (high - low)
+    """Paired amplitude scale. Every condition of this seed uses the same draw."""
+    return draw_factors(seed, config).intent_amplitude_scale
 
 
 def _smoothstep(phase: float) -> tuple[float, float]:
@@ -71,7 +67,9 @@ class SyntheticStairIntent(IntentSource):
 
     def reset(self, seed: int) -> None:
         self.seed = int(seed)
-        self.depth_scale = depth_scale_for_seed(self.seed, self._config)
+        self.factors = draw_factors(self.seed, self._config)
+        self.depth_scale = self.factors.intent_amplitude_scale
+        self.onset_s = self.factors.intent_onset_s
         logger.info(
             "synthetic intent source reset seed=%s source_label=synthetic topic=%s depth_scale=%.6f",
             self.seed,
@@ -85,7 +83,7 @@ class SyntheticStairIntent(IntentSource):
 
     def step(self, time_s: float) -> IntentSample:
         intent = self._config["intent"]
-        onset = float(intent["onset_s"])
+        onset = float(self.onset_s)
         duration = float(intent["move_duration_s"])
         target = self.q_target()
         if time_s <= onset:

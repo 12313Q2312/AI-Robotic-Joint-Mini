@@ -33,7 +33,7 @@ class HardStopEvent:
 
 
 class KneePlant:
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, factors=None):
         plant = config["plant"]
         load = config["load"]
         strap = config["strap"]
@@ -55,6 +55,11 @@ class KneePlant:
         self.moment_arm = float(load["moment_arm_m"])
         self.strap_k = float(strap["stiffness_nm_per_rad"])
         self.strap_b = float(strap["damping_nm_s_per_rad"])
+        if factors is not None:
+            reference_height = float(load["reference_step_height_m"])
+            self.body_mass = float(factors.body_mass_kg)
+            self.moment_arm *= float(factors.step_height_m) / reference_height
+            self.strap_k *= float(factors.strap_stiffness_scale)
         self.estop_damping = float(safety["estop_passive_damping_nm_s_per_rad"])
         self.strap_torque_flexion_nm = 0.0
         self.last_motor_extension_nm = 0.0

@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -40,7 +41,15 @@ jobs:
       - name: Knee stair L1 fault injection
         run: python -m unittest tests.test_knee_stair_l1_faults -v
       - name: Knee stair L1 metrics reproduction
-        run: python scripts/run_knee_stair_l1_metrics.py --check
+        run: python scripts/run_knee_stair_l1_metrics.py --check --raw-dir "$RUNNER_TEMP/knee-stair-l1-raw"
+      - name: Upload knee stair raw metrics
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: knee-stair-l1-metrics-raw
+          path: ${{ runner.temp }}/knee-stair-l1-raw/metrics_raw.json
+          if-no-files-found: error
+      - name: Knee stair L1 latency and sensitivity sweeps
+        run: python scripts/run_knee_stair_l1_sweeps.py --check
       - name: Run offline Python, C++ and frontend verification
         run: python scripts/verify_joint_study.py --output data/verification/ci-check.json
       - name: Summarize verification

@@ -9,6 +9,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 from knee_stair_l1.config import load_config
 from knee_stair_l1.intent import SyntheticStairIntent, depth_scale_for_seed
+from knee_stair_l1.randomization import draw_factors
 from knee_stair_l1.topics import TOPIC_INTENT_SYNTHETIC
 
 
@@ -27,11 +28,12 @@ class SyntheticIntentTests(unittest.TestCase):
 
     def test_same_seed_is_paired_and_quiet_before_onset(self):
         config = load_config()
-        self.assertEqual(depth_scale_for_seed(4, config), depth_scale_for_seed(4, config))
-        self.assertNotEqual(depth_scale_for_seed(1, config), depth_scale_for_seed(2, config))
+        self.assertEqual(draw_factors(4, config), draw_factors(4, config))
+        self.assertNotEqual(draw_factors(1, config).body_mass_kg, draw_factors(2, config).body_mass_kg)
+        self.assertEqual(depth_scale_for_seed(4, config), draw_factors(4, config).intent_amplitude_scale)
         source = SyntheticStairIntent(config)
         source.reset(4)
-        before = source.step(config["intent"]["onset_s"] - config["dt_s"])
+        before = source.step(source.onset_s - config["dt_s"])
         self.assertEqual(before.q_ref_rad, config["intent"]["q_start_rad"])
         self.assertEqual(before.qd_ref_rad_s, 0.0)
         self.assertFalse(before.ascent_active)

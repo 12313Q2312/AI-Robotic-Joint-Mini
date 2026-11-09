@@ -21,7 +21,8 @@ from knee_stair_l1.controller import CONDITIONS, AssistController
 from knee_stair_l1.human import BoundedHumanKnee
 from knee_stair_l1.intent import IntentSample, IntentSource, SyntheticStairIntent
 from knee_stair_l1.plant import HardStopEvent, KneePlant
-from knee_stair_l1.safety import LIMITED_ASSIST, JointSafetyCore
+from knee_stair_l1.randomization import SeedFactors, draw_factors, gaussian, jitter_rng, noise_rng
+from knee_stair_l1.safety import LIMITED_ASSIST, NORMAL, JointSafetyCore
 from knee_stair_l1.topics import (
     TOPIC_ASSIST_COMMAND_RAW,
     TOPIC_ASSIST_COMMAND_SAFE,
@@ -49,6 +50,8 @@ class TrialResult:
     latency_samples_s: list[float] = field(default_factory=list)
     max_abs_motor_command_nm: float = 0.0
     final_flexion_rad: float = 0.0
+    factors: SeedFactors | None = None
+    non_normal_step_fraction: float = 0.0
 
 
 def run_trial(
@@ -57,12 +60,14 @@ def run_trial(
     condition: str,
     intent: IntentSource | None = None,
     bus=None,
+    jitter_max_s: float | None = None,
 ) -> TrialResult:
     if condition not in CONDITIONS:
         raise ValueError(f"unknown assist condition: {condition}")
+    factors = draw_factors(seed, config)
     source = intent if intent is not None else SyntheticStairIntent(config)
     source.reset(seed)
-    plant = KneePlant(config)
+    plant = KneePlant(config, factors)
     human = BoundedHumanKnee(config)
     safety = JointSafetyCore(config, legacy_enabled=False)
     controller = AssistController(config, condition)
@@ -72,13 +77,19 @@ def run_trial(
     dt = float(config["dt_s"])
     steps = int(round(float(config["duration_s"]) / dt))
     delay = int(config["command_transport_delay_steps"])
+    noise = noise_rng(seed)
+    angle_std = float(config["sensor_noise"]["angle_std_rad"])
+    velocity_std = float(config["sensor_noise"]["velocity_std_rad_s"])
+    delays = jitter_rng(seed)
     pending: deque[IntentSample] = deque(source.step(-(delay - index) * dt) for index in range(delay))
+    held_commands: list[tuple[float, float]] = []
 
     torque_sq = 0.0
     positive_work = 0.0
     track_sq = 0.0
     peak_interaction = 0.0
     saturated_steps = 0
+    non_normal_steps = 0
     max_command = 0.0
     latencies: list[float] = []
 
@@ -90,17 +101,34 @@ def run_trial(
         used = pending.popleft()
         q_h = plant.q_h
         qd_h = plant.qd_h
-        human_flexion = human.torque_flexion_nm(fresh.q_ref_rad, fresh.qd_ref_rad_s, q_h, qd_h)
+        q_meas = q_h + angle_std * gaussian(noise)
+        qd_meas = qd_h + velocity_std * gaussian(noise)
+        qe_meas = plant.q_e + angle_std * gaussian(noise)
+        qde_meas = plant.qd_e + velocity_std * gaussian(noise)
+        human_flexion = human.torque_flexion_nm(fresh.q_ref_rad, fresh.qd_ref_rad_s, q_meas, qd_meas)
         human_extension = -human_flexion
-        safety.observe_sensor(plant.q_e, plant.qd_e, time_s)
-        raw = controller.command(used, plant.q_e, plant.qd_e, human_extension, dt)
+        safety.observe_sensor(qe_meas, qde_meas, time_s)
+        raw = controller.command(used, qe_meas, qde_meas, human_extension, dt)
         safety.observe_command(raw.torque_extension_nm, time_s)
         decision = safety.evaluate(time_s)
         command_time_s = time_s
         latency_s = command_time_s - used.time_s
+        held_commands.append((command_time_s, decision.safe_extension_torque_nm))
+        applied_torque = decision.safe_extension_torque_nm
+        if decision.passive_damping:
+            applied_torque = 0.0
+        elif jitter_max_s is not None:
+            drawn = 0.0 if jitter_max_s <= 0.0 else delays.uniform(0.0, float(jitter_max_s))
+            target_time = time_s - drawn
+            applied_torque = 0.0
+            for stamp, torque in held_commands:
+                if stamp <= target_time + 1e-12:
+                    applied_torque = torque
+                else:
+                    break
         plant.advance(
             human_flexion,
-            decision.safe_extension_torque_nm,
+            applied_torque,
             dt,
             time_s,
             passive_damping=decision.passive_damping,
@@ -114,6 +142,8 @@ def run_trial(
         peak_interaction = max(peak_interaction, abs(plant.strap_torque_flexion_nm))
         if raw.pid_saturated or raw.policy_saturated or decision.state == LIMITED_ASSIST:
             saturated_steps += 1
+        if decision.state != NORMAL:
+            non_normal_steps += 1
         max_command = max(max_command, abs(decision.safe_extension_torque_nm))
         latencies.append(latency_s)
         if bus is not None:
@@ -123,7 +153,9 @@ def run_trial(
         seed=int(seed),
         condition=condition,
         source_label=source.source_label,
-        depth_scale=float(getattr(source, "depth_scale", float("nan"))),
+        depth_scale=float(getattr(source, "depth_scale", factors.intent_amplitude_scale)),
+        factors=factors,
+        non_normal_step_fraction=non_normal_steps / steps,
         human_torque_rms_nm=(torque_sq / steps) ** 0.5,
         human_positive_work_j=positive_work,
         tracking_error_rms_rad=(track_sq / steps) ** 0.5,

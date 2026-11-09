@@ -49,10 +49,13 @@ def validate_config(data: dict) -> None:
     if any(not isinstance(seed, int) for seed in seeds):
         raise ValueError("seeds must be integers")
     for section in (
-        "intent", "human", "load", "strap", "assist_policy", "admittance", "pid", "safety", "plant", "metrics"
+        "intent", "human", "load", "strap", "assist_policy", "admittance", "pid", "safety", "plant", "metrics",
+        "randomization", "sensor_noise",
     ):
         if section not in data:
             raise ValueError(f"missing config section: {section}")
+    if list(data["seeds"]) != list(range(30)):
+        raise ValueError("the reported study uses seeds 0..29")
     intent = data["intent"]
     if intent.get("source_label") != "synthetic":
         raise ValueError('intent.source_label must be "synthetic" for v1')
@@ -65,7 +68,8 @@ def validate_config(data: dict) -> None:
     if float(data["pid"]["torque_limit_nm"]) != 24.0:
         raise ValueError("pid torque_limit_nm is a 24 Nm safety parameter and cannot be retuned")
     span = float(intent["q_start_rad"]) - float(intent["q_end_rad"])
-    most_extended = float(intent["q_start_rad"]) - span * float(intent["depth_scale_max"])
+    amplitude = 1.0 + float(data["randomization"]["intent_amplitude_fraction"])
+    most_extended = float(intent["q_start_rad"]) - span * amplitude
     if most_extended <= float(plant["min_flexion_rad"]) + 0.15:
         raise ValueError("scaled synthetic trajectory reaches the extension stop")
     if float(data["load"]["knee_weight_share"]) <= 0 or float(data["load"]["moment_arm_m"]) <= 0:

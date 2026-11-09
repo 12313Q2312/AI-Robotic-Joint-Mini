@@ -13,7 +13,7 @@
 | 助力 | `admittance.py`、`torque_pid.py`、`assist_policy.py`、`controller.py` | 期望运动和 `/knee_stair/assist_command_raw`。PID 上限保持 24 Nm |
 | 安全监督 | `safety.py` | 唯一发出 `/knee_stair/assist_command_safe` 的对象，并发布只读的 `/joint/safety_state` |
 | 植物 | `plant.py` | 人体小腿、外骨骼连杆、重力矩和弹簧阻尼绑带 |
-| 遥测 | `telemetry.py`、`../scripts/run_knee_stair_l1_metrics.py` | 原始结果 `data/verification/knee_stair_l1/metrics_raw.json` |
+| 遥测 | `telemetry.py`、`../scripts/run_knee_stair_l1_metrics.py` | 仓库里是汇总和小样本。逐步原始 JSON 只在 CI artifact `knee-stair-l1-metrics-raw` |
 
 ## 负载、意图和交互
 
@@ -31,7 +31,9 @@
 
 同一种子的轨迹在关闭、导纳和 AssistPolicy 之间相同。标准差用 n−1。降幅是关闭减去助力。95% 区间是 df=11 的 t 区间。
 
-主指标：人体膝关节力矩 RMS 的降幅，人体膝关节正功的降幅。
+30 个种子（0–29）。每个种子抽取一次体重、台阶高、意图幅度、起始时间和绑带刚度，关闭、导纳和 AssistPolicy 共用。传感噪声水平固定，序列也按种子配对。
+
+主指标：人体膝关节力矩 RMS 的降幅，人体膝关节正功的降幅。跨种子标准差必须大于 0。导纳的正功降幅小于 AssistPolicy，这是结果。
 
 次指标：跟踪误差 RMS、绑带交互峰值、饱和时间比例、硬限位接触次数。
 
@@ -65,7 +67,7 @@
 |---|---|
 | 上表模块、重力负载、绑带、只读状态话题 | implemented |
 | 故障注入、E_STOP 力矩与角度测试、24 Nm 上限仍在 | verified，见 `tests/test_knee_stair_l1_*.py` |
-| 12 种子表和 `criteria` | experimental |
+| 30 种子汇总、`criteria`、延迟图和敏感性扫描 | experimental |
 | 重力矩公式、15 Nm 舒适假设、固定髋的单自由度 | theoretical |
 
 ## 复现
@@ -75,7 +77,7 @@ python scripts/run_knee_stair_l1_metrics.py --check
 python -m unittest tests.test_knee_stair_l1_faults tests.test_knee_stair_l1_safety -v
 ```
 
-在仓库根目录执行。`--check` 对照 `metrics_raw.json`、`metrics_summary.md` 和 `metrics_trials.csv`。
+在仓库根目录执行。`--check` 对照汇总 JSON、指标表、试验 CSV 和小样本。`run_knee_stair_l1_sweeps.py --check` 对照延迟扫描和敏感性 JSON。逐步原始文件写到 gitignore 的 `local_raw/`，CI 再上传。
 
 ## 回退
 

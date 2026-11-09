@@ -22,12 +22,15 @@ class MetricStudyTests(unittest.TestCase):
 
     def test_study_records_the_new_metrics_and_matches_committed_raw_json(self):
         config = load_config()
-        self.assertEqual(len(config["seeds"]), 12)
+        self.assertEqual(list(config["seeds"]), list(range(30)))
         self.assertEqual(config["pid"]["torque_limit_nm"], 24.0)
         trials = run_study(config)
-        self.assertEqual(len(trials), 36)
+        self.assertEqual(len(trials), 90)
         summary = summarize(trials, config)
         self.assertNotIn("assist_timing_error_s", summary["absolute"]["off"])
+        self.assertTrue(summary["primary_std_positive"])
+        self.assertIn("simulation loop latency, not real-system latency", summary["latency_definition"])
+        self.assertFalse((pathlib.Path(__file__).resolve().parents[1] / "data/verification/knee_stair_l1/metrics_raw.json").exists())
         self.assertIn("assist_timing_error_s", summary["removed_metrics"])
         for trial in trials:
             self.assertEqual(trial.source_label, "synthetic")

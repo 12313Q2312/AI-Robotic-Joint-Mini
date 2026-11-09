@@ -1,0 +1,301 @@
+{
+  "absolute": {
+    "admittance": {
+      "hard_stop_contact_count": {
+        "ci95_excludes_0": false,
+        "ci95_high": 0.0,
+        "ci95_low": 0.0,
+        "mean": 0.0,
+        "n": 30,
+        "std": 0.0
+      },
+      "human_positive_work_j": {
+        "ci95_excludes_0": true,
+        "ci95_high": 2.594772646964,
+        "ci95_low": 2.161147827146,
+        "mean": 2.377960237055,
+        "n": 30,
+        "std": 0.580634297527
+      },
+      "human_torque_rms_nm": {
+        "ci95_excludes_0": true,
+        "ci95_high": 6.291887444767,
+        "ci95_low": 5.470035141625,
+        "mean": 5.880961293196,
+        "n": 30,
+        "std": 1.100480445069
+      },
+      "latency": {
+        "max_s": 0.01,
+        "n": 12000,
+        "p50_s": 0.01,
+        "p95_s": 0.01
+      },
+      "peak_interaction_torque_nm": {
+        "ci95_excludes_0": true,
+        "ci95_high": 5.568003206774,
+        "ci95_low": 4.789986217817,
+        "mean": 5.178994712295,
+        "n": 30,
+        "std": 1.041783881368
+      },
+      "saturation_time_fraction": {
+        "ci95_excludes_0": false,
+        "ci95_high": 0.0,
+        "ci95_low": 0.0,
+        "mean": 0.0,
+        "n": 30,
+        "std": 0.0
+      },
+      "tracking_error_rms_rad": {
+        "ci95_excludes_0": true,
+        "ci95_high": 0.168428221836,
+        "ci95_low": 0.14650160908,
+        "mean": 0.157464915458,
+        "n": 30,
+        "std": 0.029360273703
+      }
+    },
+    "assist_policy": {
+      "hard_stop_contact_count": {
+        "ci95_excludes_0": false,
+        "ci95_high": 0.0,
+        "ci95_low": 0.0,
+        "mean": 0.0,
+        "n": 30,
+        "std": 0.0
+      },
+      "human_positive_work_j": {
+        "ci95_excludes_0": true,
+        "ci95_high": 2.233875209067,
+        "ci95_low": 1.877135068788,
+        "mean": 2.055505138928,
+        "n": 30,
+        "std": 0.477683820861
+      },
+      "human_torque_rms_nm": {
+        "ci95_excludes_0": true,
+        "ci95_high": 6.284538374798,
+        "ci95_low": 5.443508767997,
+        "mean": 5.864023571398,
+        "n": 30,
+        "std": 1.12615932628
+      },
+      "latency": {
+        "max_s": 0.01,
+        "n": 12000,
+        "p50_s": 0.01,
+        "p95_s": 0.01
+      },
+      "peak_interaction_torque_nm": {
+        "ci95_excludes_0": true,
+        "ci95_high": 5.494263323735,
+        "ci95_low": 4.796110058491,
+        "mean": 5.145186691113,
+        "n": 30,
+        "std": 0.93484439129
+      },
+      "saturation_time_fraction": {
+        "ci95_excludes_0": false,
+        "ci95_high": 0.0,
+        "ci95_low": 0.0,
+        "mean": 0.0,
+        "n": 30,
+        "std": 0.0
+      },
+      "tracking_error_rms_rad": {
+        "ci95_excludes_0": true,
+        "ci95_high": 0.169504837921,
+        "ci95_low": 0.146843128718,
+        "mean": 0.15817398332,
+        "n": 30,
+        "std": 0.030344585924
+      }
+    },
+    "off": {
+      "hard_stop_contact_count": {
+        "ci95_excludes_0": false,
+        "ci95_high": 0.0,
+        "ci95_low": 0.0,
+        "mean": 0.0,
+        "n": 30,
+        "std": 0.0
+      },
+      "human_positive_work_j": {
+        "ci95_excludes_0": true,
+        "ci95_high": 4.547677628223,
+        "ci95_low": 3.791643000264,
+        "mean": 4.169660314243,
+        "n": 30,
+        "std": 1.012348959396
+      },
+      "human_torque_rms_nm": {
+        "ci95_excludes_0": true,
+        "ci95_high": 11.105910222765,
+        "ci95_low": 9.575712759241,
+        "mean": 10.340811491003,
+        "n": 30,
+        "std": 2.048972034592
+      },
+      "latency": {
+        "max_s": 0.01,
+        "n": 12000,
+        "p50_s": 0.01,
+        "p95_s": 0.01
+      },
+      "peak_interaction_torque_nm": {
+        "ci95_excludes_0": true,
+        "ci95_high": 1.054929736448,
+        "ci95_low": 0.912913679341,
+        "mean": 0.983921707894,
+        "n": 30,
+        "std": 0.190162992955
+      },
+      "saturation_time_fraction": {
+        "ci95_excludes_0": false,
+        "ci95_high": 0.0,
+        "ci95_low": 0.0,
+        "mean": 0.0,
+        "n": 30,
+        "std": 0.0
+      },
+      "tracking_error_rms_rad": {
+        "ci95_excludes_0": true,
+        "ci95_high": 0.299956999657,
+        "ci95_low": 0.258689765991,
+        "mean": 0.279323382824,
+        "n": 30,
+        "std": 0.055257840731
+      }
+    }
+  },
+  "ci_method": "Student t, df=n-1. For 30 seeds df=29 and t_0.975=2.045229642132703. mean \u00b1 t*std/sqrt(n)",
+  "comfort_basis": "Design assumption only, not a comfort study: 15 Nm is 0.08 m cuff moment arm times 187.5 N strap force. Peaks at or above this value fail the interaction criterion.",
+  "comfort_peak_interaction_nm": 15.0,
+  "conditions": [
+    "off",
+    "admittance",
+    "assist_policy"
+  ],
+  "config_sha256": "724ef28b89ead513c0bff157b94dc79b0502e2ed0cb1541ba48628f365baba7b",
+  "criteria": {
+    "admittance": {
+      "comfort_peak_interaction_nm": 15.0,
+      "hard_stop_contacts_zero": true,
+      "human_torque_rms_reduction_ci95": [
+        4.099931683358,
+        4.819768712256
+      ],
+      "human_torque_rms_reduction_ci_excludes_0": true,
+      "peak_interaction_below_comfort": true,
+      "saturation_time_fraction_below_5_percent": true,
+      "saturation_time_fraction_mean": 0.0,
+      "tracking_error_no_more_than_10_percent_worse": true,
+      "tracking_error_ratio_max": 0.597015026104
+    },
+    "assist_policy": {
+      "comfort_peak_interaction_nm": 15.0,
+      "hard_stop_contacts_zero": true,
+      "human_torque_rms_reduction_ci95": [
+        4.131964445785,
+        4.821611393426
+      ],
+      "human_torque_rms_reduction_ci_excludes_0": true,
+      "peak_interaction_below_comfort": true,
+      "saturation_time_fraction_below_5_percent": null,
+      "saturation_time_fraction_mean": 0.0,
+      "tracking_error_no_more_than_10_percent_worse": true,
+      "tracking_error_ratio_max": 0.574556818193
+    }
+  },
+  "evidence_label": "experimental",
+  "intent_source_label": "synthetic",
+  "interaction_definition": "peak absolute spring-damper strap torque on the human knee",
+  "latency_definition": "simulation loop latency, not real-system latency: command_timestamp_s - intent_timestamp_s of the sample consumed by that command",
+  "load_assumption": "Theoretical stair-support moment, not a gait-lab inverse-dynamics result. Body mass is drawn from 50-85 kg around the 70 kg synthetic adult used as the nominal anchor. knee_weight_share of that weight loads this knee. The moment arm is moment_arm_m * (step_height / reference_step_height_m) * sin(flexion). reference_step_height_m is 0.15 m, the middle of the 0.13-0.18 m draw, a round riser height rather than a measured step. The moment is zero at a straight knee and is a flexion moment.",
+  "not_claimed": [
+    "real_humans",
+    "real_emg",
+    "fall_prevention"
+  ],
+  "percentile_method": "linear interpolation, rank (n-1)*p/100",
+  "pid_torque_limit_nm": 24.0,
+  "positive_work_comparison": "Admittance has a smaller positive-work reduction than AssistPolicy. That ordering is a result of this run, not a tuning target.",
+  "primary_std_positive": true,
+  "reduction_versus_off": {
+    "admittance": {
+      "human_positive_work_j": {
+        "ci95_excludes_0": true,
+        "ci95_high": 1.958414064182,
+        "ci95_low": 1.624986090196,
+        "mean": 1.791700077189,
+        "n": 30,
+        "std": 0.446468256897
+      },
+      "human_torque_rms_nm": {
+        "ci95_excludes_0": true,
+        "ci95_high": 4.819768712256,
+        "ci95_low": 4.099931683358,
+        "mean": 4.459850197807,
+        "n": 30,
+        "std": 0.963879484074
+      }
+    },
+    "assist_policy": {
+      "human_positive_work_j": {
+        "ci95_excludes_0": true,
+        "ci95_high": 2.314760278461,
+        "ci95_low": 1.913550072171,
+        "mean": 2.114155175316,
+        "n": 30,
+        "std": 0.537230332866
+      },
+      "human_torque_rms_nm": {
+        "ci95_excludes_0": true,
+        "ci95_high": 4.821611393426,
+        "ci95_low": 4.131964445785,
+        "mean": 4.476787919605,
+        "n": 30,
+        "std": 0.923454222831
+      }
+    }
+  },
+  "removed_metrics": [
+    "assist_timing_error_s"
+  ],
+  "seed_count": 30,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29
+  ],
+  "simulation_only": true,
+  "std_ddof": 1
+}

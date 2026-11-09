@@ -33,7 +33,7 @@ python scripts/run_knee_stair_l1_metrics.py --check
 python -m unittest tests.test_knee_stair_l1_faults -v
 ```
 
-结果说明见 [knee_stair_l1/README.md](../knee_stair_l1/README.md)、[原始 JSON](../data/verification/knee_stair_l1/metrics_raw.json) 和 [指标表](../data/verification/knee_stair_l1/metrics_summary.md)。这组数字是仿真实验，不是真人、肌电或防跌倒证据。CI 是否通过以该次工作流记录为准。
+结果说明见 [knee_stair_l1/README.md](../knee_stair_l1/README.md)、[汇总 JSON](../data/verification/knee_stair_l1/metrics_summary.json) 和 [指标表](../data/verification/knee_stair_l1/metrics_summary.md)。逐步原始 JSON 不进仓库，由 CI 重新生成并上传为 artifact `knee-stair-l1-metrics-raw`。这组数字是仿真实验，不是真人、肌电或防跌倒证据。CI 是否通过以该次工作流记录为准。
 
 ## CAD 和绘图
 

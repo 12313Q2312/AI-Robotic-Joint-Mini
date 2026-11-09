@@ -14,10 +14,11 @@ Secondary:
 Latency is the measured command timestamp minus the consumed intent timestamp.
 Percentiles use linear interpolation: rank = (n - 1) * p / 100.
 
-The 95% CI is the Student t interval. For the required 12 seeds, df = 11 and
-t_0.975 = 2.200985160082949. A CI excludes 0 when the lower bound is positive
-or the upper bound is negative. The reduction criterion passes only when the
-lower bound is positive.
+The 95% CI is the Student t interval with df = n - 1. For the reported 30
+seeds, df = 29 and t_0.975 = 2.045229642132703. The reduction criterion passes
+only when the lower bound is positive.
+
+The fixed-queue p50/p95/max are simulation loop latency, not real-system latency.
 """
 
 from __future__ import annotations
@@ -41,7 +42,7 @@ SECONDARY = (
 )
 METRICS = PRIMARY + SECONDARY
 CONDITIONS = ("off", "admittance", "assist_policy")
-T_CRIT_95_DF11 = 2.200985160082949
+T_CRIT_95 = {11: 2.200985160082949, 29: 2.045229642132703}
 
 
 def run_study(config: dict | None = None) -> list[TrialResult]:
@@ -71,9 +72,10 @@ def percentile(values: list[float], percent: float) -> float:
 
 
 def _t_crit(n: int) -> float:
-    if n != 12:
-        raise ValueError("the 95% CI table in this study is for 12 seeds (df=11)")
-    return T_CRIT_95_DF11
+    df = n - 1
+    if df not in T_CRIT_95:
+        raise ValueError(f"no 95% t critical value tabulated for df={df}")
+    return T_CRIT_95[df]
 
 
 def _stats(values: list[float]) -> dict:
@@ -162,6 +164,8 @@ def summarize(trials: list[TrialResult], config: dict) -> dict:
     config_bytes = Path(config["_config_path"]).read_bytes() if config.get("_config_path") else json.dumps(
         config, sort_keys=True
     ).encode()
+    if not _primary_std_positive(absolute):
+        raise AssertionError("primary metrics must have std > 0 across seeds")
     return {
         "evidence_label": "experimental",
         "simulation_only": True,
@@ -172,8 +176,8 @@ def summarize(trials: list[TrialResult], config: dict) -> dict:
         "seeds": list(config["seeds"]),
         "conditions": list(CONDITIONS),
         "std_ddof": 1,
-        "ci_method": "Student t, df=11, t_0.975=2.200985160082949, mean ± t*std/sqrt(n)",
-        "latency_definition": "command_timestamp_s - intent_timestamp_s of the sample consumed by that command",
+        "ci_method": "Student t, df=n-1. For 30 seeds df=29 and t_0.975=2.045229642132703. mean ± t*std/sqrt(n)",
+        "latency_definition": "simulation loop latency, not real-system latency: command_timestamp_s - intent_timestamp_s of the sample consumed by that command",
         "percentile_method": "linear interpolation, rank (n-1)*p/100",
         "interaction_definition": "peak absolute spring-damper strap torque on the human knee",
         "pid_torque_limit_nm": config["pid"]["torque_limit_nm"],
@@ -184,7 +188,30 @@ def summarize(trials: list[TrialResult], config: dict) -> dict:
         "absolute": absolute,
         "reduction_versus_off": reductions,
         "criteria": criteria,
+        "primary_std_positive": _primary_std_positive(absolute),
+        "positive_work_comparison": _work_comparison(reductions),
     }
+
+
+def _primary_std_positive(absolute: dict) -> bool:
+    for condition in CONDITIONS:
+        for metric in PRIMARY:
+            if absolute[condition][metric]["std"] <= 0.0:
+                return False
+    return True
+
+
+def _work_comparison(reductions: dict) -> str:
+    admit = reductions["admittance"]["human_positive_work_j"]["mean"]
+    policy = reductions["assist_policy"]["human_positive_work_j"]["mean"]
+    if admit < policy:
+        return (
+            "Admittance has a smaller positive-work reduction than AssistPolicy. "
+            "That ordering is a result of this run, not a tuning target."
+        )
+    if admit > policy:
+        return "Admittance has a larger positive-work reduction than AssistPolicy in this run."
+    return "Admittance and AssistPolicy have the same positive-work reduction in this run."
 
 
 def _event_dict(event) -> dict:
@@ -247,6 +274,10 @@ def format_summary_markdown(summary: dict) -> str:
         "",
         f"Seeds: {summary['seed_count']} ({summary['seeds'][0]}..{summary['seeds'][-1]}). "
         "Sample std (n-1). 95% CI is the Student t interval.",
+        "",
+        summary["positive_work_comparison"],
+        "",
+        "Latency p50/p95/max below are simulation loop latency, not real-system latency.",
         "",
         f"Comfort threshold: {summary['comfort_peak_interaction_nm']} Nm. {summary['comfort_basis']}",
         "",

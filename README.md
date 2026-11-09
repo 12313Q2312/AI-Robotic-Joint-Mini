@@ -93,17 +93,33 @@ AI负责估计与决策，缓震需要可验证的物理能量吸收路径；弹
 | 重力负载、绑带约束、硬限位异常记录 | implemented | `knee_stair_l1/plant.py` |
 | 可选单膝 Webots 几何 | implemented | `knee_stair_l1/webots/worlds/knee_stair_l1.wbt`（未运行） |
 | 四项故障注入，以及 E_STOP 后力矩保持 0、角度不跳变 | verified | `tests/test_knee_stair_l1_faults.py`，`tests/test_knee_stair_l1_safety.py` |
-| 12 个种子的配对指标与通过/失败记录 | experimental | [原始 JSON](data/verification/knee_stair_l1/metrics_raw.json)，[指标表](data/verification/knee_stair_l1/metrics_summary.md) |
+| 30 个种子的配对指标与通过/失败记录 | experimental | [汇总 JSON](data/verification/knee_stair_l1/metrics_summary.json)，[小样本](data/verification/knee_stair_l1/metrics_sample.json) |
 | 单自由度重力矩、绑带舒适阈值 15 Nm、固定髋 | theoretical | `knee_stair_l1/config/default.json` 里的 `load.assumption` 与 `metrics.comfort_basis` |
 
 真人助力效果、真实肌电识别和防跌倒没有归入上表的任何一个标记，本层不报告这些结果。
 
-假设与限制：重力矩用 `份额 × 体重 × g × 力臂 × sin(屈膝)`，70 kg 和力臂都是合成假设，不是步态实验反推。15 Nm 舒适阈值来自 0.08 m 绑带力臂乘 187.5 N 的设计假设，不是舒适性试验。导纳内环的 24 Nm 上限没有提高；积分增益取 0，避免重力矩把积分推到这个上限。时延由意图时间戳和力矩命令时间戳相减得到，再报告 p50、p95 和最大值。已取消用试验末端充数的时机误差。`E_STOP` 是软件锁存，不是硬件急停。软件测试不证明 ROS 2/Webots 运动、机械安全或测得的能量节省。通过与否以原始 JSON 里的 `criteria` 为准，不改指标定义来凑通过。
+假设和来源：
+
+| 假设 | 来源 |
+|---|---|
+| 体重在 50–85 kg 内抽取，名义锚点是合成的 70 kg | 配置 `randomization` 与 `load.assumption`，不是实测队列 |
+| 台阶高 0.13–0.18 m，参考高度 0.15 m | 配置。0.15 m 是抽取区间中点，当作一个整数级踏步高度 |
+| 重力矩 = 份额 × 体重 × g × 力臂 × (台阶高 / 0.15) × sin(屈膝) | `load.assumption`。理论力矩，不是步态反推 |
+| 膝关节承担体重的份额是 0.4 | 配置里的理论份额 |
+| 意图幅度 ±20%，起始时间 ±100 ms | 本轮要求的抽取范围，写在 `randomization` |
+| 绑带刚度在名义值上下 ±30% | 配置。名义刚度是模型参数 |
+| 传感噪声标准差为 0.005 rad 和 0.05 rad/s | `sensor_noise.level_note`。选定的仿真水平，不是编码器说明书 |
+| 舒适阈值 15 Nm = 0.08 m × 187.5 N | `metrics.comfort_basis`。设计假设，不是舒适性试验 |
+| 屈膝上限 2.2 rad | `knee_stair_l1/TUNING.md`。模型活动范围，不是测得关节活动度 |
+| 固定 2 步队列的 p50/p95/max 是仿真环路时延，不是真实系统时延 | `metrics_summary.json` 的 `latency_definition` |
+
+导纳的正功降幅小于 AssistPolicy。这是这次结果，没有为了让导纳更大而调参。±30% 的力臂和舒适阈值扫描没有让通过/失败结论翻转，见 [sensitivity.json](data/verification/knee_stair_l1/sensitivity.json)。0–50 ms 的命令保持延迟没有使助力差于关闭，也没有让监督器离开 `NORMAL`，见 [latency_sweep.md](data/verification/knee_stair_l1/latency_sweep.md) 和 [图](data/verification/knee_stair_l1/latency_sweep.png)。24 Nm 上限没有提高。`E_STOP` 是软件锁存，不是硬件急停。软件测试不证明 ROS 2/Webots 运动、机械安全或测得的能量节省。
 
 复现（仓库根目录，只需 Python 标准库）：
 
 ```text
 python scripts/run_knee_stair_l1_metrics.py --check
+python scripts/run_knee_stair_l1_sweeps.py --check
 python -m unittest tests.test_knee_stair_l1_faults -v
 python scripts/check_repository.py
 python scripts/verify_joint_study.py --output data/verification/local-check.json
