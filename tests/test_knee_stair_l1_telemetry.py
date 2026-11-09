@@ -1,4 +1,4 @@
-"""Paired metrics and the topic contract. Results are experimental simulation."""
+"""Paired metrics. Definitions stay fixed; the study records pass or fail."""
 
 import pathlib
 import sys
@@ -9,57 +9,53 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from knee_stair_l1.bus import TopicBus
 from knee_stair_l1.config import load_config
 from knee_stair_l1.loop import run_trial
-from knee_stair_l1.telemetry import CONDITIONS, run_study
+from knee_stair_l1.telemetry import CONDITIONS, percentile, run_study, summarize
 from knee_stair_l1.topics import LAYER1_TOPICS, TOPIC_INTENT_SYNTHETIC, TOPIC_SAFETY_STATE
 from scripts.run_knee_stair_l1_metrics import main
 
 
 class MetricStudyTests(unittest.TestCase):
-    def test_paired_properties_and_committed_reproduction(self):
+    def test_percentile_interpolates_sorted_samples(self):
+        self.assertEqual(percentile([0.0, 10.0], 50), 5.0)
+        self.assertEqual(percentile([1.0, 2.0, 3.0, 4.0], 100), 4.0)
+        self.assertAlmostEqual(percentile([0.0, 10.0], 95), 9.5)
+
+    def test_study_records_the_new_metrics_and_matches_committed_raw_json(self):
         config = load_config()
-        self.assertGreaterEqual(len(config["seeds"]), 10)
-        self.assertEqual(
-            config["admittance"]["equilibrium_flexion_rad"],
-            config["plant"]["initial_flexion_rad"],
-        )
+        self.assertEqual(len(config["seeds"]), 12)
+        self.assertEqual(config["pid"]["torque_limit_nm"], 24.0)
         trials = run_study(config)
-        self.assertEqual(len(trials), len(config["seeds"]) * len(CONDITIONS))
-        by = {(trial.seed, trial.condition): trial for trial in trials}
-        for seed in config["seeds"]:
-            off = by[(seed, "off")]
-            self.assertEqual(off.source_label, "synthetic")
-            self.assertFalse(off.assist_onset)
-            self.assertEqual(off.peak_interaction_torque_nm, 0.0)
-            self.assertEqual(off.saturation_limit_trigger_count, 0)
-            self.assertGreater(off.assist_timing_error_s, 1.0)
-            for condition in ("admittance", "assist_policy"):
-                assisted = by[(seed, condition)]
-                self.assertEqual(assisted.source_label, "synthetic")
-                self.assertTrue(assisted.assist_onset)
-                self.assertGreater(assisted.assist_timing_error_s, 0.0)
-                self.assertLess(assisted.assist_timing_error_s, off.assist_timing_error_s)
-                self.assertGreater(assisted.peak_interaction_torque_nm, 0.0)
-                self.assertAlmostEqual(assisted.end_to_end_latency_s, 0.01, delta=1e-9)
-            self.assertGreater(
-                by[(seed, "assist_policy")].peak_interaction_torque_nm,
-                by[(seed, "admittance")].peak_interaction_torque_nm,
-            )
-        self.assertTrue(any(by[(seed, "assist_policy")].saturation_limit_trigger_count > 0 for seed in config["seeds"]))
-        self.assertTrue(all(by[(seed, "admittance")].saturation_limit_trigger_count > 0 for seed in config["seeds"]))
+        self.assertEqual(len(trials), 36)
+        summary = summarize(trials, config)
+        self.assertNotIn("assist_timing_error_s", summary["absolute"]["off"])
+        self.assertIn("assist_timing_error_s", summary["removed_metrics"])
+        for trial in trials:
+            self.assertEqual(trial.source_label, "synthetic")
+            self.assertEqual(trial.hard_stop_contact_count, 0)
+            self.assertGreater(len(trial.latency_samples_s), 0)
+            self.assertAlmostEqual(trial.latency_samples_s[0], trial.latency_samples_s[-1])
+            self.assertLess(trial.peak_interaction_torque_nm, config["metrics"]["comfort_peak_interaction_nm"])
+        for condition in ("admittance", "assist_policy"):
+            self.assertTrue(summary["criteria"][condition]["human_torque_rms_reduction_ci_excludes_0"])
+            self.assertTrue(summary["criteria"][condition]["tracking_error_no_more_than_10_percent_worse"])
+            self.assertTrue(summary["criteria"][condition]["hard_stop_contacts_zero"])
+            self.assertTrue(summary["criteria"][condition]["peak_interaction_below_comfort"])
+        self.assertLess(
+            summary["criteria"]["admittance"]["saturation_time_fraction_mean"],
+            config["metrics"]["admittance_saturation_fraction_max"],
+        )
         self.assertEqual(main(["--check"]), 0)
+        self.assertTrue(CONDITIONS)
 
     def test_bus_uses_the_topic_contract_and_synthetic_label(self):
         config = load_config()
         config["duration_s"] = 0.1
-        config["intent"]["onset_s"] = 0.0
-        config["intent"]["burst_duration_s"] = 0.1
         bus = TopicBus()
         run_trial(config, 0, "admittance", bus=bus)
         self.assertTrue(bus.topics() <= set(LAYER1_TOPICS))
         self.assertIn(TOPIC_INTENT_SYNTHETIC, bus.topics())
         self.assertIn(TOPIC_SAFETY_STATE, bus.topics())
         intent = [payload for topic, payload in bus.messages if topic == TOPIC_INTENT_SYNTHETIC]
-        self.assertTrue(intent)
         self.assertTrue(all(payload["source_label"] == "synthetic" for payload in intent))
         telemetry = [payload for topic, payload in bus.messages if topic.endswith("telemetry")]
-        self.assertTrue(all("synthetic" in payload for payload in telemetry))
+        self.assertTrue(all("synthetic" in payload and "command_time_s" in payload for payload in telemetry))

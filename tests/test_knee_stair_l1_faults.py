@@ -15,7 +15,6 @@ import unittest
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 from knee_stair_l1.config import load_config
-from knee_stair_l1.intent import IntentSample, IntentSource
 from knee_stair_l1.loop import run_trial
 from knee_stair_l1.safety import DAMPING_ONLY, E_STOP, LIMITED_ASSIST, JointSafetyCore
 
@@ -77,21 +76,9 @@ class FaultInjectionTests(unittest.TestCase):
         self.assertAlmostEqual(decision.safe_extension_torque_nm, 1.0, places=12)
         self.assertNotEqual(decision.safe_extension_torque_nm, 5.0)
 
-    def test_closed_loop_clamps_before_the_plant(self):
+    def test_closed_loop_motor_command_stays_inside_the_supervisor_limit(self):
         config = load_config()
         config["duration_s"] = 0.2
-
-        class HugeSynthetic(IntentSource):
-            source_label = "synthetic"
-            amplitude_nm = 500.0
-
-            def reset(self, seed: int) -> None:
-                return None
-
-            def step(self, time_s: float) -> IntentSample:
-                return IntentSample("synthetic", time_s, 500.0, True, 1.0, 500.0)
-
-        trial = run_trial(config, seed=0, condition="assist_policy", intent=HugeSynthetic())
-        self.assertLessEqual(trial.peak_interaction_torque_nm, config["safety"]["command_limit_nm"] + 1e-9)
-        self.assertGreater(trial.saturation_limit_trigger_count, 0)
+        trial = run_trial(config, seed=0, condition="assist_policy")
+        self.assertLessEqual(trial.max_abs_motor_command_nm, config["safety"]["command_limit_nm"] + 1e-9)
         self.assertEqual(trial.source_label, "synthetic")

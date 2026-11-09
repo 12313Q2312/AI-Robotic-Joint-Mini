@@ -66,23 +66,24 @@ class AssistController:
         self.policy.reset()
         self.admittance.reset(measured_flexion_rad)
 
-    def reference_flexion(self, time_s: float) -> float:
-        if not math.isfinite(time_s):
-            raise ValueError("reference time must be finite")
-        # Equilibrium stays put. Desired motion comes from the effort through
-        # the admittance, so a scripted trajectory cannot lead the synthetic intent.
-        return float(self._config["admittance"]["equilibrium_flexion_rad"])
-
     def command(
         self,
         sample: IntentSample,
         measured_flexion_rad: float,
         measured_flexion_velocity_rad_s: float,
+        human_extension_nm: float,
         dt: float,
     ) -> ControllerCommand:
         if not all(
             math.isfinite(value)
-            for value in (measured_flexion_rad, measured_flexion_velocity_rad_s, dt, sample.effort_extension_nm)
+            for value in (
+                measured_flexion_rad,
+                measured_flexion_velocity_rad_s,
+                human_extension_nm,
+                dt,
+                sample.q_ref_rad,
+                sample.time_s,
+            )
         ):
             raise ValueError("controller measurements must be finite")
         desired_q = None
@@ -92,11 +93,10 @@ class AssistController:
         if self.condition == "off":
             torque = 0.0
         elif self.condition == "assist_policy":
-            policy_saturated = self.policy.command_is_saturated(sample.effort_extension_nm, True)
-            torque = self.policy.step(sample.effort_extension_nm, dt, True)
+            policy_saturated = self.policy.command_is_saturated(human_extension_nm, True)
+            torque = self.policy.step(human_extension_nm, dt, True)
         else:
-            q_ref = self.reference_flexion(sample.time_s)
-            desired_q, desired_qd, _qdd = self.admittance.step(sample.effort_extension_nm, q_ref, dt)
+            desired_q, desired_qd, _qdd = self.admittance.step(human_extension_nm, sample.q_ref_rad, dt)
             pid_step = self.pid.step(
                 desired_q,
                 measured_flexion_rad,

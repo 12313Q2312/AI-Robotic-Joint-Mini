@@ -83,23 +83,22 @@ AI负责估计与决策，缓震需要可验证的物理能量吸收路径；弹
 
 这一层是电脑里的单侧膝关节闭环，用来检查合成意图、助力命令、安全监督和简化植物模型是否按约定连接。它不涉及真人、真实表面肌电，也不给出防跌倒结论。全身 10 关节、危险预测、缓冲机构和云端连接不在这一层。
 
-意图接口可以替换。当前 v1 是合成伸膝力矩，代码、话题 `/knee_stair/intent_synthetic` 和日志都标成 **synthetic**。助力有三条同条件对照：关闭、导纳（生成期望屈膝角，内环沿用既有力矩 PID 的抗饱和递推）、以及从 PR #3 复制的比例分担 AssistPolicy（含饱和和变化率限制）。所有外骨骼力矩都经过同一个 `JointSafetyCore`；`joint_safety_node.py` 使用这一份核心，不再并列第二套监督。状态是 `NORMAL` / `LIMITED_ASSIST` / `DAMPING_ONLY` / `E_STOP`。植物模型把人体伸膝力矩和外骨骼力矩分开，只在显式边界上相加。CI 跑的是不依赖 Webots 的无界面植物模型；`knee_stair_l1/webots/worlds/knee_stair_l1.wbt` 是从 PR #3 腿部铰链裁出的可选几何，本仓库没有把它当作已运行的运动验收。
+意图接口可以替换。当前 v1 是合成的期望屈膝轨迹，人体膝关节力矩由有界跟踪器产生。代码、话题 `/knee_stair/intent_synthetic` 和日志都标成 **synthetic**。助力有三条同条件对照：关闭、导纳（生成期望运动，内环沿用既有力矩 PID 的抗饱和递推，力矩上限保持 24 Nm）、以及从 PR #3 复制的比例分担 AssistPolicy。所有外骨骼电机力矩都经过同一个 `JointSafetyCore`。状态是 `NORMAL` / `LIMITED_ASSIST` / `DAMPING_ONLY` / `E_STOP`。`E_STOP` 把助力力矩置 0，外骨骼进入被动阻尼，并锁存到手动 `reset`；`/joint/safe_target_angle` 保持原有数字合同。`/joint/safety_state` 只发布、不接收命令。植物模型是人体小腿和外骨骼连杆，中间有弹簧阻尼绑带；交互力矩读绑带约束，不读电机输出。上楼负载是随屈膝变化的重力矩，按膝关节承担的体重份额缩放。CI 跑的是不依赖 Webots 的植物模型。可选 Webots 文件只保留裁剪几何，没有这套绑带动力学。
 
 | 内容 | 标记 | 依据 |
 |---|---|---|
-| 可替换意图接口；v1 合成信号 | implemented | `knee_stair_l1/intent.py` |
-| 导纳期望运动 + 既有 PID 递推；AssistPolicy 对照 | implemented | `torque_pid.py`、`assist_policy.py`、`controller.py` |
-| 合并后的安全状态机 | implemented | `knee_stair_l1/safety.py`，`joint_safety_node.py` |
-| 人机力矩边界与无 Webots 植物 | implemented | `knee_stair_l1/plant.py` |
+| 可替换意图接口；v1 合成轨迹与有界人体力矩 | implemented | `knee_stair_l1/intent.py`，`human.py` |
+| 导纳期望运动 + 24 Nm PID 上限；AssistPolicy 对照 | implemented | `torque_pid.py`、`assist_policy.py`、`controller.py` |
+| 合并后的安全状态机与只读 `/joint/safety_state` | implemented | `knee_stair_l1/safety.py`，`joint_safety_node.py` |
+| 重力负载、绑带约束、硬限位异常记录 | implemented | `knee_stair_l1/plant.py` |
 | 可选单膝 Webots 几何 | implemented | `knee_stair_l1/webots/worlds/knee_stair_l1.wbt`（未运行） |
-| 四项故障注入 | verified | `tests/test_knee_stair_l1_faults.py`；CI 步骤 `Knee stair L1 fault injection` |
-| 历史角度口的钳位、非有限拒绝和 1 s 超时数字 | verified | `tests/test_knee_stair_l1_safety.py` |
-| 12 个种子的配对指标 | experimental | [指标表](data/verification/knee_stair_l1/metrics_summary.md)，原始行在同目录 `metrics_trials.csv` |
-| 髋关节固定的单自由度膝、理想力矩边界、默认定值负载为 0 | theoretical | 配置 `knee_stair_l1/config/default.json` |
+| 四项故障注入，以及 E_STOP 后力矩保持 0、角度不跳变 | verified | `tests/test_knee_stair_l1_faults.py`，`tests/test_knee_stair_l1_safety.py` |
+| 12 个种子的配对指标与通过/失败记录 | experimental | [原始 JSON](data/verification/knee_stair_l1/metrics_raw.json)，[指标表](data/verification/knee_stair_l1/metrics_summary.md) |
+| 单自由度重力矩、绑带舒适阈值 15 Nm、固定髋 | theoretical | `knee_stair_l1/config/default.json` 里的 `load.assumption` 与 `metrics.comfort_basis` |
 
 真人助力效果、真实肌电识别和防跌倒没有归入上表的任何一个标记，本层不报告这些结果。
 
-假设与限制：默认人体爆发在这个惯量下，关闭助力也会碰到伸膝止挡，所以末端角度不是助力效果。导纳内环在每个种子上都顶到 PID 力矩上限，因此该项峰值的标准差为 0。AssistPolicy 使用 PR #3 上楼参数（增益 0.65、80 Nm、350 Nm/s），监督器命令上限是 40 Nm，更大的命令会被钳位。关助力时助力没有出现，时机误差记到试验末端。端到端时延是配置里的 2 步传输延迟，三种条件相同。`E_STOP` 是软件锁存，不是硬件急停；它把膝力矩置 0，但不改写既有 `/joint/safe_target_angle` 的数字。软件测试不证明 ROS 2/Webots 运动、机械安全或测得的能量节省。
+假设与限制：重力矩用 `份额 × 体重 × g × 力臂 × sin(屈膝)`，70 kg 和力臂都是合成假设，不是步态实验反推。15 Nm 舒适阈值来自 0.08 m 绑带力臂乘 187.5 N 的设计假设，不是舒适性试验。导纳内环的 24 Nm 上限没有提高；积分增益取 0，避免重力矩把积分推到这个上限。时延由意图时间戳和力矩命令时间戳相减得到，再报告 p50、p95 和最大值。已取消用试验末端充数的时机误差。`E_STOP` 是软件锁存，不是硬件急停。软件测试不证明 ROS 2/Webots 运动、机械安全或测得的能量节省。通过与否以原始 JSON 里的 `criteria` 为准，不改指标定义来凑通过。
 
 复现（仓库根目录，只需 Python 标准库）：
 

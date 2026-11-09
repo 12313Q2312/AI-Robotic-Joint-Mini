@@ -4,8 +4,9 @@
 The numeric legacy map is unchanged: non-finite targets are ignored, finite
 targets are clamped to the configured angle window, and a command older than
 the configured timeout publishes 0 rad. Knee torque is published only after
-JointSafetyCore has evaluated it. This node is that supervisor; it does not
-sit beside a second safety node.
+JointSafetyCore has evaluated it. On E_STOP the assist torque is 0 and the
+state topic reports the latch; the safe target angle is not rewritten.
+/joint/safety_state is published for readers and is not a command input.
 """
 import sys
 from pathlib import Path

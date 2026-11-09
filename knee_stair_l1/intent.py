@@ -1,4 +1,9 @@
-"""Swappable intent source. v1 is a synthetic stair-ascent effort signal."""
+"""Swappable intent source.
+
+v1 is a synthetic desired knee trajectory. The human torque that tracks it is
+bounded separately. Logs, the topic name and source_label say synthetic.
+This is not EMG and not a recording from a person.
+"""
 
 from __future__ import annotations
 
@@ -15,24 +20,15 @@ logger = logging.getLogger("knee_stair_l1.intent")
 
 @dataclass(frozen=True)
 class IntentSample:
-    """One intent sample.
-
-    effort_extension_nm is the assist-relevant extension request.
-    human_extension_nm is what the human side of the plant applies.
-    v1 sets those equal. source_label for the built-in source is synthetic.
-    """
-
     source_label: str
     time_s: float
-    effort_extension_nm: float
+    q_ref_rad: float
+    qd_ref_rad_s: float
     ascent_active: bool
     phase: float
-    human_extension_nm: float
 
 
 class IntentSource(ABC):
-    """Replacement point for a future estimator. v1 does not read EMG."""
-
     source_label: str
 
     @abstractmethod
@@ -44,59 +40,71 @@ class IntentSource(ABC):
         raise NotImplementedError
 
 
-def amplitude_for_seed(seed: int, config: dict) -> float:
-    """Deterministic amplitude shared by every condition of this seed."""
+def depth_scale_for_seed(seed: int, config: dict) -> float:
+    """Paired scale: every condition of this seed uses the same trajectory depth."""
     intent = config["intent"]
     draw = random.Random(int(seed)).random()
-    low = float(intent["amplitude_nm_min"])
-    high = float(intent["amplitude_nm_max"])
+    low = float(intent["depth_scale_min"])
+    high = float(intent["depth_scale_max"])
     return low + draw * (high - low)
 
 
-class SyntheticStairIntent(IntentSource):
-    """Scripted single-burst knee extension effort.
+def _smoothstep(phase: float) -> tuple[float, float]:
+    s = phase * phase * (3.0 - 2.0 * phase)
+    ds_dphase = 6.0 * phase * (1.0 - phase)
+    return s, ds_dphase
 
-    The log line, sample field and topic name all say synthetic.
-    This is not EMG and not a recording from a person.
-    """
+
+class SyntheticStairIntent(IntentSource):
+    """Smooth flexion-to-less-flexion trajectory. Depth varies by seed and stays bounded."""
 
     source_label = "synthetic"
 
     def __init__(self, config: dict):
-        label = config["intent"].get("source_label")
-        if label != "synthetic":
+        if config["intent"].get("source_label") != "synthetic":
             raise ValueError('SyntheticStairIntent requires intent.source_label "synthetic"')
         self._config = config
         self.seed = 0
-        self.amplitude_nm = 0.0
+        self.depth_scale = 1.0
+        self.q_start = float(config["intent"]["q_start_rad"])
+        self.q_end = float(config["intent"]["q_end_rad"])
 
     def reset(self, seed: int) -> None:
         self.seed = int(seed)
-        self.amplitude_nm = amplitude_for_seed(self.seed, self._config)
+        self.depth_scale = depth_scale_for_seed(self.seed, self._config)
         logger.info(
-            "synthetic intent source reset seed=%s source_label=synthetic topic=%s amplitude_nm=%.6f",
+            "synthetic intent source reset seed=%s source_label=synthetic topic=%s depth_scale=%.6f",
             self.seed,
             TOPIC_INTENT_SYNTHETIC,
-            self.amplitude_nm,
+            self.depth_scale,
         )
+
+    def q_target(self) -> float:
+        span = self.q_start - self.q_end
+        return self.q_start - span * self.depth_scale
 
     def step(self, time_s: float) -> IntentSample:
         intent = self._config["intent"]
         onset = float(intent["onset_s"])
-        duration = float(intent["burst_duration_s"])
-        if time_s < onset or time_s >= onset + duration:
-            effort = 0.0
-            phase = 0.0
-            active = False
+        duration = float(intent["move_duration_s"])
+        target = self.q_target()
+        if time_s <= onset:
+            q_ref, qd_ref, phase, active = self.q_start, 0.0, 0.0, False
+        elif time_s >= onset + duration:
+            q_ref, qd_ref, phase, active = target, 0.0, 1.0, False
         else:
             phase = (time_s - onset) / duration
-            effort = self.amplitude_nm * math.sin(math.pi * phase) ** 2
+            shaped, slope = _smoothstep(phase)
+            q_ref = self.q_start + (target - self.q_start) * shaped
+            qd_ref = (target - self.q_start) * slope / duration
             active = True
+        if not math.isfinite(q_ref):
+            raise ValueError("synthetic reference is not finite")
         return IntentSample(
             source_label="synthetic",
             time_s=float(time_s),
-            effort_extension_nm=effort,
+            q_ref_rad=q_ref,
+            qd_ref_rad_s=qd_ref,
             ascent_active=active,
             phase=phase,
-            human_extension_nm=effort,
         )

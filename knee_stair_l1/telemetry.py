@@ -1,64 +1,47 @@
-"""Trial metrics and the paired OFF comparison.
+"""Paired metrics for the synthetic knee loop.
 
-Official metrics, each reported per condition and as a paired difference
-from the OFF trial with the same seed:
+Primary, each as assisted minus the paired OFF trial is reported as a
+reduction (OFF - assisted):
+- human knee torque RMS
+- human knee positive work
 
-- assist_timing_error_s: assist-onset time minus synthetic-intent onset.
-  Onset of intent is the first sample whose synthetic effort reaches
-  intent.onset_effort_nm. Onset of assist is the first applied exo torque
-  whose magnitude reaches metrics.assist_onset_nm. If assist never onsets,
-  the error is censored to duration_s - intent_onset_s.
-- end_to_end_latency_s: mean, over control steps, of
-  (apply time - supervisor production time). The transport queue sets this.
-- peak_interaction_torque_nm: peak magnitude of the torque that crossed
-  InteractionBoundary. Human muscle torque is not included.
-- saturation_limit_trigger_count: control steps on which the PID saturated,
-  AssistPolicy saturated, or the supervisor state was LIMITED_ASSIST.
-  Rising-edge count is stored beside it.
+Secondary:
+- tracking error RMS
+- peak strap interaction torque
+- saturation time fraction
+- hard-stop contact count
 
-Mean and std use the sample standard deviation (n - 1).
+Latency is the measured command timestamp minus the consumed intent timestamp.
+Percentiles use linear interpolation: rank = (n - 1) * p / 100.
+
+The 95% CI is the Student t interval. For the required 12 seeds, df = 11 and
+t_0.975 = 2.200985160082949. A CI excludes 0 when the lower bound is positive
+or the upper bound is negative. The reduction criterion passes only when the
+lower bound is positive.
 """
 
 from __future__ import annotations
 
-from collections import defaultdict
 import csv
 import hashlib
 import json
+import math
 from pathlib import Path
 import statistics
 
 from knee_stair_l1.config import load_config
 from knee_stair_l1.loop import TrialResult, run_trial
 
-METRICS = (
-    "assist_timing_error_s",
-    "end_to_end_latency_s",
+PRIMARY = ("human_torque_rms_nm", "human_positive_work_j")
+SECONDARY = (
+    "tracking_error_rms_rad",
     "peak_interaction_torque_nm",
-    "saturation_limit_trigger_count",
+    "saturation_time_fraction",
+    "hard_stop_contact_count",
 )
+METRICS = PRIMARY + SECONDARY
 CONDITIONS = ("off", "admittance", "assist_policy")
-CONDITION_LABELS = {
-    "off": "OFF",
-    "admittance": "admittance",
-    "assist_policy": "AssistPolicy baseline",
-}
-
-CSV_FIELDS = (
-    "seed",
-    "condition",
-    "source_label",
-    "amplitude_nm",
-    "intent_onset_s",
-    "assist_onset_s",
-    "assist_onset",
-    "assist_timing_error_s",
-    "end_to_end_latency_s",
-    "peak_interaction_torque_nm",
-    "saturation_limit_trigger_count",
-    "saturation_limit_rising_edges",
-    "final_flexion_rad",
-)
+T_CRIT_95_DF11 = 2.200985160082949
 
 
 def run_study(config: dict | None = None) -> list[TrialResult]:
@@ -70,138 +53,275 @@ def run_study(config: dict | None = None) -> list[TrialResult]:
     return trials
 
 
-def _mean_std(values: list[float]) -> dict:
+def percentile(values: list[float], percent: float) -> float:
+    if not values:
+        raise ValueError("percentile of an empty sample")
+    if percent < 0 or percent > 100:
+        raise ValueError("percent must be between 0 and 100")
+    ordered = sorted(values)
+    if len(ordered) == 1:
+        return ordered[0]
+    rank = (len(ordered) - 1) * (percent / 100.0)
+    low = math.floor(rank)
+    high = math.ceil(rank)
+    if low == high:
+        return ordered[low]
+    weight = rank - low
+    return ordered[low] * (1.0 - weight) + ordered[high] * weight
+
+
+def _t_crit(n: int) -> float:
+    if n != 12:
+        raise ValueError("the 95% CI table in this study is for 12 seeds (df=11)")
+    return T_CRIT_95_DF11
+
+
+def _stats(values: list[float]) -> dict:
+    n = len(values)
+    mean = statistics.mean(values)
+    std = statistics.stdev(values)
+    half = _t_crit(n) * std / math.sqrt(n)
+    low = mean - half
+    high = mean + half
     return {
-        "n": len(values),
-        "mean": round(statistics.mean(values), 12),
-        "std": round(statistics.stdev(values), 12),
+        "n": n,
+        "mean": _round(mean),
+        "std": _round(std),
+        "ci95_low": _round(low),
+        "ci95_high": _round(high),
+        "ci95_excludes_0": low > 0.0 or high < 0.0,
+    }
+
+
+def _round(value: float) -> float:
+    return round(float(value), 12)
+
+
+def _latency_summary(samples: list[float]) -> dict:
+    return {
+        "n": len(samples),
+        "p50_s": _round(percentile(samples, 50)),
+        "p95_s": _round(percentile(samples, 95)),
+        "max_s": _round(max(samples)),
     }
 
 
 def summarize(trials: list[TrialResult], config: dict) -> dict:
-    by_condition: dict[str, list[TrialResult]] = defaultdict(list)
-    by_key = {}
-    for trial in trials:
-        by_condition[trial.condition].append(trial)
-        by_key[(trial.seed, trial.condition)] = trial
+    by_key = {(trial.seed, trial.condition): trial for trial in trials}
     absolute = {}
     for condition in CONDITIONS:
-        rows = by_condition[condition]
-        absolute[condition] = {metric: _mean_std([getattr(row, metric) for row in rows]) for metric in METRICS}
-    paired = {}
+        rows = [by_key[(int(seed), condition)] for seed in config["seeds"]]
+        absolute[condition] = {metric: _stats([getattr(row, metric) for row in rows]) for metric in METRICS}
+        pooled = [sample for row in rows for sample in row.latency_samples_s]
+        absolute[condition]["latency"] = _latency_summary(pooled)
+    reductions = {}
     for condition in ("admittance", "assist_policy"):
-        paired[condition] = {}
-        for metric in METRICS:
+        reductions[condition] = {}
+        for metric in PRIMARY:
             deltas = []
             for seed in config["seeds"]:
-                here = by_key[(int(seed), condition)]
                 off = by_key[(int(seed), "off")]
-                deltas.append(getattr(here, metric) - getattr(off, metric))
-            paired[condition][metric] = _mean_std(deltas)
-    config_bytes = Path(config["_config_path"]).read_bytes() if config.get("_config_path") else json.dumps(config, sort_keys=True).encode()
+                here = by_key[(int(seed), condition)]
+                deltas.append(getattr(off, metric) - getattr(here, metric))
+            reductions[condition][metric] = _stats(deltas)
+    criteria = {}
+    comfort = float(config["metrics"]["comfort_peak_interaction_nm"])
+    ratio_max = float(config["metrics"]["tracking_worse_ratio_max"])
+    sat_max = float(config["metrics"]["admittance_saturation_fraction_max"])
+    for condition in ("admittance", "assist_policy"):
+        torque_ci = reductions[condition]["human_torque_rms_nm"]
+        tracking_ok = True
+        stops_ok = True
+        interaction_ok = True
+        ratios = []
+        for seed in config["seeds"]:
+            off = by_key[(int(seed), "off")]
+            here = by_key[(int(seed), condition)]
+            if off.tracking_error_rms_rad == 0.0:
+                tracking_ok = tracking_ok and here.tracking_error_rms_rad == 0.0
+                ratios.append(1.0 if here.tracking_error_rms_rad == 0.0 else math.inf)
+            else:
+                ratio = here.tracking_error_rms_rad / off.tracking_error_rms_rad
+                ratios.append(ratio)
+                tracking_ok = tracking_ok and ratio <= ratio_max + 1e-12
+            stops_ok = stops_ok and here.hard_stop_contact_count == 0 and off.hard_stop_contact_count == 0
+            interaction_ok = interaction_ok and here.peak_interaction_torque_nm < comfort
+        sat_values = [by_key[(int(seed), condition)].saturation_time_fraction for seed in config["seeds"]]
+        sat_mean = statistics.mean(sat_values)
+        criteria[condition] = {
+            "human_torque_rms_reduction_ci_excludes_0": bool(torque_ci["ci95_low"] > 0.0),
+            "human_torque_rms_reduction_ci95": [torque_ci["ci95_low"], torque_ci["ci95_high"]],
+            "tracking_error_no_more_than_10_percent_worse": tracking_ok,
+            "tracking_error_ratio_max": _round(max(ratios)),
+            "hard_stop_contacts_zero": stops_ok,
+            "peak_interaction_below_comfort": interaction_ok,
+            "comfort_peak_interaction_nm": comfort,
+            "saturation_time_fraction_mean": _round(sat_mean),
+            "saturation_time_fraction_below_5_percent": bool(sat_mean < sat_max) if condition == "admittance" else None,
+        }
+    config_bytes = Path(config["_config_path"]).read_bytes() if config.get("_config_path") else json.dumps(
+        config, sort_keys=True
+    ).encode()
     return {
         "evidence_label": "experimental",
         "simulation_only": True,
         "intent_source_label": "synthetic",
         "not_claimed": ["real_humans", "real_emg", "fall_prevention"],
+        "removed_metrics": ["assist_timing_error_s"],
         "seed_count": len(config["seeds"]),
         "seeds": list(config["seeds"]),
         "conditions": list(CONDITIONS),
         "std_ddof": 1,
-        "timing_censor": "duration_s - intent_onset_s when assist does not reach assist_onset_nm",
+        "ci_method": "Student t, df=11, t_0.975=2.200985160082949, mean ± t*std/sqrt(n)",
+        "latency_definition": "command_timestamp_s - intent_timestamp_s of the sample consumed by that command",
+        "percentile_method": "linear interpolation, rank (n-1)*p/100",
+        "interaction_definition": "peak absolute spring-damper strap torque on the human knee",
+        "pid_torque_limit_nm": config["pid"]["torque_limit_nm"],
+        "comfort_peak_interaction_nm": comfort,
+        "comfort_basis": config["metrics"]["comfort_basis"],
+        "load_assumption": config["load"]["assumption"],
         "config_sha256": hashlib.sha256(config_bytes).hexdigest(),
         "absolute": absolute,
-        "paired_minus_off": paired,
-        "definitions": {
-            "assist_timing_error_s": "assist onset minus synthetic effort onset; censored to the horizon if assist stays below assist_onset_nm",
-            "end_to_end_latency_s": "mean apply-time minus supervisor production-time over control steps",
-            "peak_interaction_torque_nm": "peak absolute torque across the human/exoskeleton boundary",
-            "saturation_limit_trigger_count": "control steps with PID saturation, AssistPolicy saturation, or LIMITED_ASSIST",
-        },
+        "reduction_versus_off": reductions,
+        "criteria": criteria,
     }
 
 
-def trials_to_rows(trials: list[TrialResult]) -> list[dict]:
-    rows = []
-    for trial in trials:
-        rows.append(
-            {
-                "seed": trial.seed,
-                "condition": trial.condition,
-                "source_label": trial.source_label,
-                "amplitude_nm": f"{trial.amplitude_nm:.10f}",
-                "intent_onset_s": f"{trial.intent_onset_s:.10f}",
-                "assist_onset_s": "" if trial.assist_onset_s is None else f"{trial.assist_onset_s:.10f}",
-                "assist_onset": "1" if trial.assist_onset else "0",
-                "assist_timing_error_s": f"{trial.assist_timing_error_s:.10f}",
-                "end_to_end_latency_s": f"{trial.end_to_end_latency_s:.10f}",
-                "peak_interaction_torque_nm": f"{trial.peak_interaction_torque_nm:.10f}",
-                "saturation_limit_trigger_count": str(trial.saturation_limit_trigger_count),
-                "saturation_limit_rising_edges": str(trial.saturation_limit_rising_edges),
-                "final_flexion_rad": f"{trial.final_flexion_rad:.10f}",
-            }
-        )
-    return rows
+def _event_dict(event) -> dict:
+    return {
+        "time_s": _round(event.time_s),
+        "side": event.side,
+        "stop": event.stop,
+        "angle_rad": _round(event.angle_rad),
+    }
 
 
-def write_csv(path: Path, trials: list[TrialResult]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=CSV_FIELDS, lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(trials_to_rows(trials))
+def trial_record(trial: TrialResult) -> dict:
+    return {
+        "seed": trial.seed,
+        "condition": trial.condition,
+        "source_label": trial.source_label,
+        "depth_scale": _round(trial.depth_scale),
+        "human_torque_rms_nm": _round(trial.human_torque_rms_nm),
+        "human_positive_work_j": _round(trial.human_positive_work_j),
+        "tracking_error_rms_rad": _round(trial.tracking_error_rms_rad),
+        "peak_interaction_torque_nm": _round(trial.peak_interaction_torque_nm),
+        "saturation_time_fraction": _round(trial.saturation_time_fraction),
+        "hard_stop_contact_count": trial.hard_stop_contact_count,
+        "hard_stop_events": [_event_dict(event) for event in trial.hard_stop_events],
+        "latency_p50_s": _round(percentile(trial.latency_samples_s, 50)),
+        "latency_p95_s": _round(percentile(trial.latency_samples_s, 95)),
+        "latency_max_s": _round(max(trial.latency_samples_s)),
+        "latency_samples_s": [_round(sample) for sample in trial.latency_samples_s],
+        "max_abs_motor_command_nm": _round(trial.max_abs_motor_command_nm),
+        "final_flexion_rad": _round(trial.final_flexion_rad),
+    }
 
 
-def format_summary_json(summary: dict) -> str:
-    return json.dumps(summary, indent=2, sort_keys=True) + "\n"
+def raw_document(trials: list[TrialResult], summary: dict) -> dict:
+    return {
+        "evidence_label": "experimental",
+        "intent_source_label": "synthetic",
+        "summary": summary,
+        "trials": [trial_record(trial) for trial in trials],
+    }
+
+
+def format_raw_json(document: dict) -> str:
+    return json.dumps(document, indent=2, sort_keys=True) + "\n"
+
+
+def _fmt(stats: dict) -> str:
+    return f"{stats['mean']:.6f} ± {stats['std']:.6f}"
+
+
+def _fmt_ci(stats: dict) -> str:
+    return f"[{stats['ci95_low']:.6f}, {stats['ci95_high']:.6f}]"
 
 
 def format_summary_markdown(summary: dict) -> str:
     lines = [
         "# Layer 1 paired metrics",
         "",
-        "Experimental simulation results. Synthetic intent. Not a human, EMG, or fall-prevention result.",
+        "Experimental simulation. Synthetic intent. Not a human, EMG, or fall-prevention result.",
         "",
-        f"Seeds: {summary['seed_count']} ({summary['seeds'][0]}..{summary['seeds'][-1]}). Sample std (n-1).",
+        f"Seeds: {summary['seed_count']} ({summary['seeds'][0]}..{summary['seeds'][-1]}). "
+        "Sample std (n-1). 95% CI is the Student t interval.",
         "",
-        "## Absolute, mean ± std",
+        f"Comfort threshold: {summary['comfort_peak_interaction_nm']} Nm. {summary['comfort_basis']}",
         "",
-        "| Metric | OFF | admittance | AssistPolicy baseline |",
-        "|---|---:|---:|---:|",
+        f"Load: {summary['load_assumption']}",
+        "",
+        "The censored timing-error metric is not used.",
+        "",
+        "## Primary reductions versus OFF (OFF − assisted), mean ± std, 95% CI",
+        "",
+        "| Metric | admittance | admittance 95% CI | AssistPolicy baseline | AssistPolicy 95% CI |",
+        "|---|---:|---:|---:|---:|",
     ]
-    for metric in METRICS:
-        cells = []
-        for condition in CONDITIONS:
-            stats = summary["absolute"][condition][metric]
-            cells.append(f"{stats['mean']:.6f} ± {stats['std']:.6f}")
-        lines.append("| " + " | ".join([metric, *cells]) + " |")
-    lines.extend(
-        [
-            "",
-            "## Paired difference versus OFF, mean ± std",
-            "",
-            "| Metric | admittance − OFF | AssistPolicy baseline − OFF |",
-            "|---|---:|---:|",
-        ]
-    )
-    for metric in METRICS:
+    for metric in PRIMARY:
         cells = []
         for condition in ("admittance", "assist_policy"):
-            stats = summary["paired_minus_off"][condition][metric]
-            cells.append(f"{stats['mean']:.6f} ± {stats['std']:.6f}")
+            stats = summary["reduction_versus_off"][condition][metric]
+            cells.extend((_fmt(stats), _fmt_ci(stats)))
         lines.append("| " + " | ".join([metric, *cells]) + " |")
     lines.extend(
         [
             "",
-            "Timing for OFF is censored to the horizon because assist torque stays at 0.",
-            "Latency is the configured transport delay and is shared by every condition.",
+            "## Secondary metrics, mean ± std",
             "",
+            "| Metric | OFF | admittance | AssistPolicy baseline |",
+            "|---|---:|---:|---:|",
         ]
     )
+    for metric in SECONDARY:
+        cells = [_fmt(summary["absolute"][condition][metric]) for condition in CONDITIONS]
+        lines.append("| " + " | ".join([metric, *cells]) + " |")
+    lines.extend(
+        [
+            "",
+            "## Measured latency, pooled over seeds (command time − intent time)",
+            "",
+            "| Condition | p50 s | p95 s | max s |",
+            "|---|---:|---:|---:|",
+        ]
+    )
+    for condition in CONDITIONS:
+        latency = summary["absolute"][condition]["latency"]
+        lines.append(
+            f"| {condition} | {latency['p50_s']:.6f} | {latency['p95_s']:.6f} | {latency['max_s']:.6f} |"
+        )
+    lines.extend(["", "## Criteria", ""])
+    for condition, result in summary["criteria"].items():
+        lines.append(f"### {condition}")
+        lines.append("")
+        for key, value in result.items():
+            lines.append(f"- {key}: {value}")
+        lines.append("")
     return "\n".join(lines)
 
 
-def write_summary(directory: Path, summary: dict) -> None:
-    directory.mkdir(parents=True, exist_ok=True)
-    (directory / "metrics_summary.json").write_text(format_summary_json(summary), encoding="utf-8")
-    (directory / "metrics_summary.md").write_text(format_summary_markdown(summary), encoding="utf-8")
+CSV_FIELDS = (
+    "seed",
+    "condition",
+    "source_label",
+    "depth_scale",
+    "human_torque_rms_nm",
+    "human_positive_work_j",
+    "tracking_error_rms_rad",
+    "peak_interaction_torque_nm",
+    "saturation_time_fraction",
+    "hard_stop_contact_count",
+    "latency_p50_s",
+    "latency_p95_s",
+    "latency_max_s",
+    "final_flexion_rad",
+)
+
+
+def trials_to_rows(trials: list[TrialResult]) -> list[dict]:
+    rows = []
+    for trial in trials:
+        record = trial_record(trial)
+        rows.append({key: record[key] for key in CSV_FIELDS})
+    return rows

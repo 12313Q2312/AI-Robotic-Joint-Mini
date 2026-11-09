@@ -1,82 +1,158 @@
-"""Simplified single-knee plant with an explicit human/exoskeleton boundary.
+"""Two-body knee plant: human shank, exoskeleton link, and a strap.
 
-The human side contributes only human_extension_nm. The exoskeleton side
-contributes only the torque that has already passed the supervisor. Those two
-torques meet inside InteractionBoundary. A command above the configured limit
-is rejected, so the integrator is not a second, quieter way around the
-supervisor.
+The strap is a rotational spring-damper. Its torque is the interaction torque.
+The exoskeleton motor torque is a different quantity and is not the interaction
+metric. A motor command above the supervisor limit is rejected.
 
-The constant resist_nm is a theoretical flexion-direction load used as a
-stair-support stand-in. It is not a measured ground reaction and not a
-full-body stair model. Hip angle is fixed. One degree of freedom.
+Gravity torque is a flexion moment:
+    share * body_mass * g * moment_arm * sin(flexion)
+It is zero at a straight knee. Assumptions are in config load.assumption.
+
+Hard-stop contact is an anomaly. Extension is the lower flexion limit.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+import logging
 import math
+
+logger = logging.getLogger("knee_stair_l1.plant")
 
 
 class BoundaryError(ValueError):
-    """Raised when a torque reaches the plant without passing the boundary check."""
+    """Raised when a motor torque reaches the plant outside the supervisor limit."""
 
 
-class InteractionBoundary:
-    """Ideal torque interface. No compliance and no shared muscle/motor object."""
-
-    def __init__(self, exo_extension_nm: float, abs_limit_nm: float):
-        if not math.isfinite(exo_extension_nm):
-            raise BoundaryError("non-finite torque at the human/exoskeleton boundary")
-        if abs(exo_extension_nm) > abs_limit_nm + 1e-9:
-            raise BoundaryError(
-                "exo torque above the boundary limit; the supervisor must clamp it first"
-            )
-        self.torque_on_human_extension_nm = float(exo_extension_nm)
-        self.torque_on_exo_extension_nm = -float(exo_extension_nm)
+@dataclass(frozen=True)
+class HardStopEvent:
+    time_s: float
+    side: str
+    stop: str
+    angle_rad: float
 
 
 class KneePlant:
     def __init__(self, config: dict):
         plant = config["plant"]
-        self.inertia = float(plant["inertia_kg_m2"])
-        self.viscous = float(plant["viscous_nm_s_per_rad"])
-        self.resist = float(plant["resist_nm"])
+        load = config["load"]
+        strap = config["strap"]
+        safety = config["safety"]
+        self.human_inertia = float(plant["human_inertia_kg_m2"])
+        self.exo_inertia = float(plant["exo_inertia_kg_m2"])
+        self.human_viscous = float(plant["human_viscous_nm_s_per_rad"])
+        self.exo_viscous = float(plant["exo_viscous_nm_s_per_rad"])
         self.q_min = float(plant["min_flexion_rad"])
         self.q_max = float(plant["max_flexion_rad"])
         self.boundary_limit = float(plant["boundary_abs_limit_nm"])
-        self.flexion_rad = float(plant["initial_flexion_rad"])
-        self.flexion_velocity_rad_s = 0.0
-        self.last_interaction_nm = 0.0
+        self.q_h = float(plant["initial_flexion_rad"])
+        self.q_e = float(plant["initial_flexion_rad"])
+        self.qd_h = 0.0
+        self.qd_e = 0.0
+        self.body_mass = float(load["body_mass_kg"])
+        self.gravity = float(load["gravity_m_s2"])
+        self.weight_share = float(load["knee_weight_share"])
+        self.moment_arm = float(load["moment_arm_m"])
+        self.strap_k = float(strap["stiffness_nm_per_rad"])
+        self.strap_b = float(strap["damping_nm_s_per_rad"])
+        self.estop_damping = float(safety["estop_passive_damping_nm_s_per_rad"])
+        self.strap_torque_flexion_nm = 0.0
+        self.last_motor_extension_nm = 0.0
+        self.anomalies: list[HardStopEvent] = []
+        self._human_on_stop = False
+        self._exo_on_stop = False
         self._check_parameters()
 
     def _check_parameters(self) -> None:
-        if min(self.inertia, self.boundary_limit) <= 0:
-            raise ValueError("plant inertia and boundary limit must be positive")
+        if min(self.human_inertia, self.exo_inertia, self.boundary_limit, self.body_mass, self.gravity) <= 0:
+            raise ValueError("plant mass, gravity, inertia and motor limit must be positive")
+        if self.weight_share <= 0 or self.moment_arm <= 0:
+            raise ValueError("knee load share and moment arm must be positive")
         if self.q_min >= self.q_max:
             raise ValueError("plant joint limits are inverted")
-        if not (self.q_min <= self.flexion_rad <= self.q_max):
-            raise ValueError("initial flexion is outside the joint limits")
+        if not (self.q_min < self.q_h < self.q_max):
+            raise ValueError("initial flexion must sit strictly inside the stops")
+        if min(self.strap_k, self.strap_b, self.estop_damping) < 0:
+            raise ValueError("strap and passive damping must be non-negative")
 
-    def advance(self, human_extension_nm: float, exo_extension_nm: float, dt: float) -> None:
-        if not math.isfinite(human_extension_nm) or not math.isfinite(dt) or dt <= 0:
-            raise BoundaryError("plant step requires a finite human torque and a positive dt")
-        boundary = InteractionBoundary(exo_extension_nm, self.boundary_limit)
-        # Viscous term opposes flexion velocity and is therefore extension-positive
-        # when flexion velocity is positive.
-        extension = (
-            human_extension_nm
-            + boundary.torque_on_human_extension_nm
-            - self.resist
-            + self.viscous * self.flexion_velocity_rad_s
-        )
-        flexion_accel = -extension / self.inertia
-        self.flexion_velocity_rad_s += flexion_accel * dt
-        self.flexion_rad += self.flexion_velocity_rad_s * dt
-        if self.flexion_rad > self.q_max:
-            self.flexion_rad = self.q_max
-            if self.flexion_velocity_rad_s > 0.0:
-                self.flexion_velocity_rad_s = 0.0
-        elif self.flexion_rad < self.q_min:
-            self.flexion_rad = self.q_min
-            if self.flexion_velocity_rad_s < 0.0:
-                self.flexion_velocity_rad_s = 0.0
-        self.last_interaction_nm = boundary.torque_on_human_extension_nm
+    def gravity_flexion_nm(self, flexion_rad: float) -> float:
+        """Flexion moment from the configured share of body weight."""
+        return self.weight_share * self.body_mass * self.gravity * self.moment_arm * math.sin(flexion_rad)
+
+    @property
+    def flexion_rad(self) -> float:
+        return self.q_h
+
+    @property
+    def flexion_velocity_rad_s(self) -> float:
+        return self.qd_h
+
+    def advance(
+        self,
+        human_flexion_nm: float,
+        exo_extension_nm: float,
+        dt: float,
+        time_s: float,
+        passive_damping: bool = False,
+    ) -> None:
+        if not all(math.isfinite(value) for value in (human_flexion_nm, exo_extension_nm, dt, time_s)) or dt <= 0:
+            raise BoundaryError("plant step requires finite torques, a finite time and a positive dt")
+        if abs(exo_extension_nm) > self.boundary_limit + 1e-9:
+            raise BoundaryError("exo motor torque above the supervisor limit")
+        motor_extension = 0.0 if passive_damping else float(exo_extension_nm)
+        self.last_motor_extension_nm = motor_extension
+        strap = self.strap_k * (self.q_e - self.q_h) + self.strap_b * (self.qd_e - self.qd_h)
+        self.strap_torque_flexion_nm = strap
+        exo_damping = self.estop_damping if passive_damping else self.exo_viscous
+        human_accel = (
+            human_flexion_nm
+            + self.gravity_flexion_nm(self.q_h)
+            + strap
+            - self.human_viscous * self.qd_h
+        ) / self.human_inertia
+        exo_accel = (
+            -motor_extension
+            - strap
+            - exo_damping * self.qd_e
+        ) / self.exo_inertia
+        self.qd_h += human_accel * dt
+        self.qd_e += exo_accel * dt
+        self.q_h += self.qd_h * dt
+        self.q_e += self.qd_e * dt
+        self._apply_stop("human", time_s)
+        self._apply_stop("exo", time_s)
+
+    def _apply_stop(self, side: str, time_s: float) -> None:
+        if side == "human":
+            q, qd = self.q_h, self.qd_h
+        else:
+            q, qd = self.q_e, self.qd_e
+        stop = None
+        if q > self.q_max:
+            q = self.q_max
+            if qd > 0.0:
+                qd = 0.0
+            stop = "flexion"
+        elif q < self.q_min:
+            q = self.q_min
+            if qd < 0.0:
+                qd = 0.0
+            stop = "extension"
+        if side == "human":
+            self.q_h, self.qd_h = q, qd
+            was = self._human_on_stop
+            self._human_on_stop = stop is not None
+        else:
+            self.q_e, self.qd_e = q, qd
+            was = self._exo_on_stop
+            self._exo_on_stop = stop is not None
+        if stop is not None and not was:
+            event = HardStopEvent(time_s=time_s, side=side, stop=stop, angle_rad=q)
+            self.anomalies.append(event)
+            logger.warning(
+                "anomaly hard_stop_contact side=%s stop=%s t_s=%.4f angle_rad=%.4f",
+                side,
+                stop,
+                time_s,
+                q,
+            )

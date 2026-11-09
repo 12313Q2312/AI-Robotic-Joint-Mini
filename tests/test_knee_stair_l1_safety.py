@@ -74,6 +74,32 @@ class KneePortTests(unittest.TestCase):
         self.assertAlmostEqual(decision.safe_extension_torque_nm, 1.0, places=12)
         self.assertNotEqual(decision.safe_extension_torque_nm, 5.0)
 
+    def test_estop_command_stays_zero_and_angle_does_not_jump(self):
+        core = JointSafetyCore(load_config(), legacy_enabled=True)
+        core.reset(0.0)
+        self.assertTrue(core.observe_legacy_target(0.4, 0.0))
+        before = core.evaluate(0.0)
+        self.assertAlmostEqual(before.legacy_safe_target_rad, 0.4)
+        self.assertEqual(before.state, NORMAL)
+        core.observe_sensor(float("nan"), 0.2, 0.01)
+        for step, time_s in enumerate((0.01, 0.02, 0.04, 0.08)):
+            core.observe_command(25.0 + step, time_s)
+            decision = core.evaluate(time_s)
+            self.assertEqual(decision.state, E_STOP)
+            self.assertEqual(decision.safe_extension_torque_nm, 0.0)
+            self.assertTrue(decision.passive_damping)
+            self.assertTrue(decision.estop_latched)
+            self.assertAlmostEqual(decision.legacy_safe_target_rad, before.legacy_safe_target_rad)
+
+    def test_safety_state_topic_is_read_only(self):
+        path = pathlib.Path(__file__).resolve().parents[1] / (
+            "ros2_ws/src/ai_robotic_joint_ros2/scripts/joint_safety_node.py"
+        )
+        text = path.read_text(encoding="utf-8")
+        self.assertIn("TOPIC_SAFETY_STATE", text)
+        self.assertIn("state_publisher", text)
+        self.assertNotIn("create_subscription(String, TOPIC_SAFETY_STATE", text)
+
     def test_estop_latches_until_reset(self):
         core = JointSafetyCore(load_config(), legacy_enabled=False)
         core.reset(0.0)

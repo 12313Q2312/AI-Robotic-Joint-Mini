@@ -15,8 +15,6 @@ from knee_stair_l1.torque_pid import TorquePid
 
 class TorquePidTests(unittest.TestCase):
     def test_first_step_matches_historical_joint_controller_printout(self):
-        # experiment_0007 first printed sample. dt is 0.032 s; the controller
-        # prints every second step. Gains are the historical rig, not the knee config.
         pid = TorquePid(0.15, 0.05, 0.04, 0.10)
         step = pid.step(0.523599, 0.0, 0.0, 0.032)
         error = 0.523599
@@ -47,6 +45,9 @@ class TorquePidTests(unittest.TestCase):
         self.assertEqual(second.error_integral_rad_s, 0.0)
         self.assertTrue(first.saturated)
 
+    def test_knee_safety_limit_stays_24_nm(self):
+        self.assertEqual(load_config()["pid"]["torque_limit_nm"], 24.0)
+
 
 class AssistPolicyTests(unittest.TestCase):
     def test_saturation_slew_disable_and_nan_match_pr3(self):
@@ -71,22 +72,22 @@ class AssistPolicyTests(unittest.TestCase):
 class AssistControllerTests(unittest.TestCase):
     def test_sources_are_swappable_and_modes_differ(self):
         config = load_config()
-        sample = IntentSample("unit-test-double", 0.5, 30.0, True, 0.2, 30.0)
+        sample = IntentSample("unit-test-double", 0.5, 0.7, -0.2, True, 0.4)
         off = AssistController(config, "off")
-        off.reset(1.05)
-        off_command = off.command(sample, 1.05, 0.0, 0.005)
+        off.reset(1.0)
+        off_command = off.command(sample, 1.0, 0.0, 30.0, 0.005)
         self.assertEqual(off_command.torque_extension_nm, 0.0)
         self.assertIsNone(off_command.desired_flexion_rad)
 
         policy = AssistController(config, "assist_policy")
-        policy.reset(1.05)
-        policy_command = policy.command(sample, 1.05, 0.0, 0.005)
+        policy.reset(1.0)
+        policy_command = policy.command(sample, 1.0, 0.0, 30.0, 0.005)
         self.assertAlmostEqual(policy_command.torque_extension_nm, 350.0 * 0.005, places=12)
         self.assertEqual(policy_command.source_label, "unit-test-double")
 
         admit = AssistController(config, "admittance")
-        admit.reset(1.05)
-        admit_command = admit.command(sample, 1.05, 0.0, 0.005)
-        self.assertLess(admit_command.desired_flexion_rad, 1.05)
+        admit.reset(1.0)
+        admit_command = admit.command(sample, 1.05, 0.0, 30.0, 0.005)
+        self.assertLess(admit_command.desired_flexion_rad, 1.0)
         self.assertGreater(admit_command.torque_extension_nm, 0.0)
         self.assertEqual(admit_command.source_label, "unit-test-double")

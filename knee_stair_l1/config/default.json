@@ -1,17 +1,36 @@
 {
-  "schema_version": 1,
-  "schema_note": "Layer 1 single-knee stair-assist simulation parameters. The v1 intent source is synthetic. Not EMG, not a human subject, and not a fall-prevention result.",
+  "schema_version": 2,
+  "schema_note": "Layer 1 single-knee stair-assist simulation. Intent v1 is synthetic. Not EMG, not a human subject, and not a fall-prevention result. The 24 Nm PID limit is a safety parameter and is not a tuning knob.",
   "dt_s": 0.005,
-  "duration_s": 1.5,
+  "duration_s": 2.0,
   "seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
   "command_transport_delay_steps": 2,
   "intent": {
     "source_label": "synthetic",
-    "onset_s": 0.4,
-    "burst_duration_s": 0.7,
-    "amplitude_nm_min": 40.0,
-    "amplitude_nm_max": 140.0,
-    "onset_effort_nm": 1.0
+    "onset_s": 0.25,
+    "move_duration_s": 1.2,
+    "q_start_rad": 1.0,
+    "q_end_rad": 0.72,
+    "depth_scale_min": 0.85,
+    "depth_scale_max": 1.15
+  },
+  "human": {
+    "kp_nm_per_rad": 36.0,
+    "kd_nm_s_per_rad": 3.0,
+    "torque_limit_nm": 20.0,
+    "note": "Bounded synthetic knee torque. The tracker follows the synthetic trajectory and is clipped to torque_limit_nm."
+  },
+  "load": {
+    "body_mass_kg": 70.0,
+    "gravity_m_s2": 9.81,
+    "knee_weight_share": 0.4,
+    "moment_arm_m": 0.04,
+    "assumption": "Theoretical stair-support moment. A synthetic 70 kg body, not a measured person, places knee_weight_share of its weight on this knee. The moment arm is moment_arm_m*sin(flexion), zero when the knee is straight and moment_arm_m at 90 degrees. The load is a flexion moment. It is not an inverse-dynamics result from a gait lab."
+  },
+  "strap": {
+    "stiffness_nm_per_rad": 28.0,
+    "damping_nm_s_per_rad": 1.2,
+    "note": "Spring-damper cuff between the human shank and the exoskeleton link. Interaction torque is this constraint torque."
   },
   "assist_policy": {
     "gain": 0.65,
@@ -20,17 +39,16 @@
     "source": "Copied stair-assist parameters from PR #3 AssistPolicy usage (gain 0.65, limit 80 Nm, slew 350 Nm/s)."
   },
   "admittance": {
-    "mass_kg_m2": 1.2,
-    "damping_nm_s_per_rad": 5.0,
-    "stiffness_nm_per_rad": 30.0,
-    "equilibrium_flexion_rad": 1.05
+    "mass_kg_m2": 0.35,
+    "damping_nm_s_per_rad": 4.0,
+    "stiffness_nm_per_rad": 10.0
   },
   "pid": {
-    "kp_nm_per_rad": 55.0,
-    "ki_nm_per_rad_s": 10.0,
-    "kd_nm_s_per_rad": 3.0,
+    "kp_nm_per_rad": 10.0,
+    "ki_nm_per_rad_s": 0.0,
+    "kd_nm_s_per_rad": 0.8,
     "torque_limit_nm": 24.0,
-    "algorithm": "Same anti-windup recurrence as simulation/webots/controllers/joint_controller/joint_controller.cpp and JointControllerPlugin.cpp. Knee gains are scenario parameters; the historical rig used kp 0.15, ki 0.05, kd 0.04 and a 0.10 Nm limit."
+    "algorithm": "Same anti-windup recurrence as simulation/webots/controllers/joint_controller/joint_controller.cpp. The 24 Nm limit is a safety parameter. ki is 0 so a persistent gravity moment cannot wind the integrator into that limit."
   },
   "safety": {
     "legacy_min_angle_rad": -1.5707963267948966,
@@ -40,18 +58,23 @@
     "command_timeout_s": 0.05,
     "sensor_dropout_s": 0.04,
     "damping_nm_s_per_rad": 2.0,
-    "damping_limit_nm": 8.0
+    "damping_limit_nm": 8.0,
+    "estop_passive_damping_nm_s_per_rad": 1.2
   },
   "plant": {
-    "inertia_kg_m2": 2.5,
-    "viscous_nm_s_per_rad": 0.8,
-    "resist_nm": 0.0,
-    "initial_flexion_rad": 1.05,
-    "min_flexion_rad": 0.15,
-    "max_flexion_rad": 1.25,
+    "human_inertia_kg_m2": 0.45,
+    "exo_inertia_kg_m2": 0.06,
+    "human_viscous_nm_s_per_rad": 0.6,
+    "exo_viscous_nm_s_per_rad": 0.12,
+    "initial_flexion_rad": 1.0,
+    "min_flexion_rad": 0.2,
+    "max_flexion_rad": 1.55,
     "boundary_abs_limit_nm": 40.0
   },
   "metrics": {
-    "assist_onset_nm": 1.0
+    "comfort_peak_interaction_nm": 15.0,
+    "comfort_basis": "Design assumption only, not a comfort study: 15 Nm is 0.08 m cuff moment arm times 187.5 N strap force. Peaks at or above this value fail the interaction criterion.",
+    "tracking_worse_ratio_max": 1.1,
+    "admittance_saturation_fraction_max": 0.05
   }
 }

@@ -33,4 +33,4 @@ ROS 2 包位于 `ros2_ws/src/ai_robotic_joint_ros2`；头文件 `ManualReference
 | `/joint/safety_state` | 同一个监督器的状态 |
 | `/joint/target_angle` → `/joint/safe_target_angle` | 原角度口，数字行为保持 |
 
-命令归属：意图源不推动植物，控制器只提案，`JointSafetyCore` 是外骨骼力矩的唯一出口，植物只积分人体力矩和这份安全力矩。故障时状态按 `E_STOP`、`DAMPING_ONLY`、`LIMITED_ASSIST`、`NORMAL` 的优先顺序取更严格者。
+命令归属：意图源给出合成期望轨迹，有界人体跟踪器产生人体力矩，控制器只提案，`JointSafetyCore` 是外骨骼电机力矩的唯一出口。植物把人体力矩、重力矩、绑带约束和这份电机力矩分开积分。交互力矩是绑带力矩。`E_STOP` 时电机力矩为 0，外骨骼只剩被动阻尼，`/joint/safe_target_angle` 沿用原合同。`/joint/safety_state` 只发布。故障时状态按 `E_STOP`、`DAMPING_ONLY`、`LIMITED_ASSIST`、`NORMAL` 的优先顺序取更严格者。

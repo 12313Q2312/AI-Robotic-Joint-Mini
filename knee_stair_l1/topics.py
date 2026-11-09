@@ -8,7 +8,8 @@ Float64MultiArray field order is fixed here and in the publishers.
 TOPIC_LEGACY_TARGET = "/joint/target_angle"
 TOPIC_LEGACY_SAFE_TARGET = "/joint/safe_target_angle"
 
-# One supervisor state for the merged joint_safety node.
+# Read-only supervisor state for coordination. The node publishes it.
+# Nothing writes this topic; it is not a command.
 TOPIC_SAFETY_STATE = "/joint/safety_state"
 
 # v1 intent. The topic name itself says synthetic.

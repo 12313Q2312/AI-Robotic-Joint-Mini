@@ -10,12 +10,15 @@ Fault mapping used by the injection suite:
 - finite command outside command_limit_nm -> LIMITED_ASSIST, torque clamped
 - sensor dropout (last finite sample older than sensor_dropout_s) -> DAMPING_ONLY
 - communication timeout (last finite command older than command_timeout_s) -> DAMPING_ONLY
-- non-finite sensor or command -> E_STOP, torque 0, latched until reset()
+- non-finite sensor or command -> E_STOP, assist torque 0, latched until reset()
 
 E_STOP outranks DAMPING_ONLY, which outranks LIMITED_ASSIST.
-DAMPING_ONLY torque is viscous and opposes flexion velocity. It does not
-forward the assist command. This is a software state machine, not a hardware
-emergency stop.
+On E_STOP the assist command is 0 and passive_damping is true: the exo does
+not actively drive. The legacy safe target angle is left on its existing
+contract and is not forced to 0. DAMPING_ONLY, used for dropout and timeout,
+still publishes a viscous command. This is a software state machine, not a
+hardware emergency stop. /joint/safety_state is published for readers and is
+not a command topic.
 """
 
 from __future__ import annotations
@@ -39,6 +42,7 @@ class SafetyDecision:
     legacy_safe_target_rad: float
     clamped: bool
     estop_latched: bool
+    passive_damping: bool
 
 
 class JointSafetyCore:
@@ -172,4 +176,5 @@ class JointSafetyCore:
             legacy_safe_target_rad=angle,
             clamped=clamped,
             estop_latched=self._estop_latched,
+            passive_damping=state == E_STOP,
         )

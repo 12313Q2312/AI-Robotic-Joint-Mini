@@ -1,23 +1,26 @@
-"""Closed loop. Every exo torque is a JointSafetyCore output.
+"""Closed loop. Every exo motor torque is a JointSafetyCore output.
 
 Command ownership
-- IntentSource proposes a synthetic (or test-double) effort. It does not move the plant.
-- AssistController proposes a raw exo torque.
-- JointSafetyCore is the only writer of the torque that enters the plant.
-- KneePlant integrates the human torque and that safe exo torque.
+- IntentSource emits a synthetic desired trajectory. It does not move the plant.
+- BoundedHumanKnee turns that trajectory into a clipped knee torque.
+- AssistController proposes a raw exo torque from a delayed intent sample.
+- JointSafetyCore is the only writer of the motor torque that enters the plant.
+- KneePlant integrates the human torque, the gravity load, the strap, and that
+  motor torque. On E_STOP the motor torque is 0 and the exo damper is passive.
 
-Transport delay is an explicit queue of supervisor outputs. End-to-end latency
-is apply_time minus the time that command was produced.
+Latency is measured as command_time minus the timestamp on the intent sample
+the command consumed. It is not filled in from the delay parameter.
 """
 
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from knee_stair_l1.controller import CONDITIONS, AssistController
+from knee_stair_l1.human import BoundedHumanKnee
 from knee_stair_l1.intent import IntentSample, IntentSource, SyntheticStairIntent
-from knee_stair_l1.plant import KneePlant
+from knee_stair_l1.plant import HardStopEvent, KneePlant
 from knee_stair_l1.safety import LIMITED_ASSIST, JointSafetyCore
 from knee_stair_l1.topics import (
     TOPIC_ASSIST_COMMAND_RAW,
@@ -35,16 +38,17 @@ class TrialResult:
     seed: int
     condition: str
     source_label: str
-    amplitude_nm: float
-    intent_onset_s: float
-    assist_onset_s: float | None
-    assist_onset: bool
-    assist_timing_error_s: float
-    end_to_end_latency_s: float
+    depth_scale: float
+    human_torque_rms_nm: float
+    human_positive_work_j: float
+    tracking_error_rms_rad: float
     peak_interaction_torque_nm: float
-    saturation_limit_trigger_count: int
-    saturation_limit_rising_edges: int
-    final_flexion_rad: float
+    saturation_time_fraction: float
+    hard_stop_contact_count: int
+    hard_stop_events: list[HardStopEvent] = field(default_factory=list)
+    latency_samples_s: list[float] = field(default_factory=list)
+    max_abs_motor_command_nm: float = 0.0
+    final_flexion_rad: float = 0.0
 
 
 def run_trial(
@@ -59,85 +63,77 @@ def run_trial(
     source = intent if intent is not None else SyntheticStairIntent(config)
     source.reset(seed)
     plant = KneePlant(config)
+    human = BoundedHumanKnee(config)
     safety = JointSafetyCore(config, legacy_enabled=False)
     controller = AssistController(config, condition)
     safety.reset(0.0)
-    controller.reset(plant.flexion_rad)
+    controller.reset(plant.q_e)
 
     dt = float(config["dt_s"])
     steps = int(round(float(config["duration_s"]) / dt))
     delay = int(config["command_transport_delay_steps"])
-    # Padding keeps the delay constant from the first applied sample.
-    pending: deque = deque((-((delay - index) * dt), 0.0) for index in range(delay))
+    pending: deque[IntentSample] = deque(source.step(-(delay - index) * dt) for index in range(delay))
 
-    onset_effort = float(config["intent"]["onset_effort_nm"])
-    assist_onset_nm = float(config["metrics"]["assist_onset_nm"])
-    intent_onset = None
-    assist_onset = None
-    peak = 0.0
-    limit_steps = 0
-    rising = 0
-    previous_limit = False
-    latency_sum = 0.0
-    amplitude = getattr(source, "amplitude_nm", float("nan"))
+    torque_sq = 0.0
+    positive_work = 0.0
+    track_sq = 0.0
+    peak_interaction = 0.0
+    saturated_steps = 0
+    max_command = 0.0
+    latencies: list[float] = []
 
     for index in range(steps):
         time_s = index * dt
-        sample = source.step(time_s)
-        _require_labeled_sample(sample)
-        safety.observe_sensor(plant.flexion_rad, plant.flexion_velocity_rad_s, time_s)
-        raw = controller.command(
-            sample,
-            plant.flexion_rad,
-            plant.flexion_velocity_rad_s,
-            dt,
-        )
+        fresh = source.step(time_s)
+        _require_labeled_sample(fresh)
+        pending.append(fresh)
+        used = pending.popleft()
+        q_h = plant.q_h
+        qd_h = plant.qd_h
+        human_flexion = human.torque_flexion_nm(fresh.q_ref_rad, fresh.qd_ref_rad_s, q_h, qd_h)
+        human_extension = -human_flexion
+        safety.observe_sensor(plant.q_e, plant.qd_e, time_s)
+        raw = controller.command(used, plant.q_e, plant.qd_e, human_extension, dt)
         safety.observe_command(raw.torque_extension_nm, time_s)
         decision = safety.evaluate(time_s)
-        pending.append((time_s, decision.safe_extension_torque_nm))
-        produced_s, applied = pending.popleft()
-        plant.advance(sample.human_extension_nm, applied, dt)
-
-        if intent_onset is None and sample.effort_extension_nm >= onset_effort:
-            intent_onset = time_s
-        if assist_onset is None and abs(applied) >= assist_onset_nm:
-            assist_onset = time_s
-        peak = max(peak, abs(plant.last_interaction_nm))
-        limit_active = raw.pid_saturated or raw.policy_saturated or decision.state == LIMITED_ASSIST
-        if limit_active:
-            limit_steps += 1
-            if not previous_limit:
-                rising += 1
-        previous_limit = limit_active
-        latency_sum += time_s - produced_s
+        command_time_s = time_s
+        latency_s = command_time_s - used.time_s
+        plant.advance(
+            human_flexion,
+            decision.safe_extension_torque_nm,
+            dt,
+            time_s,
+            passive_damping=decision.passive_damping,
+        )
+        torque_sq += human_flexion * human_flexion
+        power = human_flexion * qd_h
+        if power > 0.0:
+            positive_work += power * dt
+        track_error = fresh.q_ref_rad - q_h
+        track_sq += track_error * track_error
+        peak_interaction = max(peak_interaction, abs(plant.strap_torque_flexion_nm))
+        if raw.pid_saturated or raw.policy_saturated or decision.state == LIMITED_ASSIST:
+            saturated_steps += 1
+        max_command = max(max_command, abs(decision.safe_extension_torque_nm))
+        latencies.append(latency_s)
         if bus is not None:
-            _publish(bus, sample, raw, decision, applied, plant, time_s)
+            _publish(bus, fresh, raw, decision, plant, time_s, command_time_s, used.time_s)
 
-    if intent_onset is None:
-        raise RuntimeError("intent effort never reached onset_effort_nm; timing is undefined")
-    horizon = float(config["duration_s"])
-    if assist_onset is None:
-        timing = horizon - intent_onset
-        onset_flag = False
-        onset_value = None
-    else:
-        timing = assist_onset - intent_onset
-        onset_flag = True
-        onset_value = assist_onset
     return TrialResult(
         seed=int(seed),
         condition=condition,
         source_label=source.source_label,
-        amplitude_nm=float(amplitude),
-        intent_onset_s=intent_onset,
-        assist_onset_s=onset_value,
-        assist_onset=onset_flag,
-        assist_timing_error_s=timing,
-        end_to_end_latency_s=latency_sum / steps,
-        peak_interaction_torque_nm=peak,
-        saturation_limit_trigger_count=limit_steps,
-        saturation_limit_rising_edges=rising,
-        final_flexion_rad=plant.flexion_rad,
+        depth_scale=float(getattr(source, "depth_scale", float("nan"))),
+        human_torque_rms_nm=(torque_sq / steps) ** 0.5,
+        human_positive_work_j=positive_work,
+        tracking_error_rms_rad=(track_sq / steps) ** 0.5,
+        peak_interaction_torque_nm=peak_interaction,
+        saturation_time_fraction=saturated_steps / steps,
+        hard_stop_contact_count=len(plant.anomalies),
+        hard_stop_events=list(plant.anomalies),
+        latency_samples_s=latencies,
+        max_abs_motor_command_nm=max_command,
+        final_flexion_rad=plant.q_h,
     )
 
 
@@ -146,7 +142,7 @@ def _require_labeled_sample(sample: IntentSample) -> None:
         raise ValueError("intent sample is missing source_label")
 
 
-def _publish(bus, sample, raw, decision, applied, plant, time_s) -> None:
+def _publish(bus, sample, raw, decision, plant, time_s, command_time_s, intent_time_s) -> None:
     import json
 
     bus.publish(
@@ -154,8 +150,8 @@ def _publish(bus, sample, raw, decision, applied, plant, time_s) -> None:
         {
             "source_label": sample.source_label,
             "time_s": sample.time_s,
-            "effort_extension_nm": sample.effort_extension_nm,
-            "phase": sample.phase,
+            "q_ref_rad": sample.q_ref_rad,
+            "qd_ref_rad_s": sample.qd_ref_rad_s,
             "ascent_active": 1.0 if sample.ascent_active else 0.0,
         },
     )
@@ -171,13 +167,17 @@ def _publish(bus, sample, raw, decision, applied, plant, time_s) -> None:
         },
     )
     bus.publish(TOPIC_ASSIST_COMMAND_RAW, raw.torque_extension_nm)
-    bus.publish(TOPIC_ASSIST_COMMAND_SAFE, applied)
+    bus.publish(
+        TOPIC_ASSIST_COMMAND_SAFE,
+        {"torque_extension_nm": decision.safe_extension_torque_nm, "command_time_s": command_time_s},
+    )
     bus.publish(
         TOPIC_PLANT_STATE,
         {
-            "flexion_rad": plant.flexion_rad,
-            "flexion_velocity_rad_s": plant.flexion_velocity_rad_s,
-            "interaction_extension_nm": plant.last_interaction_nm,
+            "human_flexion_rad": plant.q_h,
+            "human_velocity_rad_s": plant.qd_h,
+            "exo_flexion_rad": plant.q_e,
+            "strap_torque_flexion_nm": plant.strap_torque_flexion_nm,
         },
     )
     bus.publish(TOPIC_SAFETY_STATE, decision.state)
@@ -186,9 +186,12 @@ def _publish(bus, sample, raw, decision, applied, plant, time_s) -> None:
         json.dumps(
             {
                 "time_s": time_s,
+                "intent_time_s": intent_time_s,
+                "command_time_s": command_time_s,
                 "source_label": sample.source_label,
                 "state": decision.state,
                 "safe_extension_torque_nm": decision.safe_extension_torque_nm,
+                "passive_damping": decision.passive_damping,
             },
             sort_keys=True,
         ),
