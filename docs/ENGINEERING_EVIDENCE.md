@@ -2,7 +2,7 @@
 
 ## 本轮软件检查
 
-`scripts/verify_joint_study.py` 运行现有59项 Python测试、C++参考行为组、配对夹具行为组、12个理想固定轴动力学工况及新旧面板前端回归。最终实际结果以 `data/verification/software_baseline_20261104.json` 和 GitHub CI 为准；测试数量属于不同统计口径，不合并为一个总数。
+`scripts/verify_joint_study.py` 会运行 `tests/` 下的 Python 测试、C++ 参考行为组、配对夹具行为组、12 个理想固定轴动力学工况及新旧面板前端回归。2026-11-04 基线摘要中的 Python 用例数是 59，见 `data/verification/software_baseline_20261104.json`，该历史摘要不随后续测试增减而改写。新增用例由同一入口执行。数量分属不同口径，不合并成一个总数。
 
 源码指纹与测试工具版本纳入摘要。验证范围为合成软件行为，不包含 ROS 2 插件构建、实际 Webots 反馈、SolidWorks 几何重读或硬件试验。
 

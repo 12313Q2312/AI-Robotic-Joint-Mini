@@ -37,6 +37,10 @@ jobs:
           package-manager-cache: false
       - name: Check repository contents
         run: python scripts/check_repository.py
+      - name: Knee stair L1 fault injection
+        run: python -m unittest tests.test_knee_stair_l1_faults -v
+      - name: Knee stair L1 metrics reproduction
+        run: python scripts/run_knee_stair_l1_metrics.py --check
       - name: Run offline Python, C++ and frontend verification
         run: python scripts/verify_joint_study.py --output data/verification/ci-check.json
       - name: Summarize verification

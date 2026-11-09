@@ -1,0 +1,153 @@
+{
+  "absolute": {
+    "admittance": {
+      "assist_timing_error_s": {
+        "mean": 0.336666666667,
+        "n": 12,
+        "std": 0.030476021374
+      },
+      "end_to_end_latency_s": {
+        "mean": 0.01,
+        "n": 12,
+        "std": 0.0
+      },
+      "peak_interaction_torque_nm": {
+        "mean": 24.0,
+        "n": 12,
+        "std": 0.0
+      },
+      "saturation_limit_trigger_count": {
+        "mean": 26.416666666667,
+        "n": 12,
+        "std": 0.514928650544
+      }
+    },
+    "assist_policy": {
+      "assist_timing_error_s": {
+        "mean": 0.015416666667,
+        "n": 12,
+        "std": 0.002574643253
+      },
+      "end_to_end_latency_s": {
+        "mean": 0.01,
+        "n": 12,
+        "std": 0.0
+      },
+      "peak_interaction_torque_nm": {
+        "mean": 39.561139655609,
+        "n": 12,
+        "std": 1.520256827825
+      },
+      "saturation_limit_trigger_count": {
+        "mean": 42.916666666667,
+        "n": 12,
+        "std": 25.706236715253
+      }
+    },
+    "off": {
+      "assist_timing_error_s": {
+        "mean": 1.072916666667,
+        "n": 12,
+        "std": 0.003964807305
+      },
+      "end_to_end_latency_s": {
+        "mean": 0.01,
+        "n": 12,
+        "std": 0.0
+      },
+      "peak_interaction_torque_nm": {
+        "mean": 0.0,
+        "n": 12,
+        "std": 0.0
+      },
+      "saturation_limit_trigger_count": {
+        "mean": 0,
+        "n": 12,
+        "std": 0.0
+      }
+    }
+  },
+  "conditions": [
+    "off",
+    "admittance",
+    "assist_policy"
+  ],
+  "config_sha256": "bc68711ee3388e3b9b2b02f3081cc3d1695449e509b986ba46a2475801c1f49d",
+  "definitions": {
+    "assist_timing_error_s": "assist onset minus synthetic effort onset; censored to the horizon if assist stays below assist_onset_nm",
+    "end_to_end_latency_s": "mean apply-time minus supervisor production-time over control steps",
+    "peak_interaction_torque_nm": "peak absolute torque across the human/exoskeleton boundary",
+    "saturation_limit_trigger_count": "control steps with PID saturation, AssistPolicy saturation, or LIMITED_ASSIST"
+  },
+  "evidence_label": "experimental",
+  "intent_source_label": "synthetic",
+  "not_claimed": [
+    "real_humans",
+    "real_emg",
+    "fall_prevention"
+  ],
+  "paired_minus_off": {
+    "admittance": {
+      "assist_timing_error_s": {
+        "mean": -0.73625,
+        "n": 12,
+        "std": 0.033920026265
+      },
+      "end_to_end_latency_s": {
+        "mean": 0.0,
+        "n": 12,
+        "std": 0.0
+      },
+      "peak_interaction_torque_nm": {
+        "mean": 24.0,
+        "n": 12,
+        "std": 0.0
+      },
+      "saturation_limit_trigger_count": {
+        "mean": 26.416666666667,
+        "n": 12,
+        "std": 0.514928650544
+      }
+    },
+    "assist_policy": {
+      "assist_timing_error_s": {
+        "mean": -1.0575,
+        "n": 12,
+        "std": 0.005
+      },
+      "end_to_end_latency_s": {
+        "mean": 0.0,
+        "n": 12,
+        "std": 0.0
+      },
+      "peak_interaction_torque_nm": {
+        "mean": 39.561139655609,
+        "n": 12,
+        "std": 1.520256827825
+      },
+      "saturation_limit_trigger_count": {
+        "mean": 42.916666666667,
+        "n": 12,
+        "std": 25.706236715253
+      }
+    }
+  },
+  "seed_count": 12,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "simulation_only": true,
+  "std_ddof": 1,
+  "timing_censor": "duration_s - intent_onset_s when assist does not reach assist_onset_nm"
+}
