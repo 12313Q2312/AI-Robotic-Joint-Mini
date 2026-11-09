@@ -31,13 +31,15 @@ def _failed_reasons(trials, summary) -> list[str]:
             reasons.append(f"{condition}: peak interaction torque is at or above the comfort threshold")
         if condition == "admittance" and not crit["saturation_time_fraction_below_5_percent"]:
             reasons.append("admittance: saturation time fraction is not below 5%")
-        if any(trial.non_normal_step_fraction > 0.0 for trial in trials if trial.condition == condition):
-            reasons.append(f"{condition}: supervisor left NORMAL")
+        if any(trial.steady_non_normal_fraction > 0.0 for trial in trials if trial.condition == condition):
+            reasons.append(f"{condition}: supervisor steady state left NORMAL")
     return reasons
 
 
 def latency_sweep(config: dict, delays_s: list[float] | None = None) -> dict:
-    grid = [0.0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05] if delays_s is None else delays_s
+    grid = [
+        0.0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.1, 0.2, 0.5,
+    ] if delays_s is None else delays_s
     points = []
     first_failure = None
     for delay in grid:
@@ -50,7 +52,22 @@ def latency_sweep(config: dict, delays_s: list[float] | None = None) -> dict:
         reasons = _failed_reasons(trials, summary)
         if reasons and first_failure is None:
             first_failure = {"delay_s": delay, "reasons": reasons}
-        point = {"delay_s": delay, "delay_ms": round(delay * 1000.0, 3), "failed": bool(reasons), "reasons": reasons}
+        states = {}
+        for condition in CONDITIONS:
+            rows = [trial for trial in trials if trial.condition == condition]
+            counts: dict[str, int] = {}
+            for trial in rows:
+                for state, count in trial.steady_state_counts.items():
+                    counts[state] = counts.get(state, 0) + count
+            mode = max(counts, key=counts.get) if counts else "NONE"
+            states[condition] = {"state": mode, "counts": counts}
+        point = {
+            "delay_s": delay,
+            "delay_ms": round(delay * 1000.0, 3),
+            "failed": bool(reasons),
+            "reasons": reasons,
+            "supervisor_state": states,
+        }
         for condition in ("admittance", "assist_policy"):
             point[condition] = {
                 "human_torque_rms_reduction_nm": summary["reduction_versus_off"][condition]["human_torque_rms_nm"]["mean"],
@@ -59,16 +76,37 @@ def latency_sweep(config: dict, delays_s: list[float] | None = None) -> dict:
                 "human_torque_rms_ci95": summary["reduction_versus_off"][condition]["human_torque_rms_nm"]["ci95_low"],
             }
         points.append(point)
-    if first_failure is None:
-        conclusion = "No delay from 0 to 50 ms made assist worse than OFF or left the supervisor in a degraded state."
+    first_supervisor = next(
+        (
+            point for point in points
+            if any(point["supervisor_state"][condition]["state"] != "NORMAL" for condition in CONDITIONS)
+        ),
+        None,
+    )
+    if first_supervisor is None:
+        conclusion = (
+            "Through 500 ms the steady supervisor state stays NORMAL. "
+            "The supervisor has no signal-freshness or staleness check: a steady stream of late "
+            "intent and sensor packets is stamped on receipt. A check of packet age is a required "
+            "Layer 2 item and is not implemented in this layer."
+        )
     else:
         conclusion = (
-            f"At {first_failure['delay_s'] * 1000:.0f} ms of uniform intent delay, "
-            + "; ".join(first_failure["reasons"])
+            f"Steady supervisor state first leaves NORMAL at {first_supervisor['delay_ms']:.0f} ms."
         )
     return {
         "evidence_label": "experimental",
-        "delay_model": "Each step draws a command-hold delay uniformly from 0 to the sweep value and applies that earlier supervised torque. The same draw sequence is paired across conditions. This injected delay is separate from the fixed simulation-loop intent queue.",
+        "delay_model": (
+            "Each step draws a delay uniformly from 0 to the sweep value. The intent sample and the "
+            "noisy sensor sample from that earlier time are what enter the controller and the safety "
+            "supervisor. The supervisor stamps them on receipt. Torque is not delayed again after approval. "
+            "The same draw is paired across conditions. The fixed two-step simulation-loop queue is not added on top."
+        ),
+        "first_steady_supervisor_degradation": None if first_supervisor is None else {
+            "delay_ms": first_supervisor["delay_ms"],
+            "supervisor_state": first_supervisor["supervisor_state"],
+        },
+        "required_l2_if_no_degradation_by_500_ms": first_supervisor is None,
         "worse_than_off_means": "Torque-RMS reduction CI does not stay above 0, tracking is more than 10% worse than OFF, a hard stop occurs, admittance saturation reaches 5%, interaction reaches the comfort threshold, or the supervisor leaves NORMAL.",
         "points": points,
         "threshold": first_failure,

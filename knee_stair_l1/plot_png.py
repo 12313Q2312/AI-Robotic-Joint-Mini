@@ -99,7 +99,7 @@ def write_delay_plot(path, delays_ms: list[float], series: list[tuple[str, list[
     lower = [item for item in series if "peak" in item[0]]
     panel(top, upper or series[:2])
     panel(top + panel_h + gap, lower or series[2:])
-    _text(pix, left, 8, "0-50", (20, 20, 20))
+    _text(pix, left, 8, f"0-{delays_ms[-1]:.0f}", (20, 20, 20))
     raw = zlib.compress(b"".join(b"\x00" + bytes(canvas[y * width * 3:(y + 1) * width * 3]) for y in range(height)), 9)
     png = b"\x89PNG\r\n\x1a\n" + _chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)) + _chunk(b"IDAT", raw) + _chunk(b"IEND", b"")
     with open(path, "wb") as handle:

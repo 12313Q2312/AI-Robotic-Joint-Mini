@@ -20,6 +20,8 @@ class SeedFactors:
     intent_amplitude_scale: float
     intent_onset_s: float
     strap_stiffness_scale: float
+    angle_noise_std_rad: float
+    velocity_noise_std_rad_s: float
 
     def as_dict(self) -> dict:
         return {
@@ -29,6 +31,8 @@ class SeedFactors:
             "intent_amplitude_scale": self.intent_amplitude_scale,
             "intent_onset_s": self.intent_onset_s,
             "strap_stiffness_scale": self.strap_stiffness_scale,
+            "angle_noise_std_rad": self.angle_noise_std_rad,
+            "velocity_noise_std_rad_s": self.velocity_noise_std_rad_s,
         }
 
 
@@ -44,6 +48,9 @@ def draw_factors(seed: int, config: dict) -> SeedFactors:
     onset = nominal_onset + rng.uniform(-onset_jitter, onset_jitter)
     strap_frac = float(span["strap_stiffness_fraction"])
     strap_scale = rng.uniform(1.0 - strap_frac, 1.0 + strap_frac)
+    noise = config["sensor_noise"]
+    angle_noise = rng.uniform(float(noise["angle_std_rad_min"]), float(noise["angle_std_rad_max"]))
+    velocity_noise = rng.uniform(float(noise["velocity_std_rad_s_min"]), float(noise["velocity_std_rad_s_max"]))
     return SeedFactors(
         seed=int(seed),
         body_mass_kg=mass,
@@ -51,6 +58,8 @@ def draw_factors(seed: int, config: dict) -> SeedFactors:
         intent_amplitude_scale=amplitude,
         intent_onset_s=onset,
         strap_stiffness_scale=strap_scale,
+        angle_noise_std_rad=angle_noise,
+        velocity_noise_std_rad_s=velocity_noise,
     )
 
 

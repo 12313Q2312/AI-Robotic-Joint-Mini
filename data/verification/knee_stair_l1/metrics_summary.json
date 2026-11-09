@@ -11,19 +11,19 @@
       },
       "human_positive_work_j": {
         "ci95_excludes_0": true,
-        "ci95_high": 2.594772646964,
-        "ci95_low": 2.161147827146,
-        "mean": 2.377960237055,
+        "ci95_high": 2.596018280941,
+        "ci95_low": 2.162197209753,
+        "mean": 2.379107745347,
         "n": 30,
-        "std": 0.580634297527
+        "std": 0.580897082937
       },
       "human_torque_rms_nm": {
         "ci95_excludes_0": true,
-        "ci95_high": 6.291887444767,
-        "ci95_low": 5.470035141625,
-        "mean": 5.880961293196,
+        "ci95_high": 6.295424945005,
+        "ci95_low": 5.473341750604,
+        "mean": 5.884383347804,
         "n": 30,
-        "std": 1.100480445069
+        "std": 1.100789614143
       },
       "latency": {
         "max_s": 0.01,
@@ -33,11 +33,11 @@
       },
       "peak_interaction_torque_nm": {
         "ci95_excludes_0": true,
-        "ci95_high": 5.568003206774,
-        "ci95_low": 4.789986217817,
-        "mean": 5.178994712295,
+        "ci95_high": 5.572276717917,
+        "ci95_low": 4.793698387027,
+        "mean": 5.182987552472,
         "n": 30,
-        "std": 1.041783881368
+        "std": 1.042535532022
       },
       "saturation_time_fraction": {
         "ci95_excludes_0": false,
@@ -49,11 +49,11 @@
       },
       "tracking_error_rms_rad": {
         "ci95_excludes_0": true,
-        "ci95_high": 0.168428221836,
-        "ci95_low": 0.14650160908,
-        "mean": 0.157464915458,
+        "ci95_high": 0.168438675896,
+        "ci95_low": 0.146517070929,
+        "mean": 0.157477873412,
         "n": 30,
-        "std": 0.029360273703
+        "std": 0.029353568152
       }
     },
     "assist_policy": {
@@ -67,19 +67,19 @@
       },
       "human_positive_work_j": {
         "ci95_excludes_0": true,
-        "ci95_high": 2.233875209067,
-        "ci95_low": 1.877135068788,
-        "mean": 2.055505138928,
+        "ci95_high": 2.23801454789,
+        "ci95_low": 1.880062745071,
+        "mean": 2.059038646481,
         "n": 30,
-        "std": 0.477683820861
+        "std": 0.4793062668
       },
       "human_torque_rms_nm": {
         "ci95_excludes_0": true,
-        "ci95_high": 6.284538374798,
-        "ci95_low": 5.443508767997,
-        "mean": 5.864023571398,
+        "ci95_high": 6.287804733828,
+        "ci95_low": 5.446524680524,
+        "mean": 5.867164707176,
         "n": 30,
-        "std": 1.12615932628
+        "std": 1.126494680306
       },
       "latency": {
         "max_s": 0.01,
@@ -89,11 +89,11 @@
       },
       "peak_interaction_torque_nm": {
         "ci95_excludes_0": true,
-        "ci95_high": 5.494263323735,
-        "ci95_low": 4.796110058491,
-        "mean": 5.145186691113,
+        "ci95_high": 5.501292045724,
+        "ci95_low": 4.802426668102,
+        "mean": 5.151859356913,
         "n": 30,
-        "std": 0.93484439129
+        "std": 0.935797927278
       },
       "saturation_time_fraction": {
         "ci95_excludes_0": false,
@@ -105,11 +105,11 @@
       },
       "tracking_error_rms_rad": {
         "ci95_excludes_0": true,
-        "ci95_high": 0.169504837921,
-        "ci95_low": 0.146843128718,
-        "mean": 0.15817398332,
+        "ci95_high": 0.169502674044,
+        "ci95_low": 0.146850804104,
+        "mean": 0.158176739074,
         "n": 30,
-        "std": 0.030344585924
+        "std": 0.03033141091
       }
     },
     "off": {
@@ -123,19 +123,19 @@
       },
       "human_positive_work_j": {
         "ci95_excludes_0": true,
-        "ci95_high": 4.547677628223,
-        "ci95_low": 3.791643000264,
-        "mean": 4.169660314243,
+        "ci95_high": 4.550110268678,
+        "ci95_low": 3.793641059109,
+        "mean": 4.171875663894,
         "n": 30,
-        "std": 1.012348959396
+        "std": 1.01293087486
       },
       "human_torque_rms_nm": {
         "ci95_excludes_0": true,
-        "ci95_high": 11.105910222765,
-        "ci95_low": 9.575712759241,
-        "mean": 10.340811491003,
+        "ci95_high": 11.107620992852,
+        "ci95_low": 9.577410748994,
+        "mean": 10.342515870923,
         "n": 30,
-        "std": 2.048972034592
+        "std": 2.048989147772
       },
       "latency": {
         "max_s": 0.01,
@@ -145,11 +145,11 @@
       },
       "peak_interaction_torque_nm": {
         "ci95_excludes_0": true,
-        "ci95_high": 1.054929736448,
-        "ci95_low": 0.912913679341,
-        "mean": 0.983921707894,
+        "ci95_high": 1.055939854019,
+        "ci95_low": 0.913376555531,
+        "mean": 0.984658204775,
         "n": 30,
-        "std": 0.190162992955
+        "std": 0.190895762622
       },
       "saturation_time_fraction": {
         "ci95_excludes_0": false,
@@ -161,11 +161,11 @@
       },
       "tracking_error_rms_rad": {
         "ci95_excludes_0": true,
-        "ci95_high": 0.299956999657,
-        "ci95_low": 0.258689765991,
-        "mean": 0.279323382824,
+        "ci95_high": 0.299954792721,
+        "ci95_low": 0.25869497067,
+        "mean": 0.279324881695,
         "n": 30,
-        "std": 0.055257840731
+        "std": 0.055247916396
       }
     }
   },
@@ -177,35 +177,35 @@
     "admittance",
     "assist_policy"
   ],
-  "config_sha256": "724ef28b89ead513c0bff157b94dc79b0502e2ed0cb1541ba48628f365baba7b",
+  "config_sha256": "7fbd2156c2929cc3b9fc052421c9630b890beefbc83884be23e901fa530a7b54",
   "criteria": {
     "admittance": {
       "comfort_peak_interaction_nm": 15.0,
       "hard_stop_contacts_zero": true,
       "human_torque_rms_reduction_ci95": [
-        4.099931683358,
-        4.819768712256
+        4.098295872604,
+        4.817969173633
       ],
       "human_torque_rms_reduction_ci_excludes_0": true,
       "peak_interaction_below_comfort": true,
       "saturation_time_fraction_below_5_percent": true,
       "saturation_time_fraction_mean": 0.0,
       "tracking_error_no_more_than_10_percent_worse": true,
-      "tracking_error_ratio_max": 0.597015026104
+      "tracking_error_ratio_max": 0.596925457078
     },
     "assist_policy": {
       "comfort_peak_interaction_nm": 15.0,
       "hard_stop_contacts_zero": true,
       "human_torque_rms_reduction_ci95": [
-        4.131964445785,
-        4.821611393426
+        4.130640500984,
+        4.820061826509
       ],
       "human_torque_rms_reduction_ci_excludes_0": true,
       "peak_interaction_below_comfort": true,
       "saturation_time_fraction_below_5_percent": null,
       "saturation_time_fraction_mean": 0.0,
       "tracking_error_no_more_than_10_percent_worse": true,
-      "tracking_error_ratio_max": 0.574556818193
+      "tracking_error_ratio_max": 0.574553667053
     }
   },
   "evidence_label": "experimental",
@@ -226,37 +226,37 @@
     "admittance": {
       "human_positive_work_j": {
         "ci95_excludes_0": true,
-        "ci95_high": 1.958414064182,
-        "ci95_low": 1.624986090196,
-        "mean": 1.791700077189,
+        "ci95_high": 1.959559710221,
+        "ci95_low": 1.625976126872,
+        "mean": 1.792767918547,
         "n": 30,
-        "std": 0.446468256897
+        "std": 0.44667662166
       },
       "human_torque_rms_nm": {
         "ci95_excludes_0": true,
-        "ci95_high": 4.819768712256,
-        "ci95_low": 4.099931683358,
-        "mean": 4.459850197807,
+        "ci95_high": 4.817969173633,
+        "ci95_low": 4.098295872604,
+        "mean": 4.458132523118,
         "n": 30,
-        "std": 0.963879484074
+        "std": 0.963660248432
       }
     },
     "assist_policy": {
       "human_positive_work_j": {
         "ci95_excludes_0": true,
-        "ci95_high": 2.314760278461,
-        "ci95_low": 1.913550072171,
-        "mean": 2.114155175316,
+        "ci95_high": 2.313039677099,
+        "ci95_low": 1.912634357727,
+        "mean": 2.112837017413,
         "n": 30,
-        "std": 0.537230332866
+        "std": 0.536152569489
       },
       "human_torque_rms_nm": {
         "ci95_excludes_0": true,
-        "ci95_high": 4.821611393426,
-        "ci95_low": 4.131964445785,
-        "mean": 4.476787919605,
+        "ci95_high": 4.820061826509,
+        "ci95_low": 4.130640500984,
+        "mean": 4.475351163747,
         "n": 30,
-        "std": 0.923454222831
+        "std": 0.92315210927
       }
     }
   },

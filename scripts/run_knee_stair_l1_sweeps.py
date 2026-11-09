@@ -42,8 +42,8 @@ def _caption(latency: dict) -> str:
     return "\n".join([
         "# Latency jitter sweep",
         "",
-        "The horizontal axis is the upper end of a uniform command-hold delay, in milliseconds.",
-        "This is injected delay. It is not the fixed simulation-loop latency.",
+        "The horizontal axis is the upper end of a uniform delay, in milliseconds, applied to the intent and sensor before the safety supervisor.",
+        "It is not the fixed simulation-loop latency, and torque is not delayed again after the supervisor.",
         "",
         "Top panel, from the top of the legend order in the generator:",
         "- blue: admittance human-torque RMS reduction, Nm",

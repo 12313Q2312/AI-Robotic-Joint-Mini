@@ -17,7 +17,7 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass, field
 
-from knee_stair_l1.controller import CONDITIONS, AssistController
+from knee_stair_l1.controller import CONDITIONS, AssistController, ControllerCommand
 from knee_stair_l1.human import BoundedHumanKnee
 from knee_stair_l1.intent import IntentSample, IntentSource, SyntheticStairIntent
 from knee_stair_l1.plant import HardStopEvent, KneePlant
@@ -52,6 +52,10 @@ class TrialResult:
     final_flexion_rad: float = 0.0
     factors: SeedFactors | None = None
     non_normal_step_fraction: float = 0.0
+    steady_non_normal_fraction: float = 0.0
+    steady_supervisor_state: str = "NORMAL"
+    safety_state_counts: dict = field(default_factory=dict)
+    steady_state_counts: dict = field(default_factory=dict)
 
 
 def run_trial(
@@ -78,11 +82,13 @@ def run_trial(
     steps = int(round(float(config["duration_s"]) / dt))
     delay = int(config["command_transport_delay_steps"])
     noise = noise_rng(seed)
-    angle_std = float(config["sensor_noise"]["angle_std_rad"])
-    velocity_std = float(config["sensor_noise"]["velocity_std_rad_s"])
+    angle_std = factors.angle_noise_std_rad
+    velocity_std = factors.velocity_noise_std_rad_s
     delays = jitter_rng(seed)
     pending: deque[IntentSample] = deque(source.step(-(delay - index) * dt) for index in range(delay))
-    held_commands: list[tuple[float, float]] = []
+    signal_log: list[dict] = []
+    steady_counts: dict[str, int] = {}
+    all_counts: dict[str, int] = {}
 
     torque_sq = 0.0
     positive_work = 0.0
@@ -97,8 +103,6 @@ def run_trial(
         time_s = index * dt
         fresh = source.step(time_s)
         _require_labeled_sample(fresh)
-        pending.append(fresh)
-        used = pending.popleft()
         q_h = plant.q_h
         qd_h = plant.qd_h
         q_meas = q_h + angle_std * gaussian(noise)
@@ -107,25 +111,49 @@ def run_trial(
         qde_meas = plant.qd_e + velocity_std * gaussian(noise)
         human_flexion = human.torque_flexion_nm(fresh.q_ref_rad, fresh.qd_ref_rad_s, q_meas, qd_meas)
         human_extension = -human_flexion
-        safety.observe_sensor(qe_meas, qde_meas, time_s)
-        raw = controller.command(used, qe_meas, qde_meas, human_extension, dt)
-        safety.observe_command(raw.torque_extension_nm, time_s)
-        decision = safety.evaluate(time_s)
-        command_time_s = time_s
-        latency_s = command_time_s - used.time_s
-        held_commands.append((command_time_s, decision.safe_extension_torque_nm))
-        applied_torque = decision.safe_extension_torque_nm
-        if decision.passive_damping:
-            applied_torque = 0.0
-        elif jitter_max_s is not None:
+        signal_log.append({
+            "t": time_s,
+            "intent": fresh,
+            "qe": qe_meas,
+            "qde": qde_meas,
+            "human_extension": human_extension,
+        })
+        if jitter_max_s is None:
+            pending.append(fresh)
+            used = pending.popleft()
+            safety.observe_sensor(qe_meas, qde_meas, time_s)
+            raw = controller.command(used, qe_meas, qde_meas, human_extension, dt)
+            safety.observe_command(raw.torque_extension_nm, time_s)
+            intent_time_s = used.time_s
+        else:
             drawn = 0.0 if jitter_max_s <= 0.0 else delays.uniform(0.0, float(jitter_max_s))
             target_time = time_s - drawn
-            applied_torque = 0.0
-            for stamp, torque in held_commands:
-                if stamp <= target_time + 1e-12:
-                    applied_torque = torque
+            released = None
+            for sample in signal_log:
+                if sample["t"] <= target_time + 1e-12:
+                    released = sample
                 else:
                     break
+            if released is None:
+                # Nothing has aged into the delay window. Do not refresh the clocks.
+                used = fresh
+                raw = ControllerCommand(0.0, None, None, False, False, fresh.time_s, fresh.source_label)
+                intent_time_s = fresh.time_s
+            else:
+                # Receipt time is now. Payload is the delayed intent and sensor.
+                # Freshness is stamped on receipt, so a steady stream of late
+                # packets does not by itself look stale to this supervisor.
+                safety.observe_sensor(released["qe"], released["qde"], time_s)
+                used = released["intent"]
+                raw = controller.command(
+                    used, released["qe"], released["qde"], released["human_extension"], dt,
+                )
+                safety.observe_command(raw.torque_extension_nm, time_s)
+                intent_time_s = used.time_s
+        decision = safety.evaluate(time_s)
+        command_time_s = time_s
+        latency_s = command_time_s - intent_time_s
+        applied_torque = 0.0 if decision.passive_damping else decision.safe_extension_torque_nm
         plant.advance(
             human_flexion,
             applied_torque,
@@ -144,6 +172,9 @@ def run_trial(
             saturated_steps += 1
         if decision.state != NORMAL:
             non_normal_steps += 1
+        all_counts[decision.state] = all_counts.get(decision.state, 0) + 1
+        if jitter_max_s is None or time_s + 1e-12 >= float(jitter_max_s):
+            steady_counts[decision.state] = steady_counts.get(decision.state, 0) + 1
         max_command = max(max_command, abs(decision.safe_extension_torque_nm))
         latencies.append(latency_s)
         if bus is not None:
@@ -156,6 +187,13 @@ def run_trial(
         depth_scale=float(getattr(source, "depth_scale", factors.intent_amplitude_scale)),
         factors=factors,
         non_normal_step_fraction=non_normal_steps / steps,
+        steady_non_normal_fraction=(
+            sum(count for state, count in steady_counts.items() if state != "NORMAL")
+            / max(sum(steady_counts.values()), 1)
+        ),
+        steady_supervisor_state=max(steady_counts, key=steady_counts.get) if steady_counts else "NORMAL",
+        safety_state_counts=dict(all_counts),
+        steady_state_counts=dict(steady_counts),
         human_torque_rms_nm=(torque_sq / steps) ** 0.5,
         human_positive_work_j=positive_work,
         tracking_error_rms_rad=(track_sq / steps) ** 0.5,

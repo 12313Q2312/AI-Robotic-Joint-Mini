@@ -108,12 +108,18 @@ AI负责估计与决策，缓震需要可验证的物理能量吸收路径；弹
 | 膝关节承担体重的份额是 0.4 | 配置里的理论份额 |
 | 意图幅度 ±20%，起始时间 ±100 ms | 本轮要求的抽取范围，写在 `randomization` |
 | 绑带刚度在名义值上下 ±30% | 配置。名义刚度是模型参数 |
-| 传感噪声标准差为 0.005 rad 和 0.05 rad/s | `sensor_noise.level_note`。选定的仿真水平，不是编码器说明书 |
+| 每个种子抽取角度噪声 0.002–0.01 rad、角速度噪声 0.02–0.1 rad/s | `sensor_noise.level_note`。不是编码器说明书 |
 | 舒适阈值 15 Nm = 0.08 m × 187.5 N | `metrics.comfort_basis`。设计假设，不是舒适性试验 |
 | 屈膝上限 2.2 rad | `knee_stair_l1/TUNING.md`。模型活动范围，不是测得关节活动度 |
 | 固定 2 步队列的 p50/p95/max 是仿真环路时延，不是真实系统时延 | `metrics_summary.json` 的 `latency_definition` |
 
-导纳的正功降幅小于 AssistPolicy。这是这次结果，没有为了让导纳更大而调参。±30% 的力臂和舒适阈值扫描没有让通过/失败结论翻转，见 [sensitivity.json](data/verification/knee_stair_l1/sensitivity.json)。0–50 ms 的命令保持延迟没有使助力差于关闭，也没有让监督器离开 `NORMAL`，见 [latency_sweep.md](data/verification/knee_stair_l1/latency_sweep.md) 和 [图](data/verification/knee_stair_l1/latency_sweep.png)。24 Nm 上限没有提高。`E_STOP` 是软件锁存，不是硬件急停。软件测试不证明 ROS 2/Webots 运动、机械安全或测得的能量节省。
+必须单独记下的限制：
+
+- 全部结果都只是仿真。意图是合成的，CI 不运行 ROS 2 或 Webots。
+- 导纳在正功降幅上差于 AssistPolicy，在力矩 RMS 上与它相当。没有为了让导纳反超而调参。
+- 即使 1.5 s 的延迟下助力仍然有效，说明合成意图太可预测，助力接近重力补偿。L2 必须加入意图突变和动作中途停止。
+
+延迟加在进入安全监督器之前的意图和传感器上。0–50 ms 网格以及 100、200、500 ms 的稳态都是 `NORMAL`，见 [latency_sweep.md](data/verification/knee_stair_l1/latency_sweep.md) 和 [图](data/verification/knee_stair_l1/latency_sweep.png)。监督器按收到时刻盖时间戳，没有信号新鲜度检查。这是 L2 必做项，本层不实现。±30% 的力臂和舒适阈值扫描见 [sensitivity.json](data/verification/knee_stair_l1/sensitivity.json)。24 Nm 上限没有提高。`E_STOP` 是软件锁存，不是硬件急停。
 
 复现（仓库根目录，只需 Python 标准库）：
 

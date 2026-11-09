@@ -6,29 +6,29 @@
           "comfort_peak_interaction_nm": 15.0,
           "hard_stop_contacts_zero": true,
           "human_torque_rms_reduction_ci95": [
-            4.099931683358,
-            4.819768712256
+            4.098295872604,
+            4.817969173633
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
           "saturation_time_fraction_below_5_percent": true,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
-          "tracking_error_ratio_max": 0.597015026104
+          "tracking_error_ratio_max": 0.596925457078
         },
         "assist_policy": {
           "comfort_peak_interaction_nm": 15.0,
           "hard_stop_contacts_zero": true,
           "human_torque_rms_reduction_ci95": [
-            4.131964445785,
-            4.821611393426
+            4.130640500984,
+            4.820061826509
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
           "saturation_time_fraction_below_5_percent": null,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
-          "tracking_error_ratio_max": 0.574556818193
+          "tracking_error_ratio_max": 0.574553667053
         }
       },
       "kind": "baseline",
@@ -41,29 +41,29 @@
           "comfort_peak_interaction_nm": 15.0,
           "hard_stop_contacts_zero": true,
           "human_torque_rms_reduction_ci95": [
-            2.632599819721,
-            3.118099569875
+            2.63054932131,
+            3.115843556524
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
           "saturation_time_fraction_below_5_percent": true,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
-          "tracking_error_ratio_max": 0.622657055372
+          "tracking_error_ratio_max": 0.622547202995
         },
         "assist_policy": {
           "comfort_peak_interaction_nm": 15.0,
           "hard_stop_contacts_zero": true,
           "human_torque_rms_reduction_ci95": [
-            2.73433478178,
-            3.179310341095
+            2.732426577625,
+            3.177088138911
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
           "saturation_time_fraction_below_5_percent": null,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
-          "tracking_error_ratio_max": 0.581740550424
+          "tracking_error_ratio_max": 0.581740746495
         }
       },
       "flips": [],
@@ -77,29 +77,29 @@
           "comfort_peak_interaction_nm": 10.5,
           "hard_stop_contacts_zero": true,
           "human_torque_rms_reduction_ci95": [
-            4.099931683358,
-            4.819768712256
+            4.098295872604,
+            4.817969173633
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
           "saturation_time_fraction_below_5_percent": true,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
-          "tracking_error_ratio_max": 0.597015026104
+          "tracking_error_ratio_max": 0.596925457078
         },
         "assist_policy": {
           "comfort_peak_interaction_nm": 10.5,
           "hard_stop_contacts_zero": true,
           "human_torque_rms_reduction_ci95": [
-            4.131964445785,
-            4.821611393426
+            4.130640500984,
+            4.820061826509
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
           "saturation_time_fraction_below_5_percent": null,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
-          "tracking_error_ratio_max": 0.574556818193
+          "tracking_error_ratio_max": 0.574553667053
         }
       },
       "flips": [],
@@ -113,29 +113,29 @@
           "comfort_peak_interaction_nm": 15.0,
           "hard_stop_contacts_zero": true,
           "human_torque_rms_reduction_ci95": [
-            5.475910946483,
-            6.157893943039
+            5.47435826925,
+            6.156347004046
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
           "saturation_time_fraction_below_5_percent": true,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
-          "tracking_error_ratio_max": 0.60221226106
+          "tracking_error_ratio_max": 0.60180676323
         },
         "assist_policy": {
           "comfort_peak_interaction_nm": 15.0,
           "hard_stop_contacts_zero": true,
           "human_torque_rms_reduction_ci95": [
-            5.615238544247,
-            6.506555467141
+            5.614188574473,
+            6.50534838995
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
           "saturation_time_fraction_below_5_percent": null,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
-          "tracking_error_ratio_max": 0.568473417319
+          "tracking_error_ratio_max": 0.568469730729
         }
       },
       "flips": [],
@@ -149,29 +149,29 @@
           "comfort_peak_interaction_nm": 19.5,
           "hard_stop_contacts_zero": true,
           "human_torque_rms_reduction_ci95": [
-            4.099931683358,
-            4.819768712256
+            4.098295872604,
+            4.817969173633
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
           "saturation_time_fraction_below_5_percent": true,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
-          "tracking_error_ratio_max": 0.597015026104
+          "tracking_error_ratio_max": 0.596925457078
         },
         "assist_policy": {
           "comfort_peak_interaction_nm": 19.5,
           "hard_stop_contacts_zero": true,
           "human_torque_rms_reduction_ci95": [
-            4.131964445785,
-            4.821611393426
+            4.130640500984,
+            4.820061826509
           ],
           "human_torque_rms_reduction_ci_excludes_0": true,
           "peak_interaction_below_comfort": true,
           "saturation_time_fraction_below_5_percent": null,
           "saturation_time_fraction_mean": 0.0,
           "tracking_error_no_more_than_10_percent_worse": true,
-          "tracking_error_ratio_max": 0.574556818193
+          "tracking_error_ratio_max": 0.574553667053
         }
       },
       "flips": [],

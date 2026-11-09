@@ -1,6 +1,8 @@
 # Tuning record, 30-seed round
 
-No assist-controller gain was changed. Admittance mass, damping and stiffness, and the PID gains including the 24 Nm limit, are the values from the previous round. Positive-work reduction was not a tuning target. Admittance's smaller positive-work reduction is left as it is.
+No assist-controller gain was changed in any round on this branch after the 24 Nm limit was fixed. Admittance mass, damping and stiffness, and the PID gains, stay at those values. Positive-work reduction was not a tuning target. Admittance's smaller positive-work reduction is left as it is.
+
+The noise standard deviation is now drawn per seed inside the configured ranges. That is a required draw, not a gain change.
 
 Seeds 1000–1019 are not in the reported set 0–29. They were used only to check that the new draws do not hit a hard stop and that admittance saturation stays at 0 before the reported seeds were run. That probe had 0 hard-stop contacts and admittance saturation fraction 0. No parameter was changed after the probe.
 

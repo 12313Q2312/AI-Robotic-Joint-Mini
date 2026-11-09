@@ -12,12 +12,14 @@
     "intent_amplitude_fraction": 0.2,
     "intent_onset_jitter_s": 0.1,
     "strap_stiffness_fraction": 0.3,
-    "note": "Each seed draws these once. OFF, admittance and AssistPolicy reuse that draw. Sensor noise is a fixed level with an independent sequence per seed, not a second randomized std."
+    "note": "Each seed draws these once, including the sensor-noise standard deviations. OFF, admittance and AssistPolicy reuse that draw."
   },
   "sensor_noise": {
-    "angle_std_rad": 0.005,
-    "velocity_std_rad_s": 0.05,
-    "level_note": "Chosen simulation level, not a measured encoder: 0.005 rad is about 0.3 deg on the measured angle and 0.05 rad/s on the measured velocity. The same sequence is paired across conditions. The plant truth is not noised."
+    "angle_std_rad_min": 0.002,
+    "angle_std_rad_max": 0.01,
+    "velocity_std_rad_s_min": 0.02,
+    "velocity_std_rad_s_max": 0.1,
+    "level_note": "Each seed draws an angle-noise standard deviation uniformly from 0.002 to 0.01 rad and a velocity-noise standard deviation from 0.02 to 0.1 rad/s. The draw and the noise sequence are shared by OFF, admittance and AssistPolicy. This is not a measured encoder specification. The plant truth is not noised."
   },
   "command_transport_delay_steps": 2,
   "intent": {
