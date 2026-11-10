@@ -176,7 +176,13 @@ flowchart LR
 | `scripts/`、`tests/` | 生成、分析、验证入口和回归用例 |
 | `.github/` | CI、责任人、Issue/PR模板与依赖更新 |
 
-继续阅读 [工程证据](docs/ENGINEERING_EVIDENCE.md)、[当前状态](PROJECT_STATUS.md)、[贡献规范](CONTRIBUTING.md)、[许可状态](LICENSE.md) 和 [交付记录](docs/REPOSITORY_DELIVERY.md)。
+继续阅读 [工程证据](docs/ENGINEERING_EVIDENCE.md)、[当前状态](PROJECT_STATUS.md)、[贡献规范](CONTRIBUTING.md)、[许可证](LICENSE) 和 [交付记录](docs/REPOSITORY_DELIVERY.md)。
+
+## 许可证 / License
+
+本仓库中的项目代码、CAD、图纸和数据采用 [Apache License 2.0](LICENSE)。版权归张轩瑞（12313Q2312）所有，见 [NOTICE](NOTICE)。
+
+第三方材料不在此授权内，保留各自许可证。Webots 控制器 Makefile 里的 Cyberbotics Ltd. 版权声明与许可证头保持原样。已识别来源见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 ## 相关公开研究与阅读边界
 
