@@ -26,6 +26,7 @@ from knee_stair_l1.telemetry import (
     CSV_FIELDS,
     format_raw_json,
     format_summary_markdown,
+    attach_l2_scenarios,
     raw_document,
     require_boolean_criteria,
     run_study,
@@ -79,7 +80,7 @@ def _sample(trials) -> dict:
 
 def build_outputs(config):
     trials = run_study(config)
-    summary = summarize(trials, config)
+    summary = attach_l2_scenarios(summarize(trials, config), config)
     require_boolean_criteria(summary)
     committed = {
         "metrics_summary.json": json.dumps(summary, indent=2, sort_keys=True) + "\n",

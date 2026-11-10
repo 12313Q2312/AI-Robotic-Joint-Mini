@@ -63,3 +63,19 @@ The censored timing-error metric is not used.
 - comfort_peak_interaction_nm: 15.0
 - saturation_time_fraction_mean: 0.0
 - saturation_time_fraction_below_5_percent: True
+
+## L2 scenarios, primary reduction versus OFF
+
+| Scenario | Metric | admittance | AssistPolicy |
+|---|---|---:|---:|
+| nominal | human_torque_rms_nm | 4.458133 ± 0.963660 | 4.475351 ± 0.923152 |
+| nominal | human_positive_work_j | 1.792768 ± 0.446677 | 2.112837 ± 0.536153 |
+| sudden_change | human_torque_rms_nm | 4.804813 ± 0.978252 | 4.585967 ± 0.890740 |
+| sudden_change | human_positive_work_j | 0.900009 ± 0.221988 | 1.524012 ± 0.413920 |
+| mid_stop | human_torque_rms_nm | 4.708288 ± 0.991840 | 4.566895 ± 0.914963 |
+| mid_stop | human_positive_work_j | 1.027455 ± 0.246792 | 1.509268 ± 0.411425 |
+| reverse | human_torque_rms_nm | 4.870491 ± 0.976780 | 4.604886 ± 0.889790 |
+| reverse | human_positive_work_j | 1.177329 ± 0.273488 | 1.669021 ± 0.445846 |
+
+Configured default controller: assist_policy.
+Recommended: assist_policy.

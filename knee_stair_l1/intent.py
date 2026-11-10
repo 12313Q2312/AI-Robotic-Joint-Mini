@@ -51,12 +51,25 @@ def _smoothstep(phase: float) -> tuple[float, float]:
     return s, ds_dphase
 
 
+SCENARIOS = ("nominal", "sudden_change", "mid_stop", "reverse")
+
+
 class SyntheticStairIntent(IntentSource):
-    """Smooth flexion-to-less-flexion trajectory. Depth varies by seed and stays bounded."""
+    """Smooth flexion-to-less-flexion trajectory. Depth varies by seed and stays bounded.
+
+    Scenarios, all synthetic:
+    - nominal: one smooth extension
+    - sudden_change: at mid-move the reference jumps back to the start angle
+    - mid_stop: at mid-move the reference freezes and its velocity becomes 0
+    - reverse: after mid-move the reference moves back to the start angle
+    """
 
     source_label = "synthetic"
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, scenario: str = "nominal"):
+        if scenario not in SCENARIOS:
+            raise ValueError(f"unknown intent scenario: {scenario}")
+        self.scenario = scenario
         if config["intent"].get("source_label") != "synthetic":
             raise ValueError('SyntheticStairIntent requires intent.source_label "synthetic"')
         self._config = config
@@ -90,13 +103,15 @@ class SyntheticStairIntent(IntentSource):
             q_ref, qd_ref, phase, active = self.q_start, 0.0, 0.0, False
         elif time_s >= onset + duration:
             q_ref, qd_ref, phase, active = target, 0.0, 1.0, False
+            q_ref, qd_ref = self._apply_scenario(time_s, onset, duration, target, q_ref, qd_ref)
         else:
             phase = (time_s - onset) / duration
             shaped, slope = _smoothstep(phase)
             q_ref = self.q_start + (target - self.q_start) * shaped
             qd_ref = (target - self.q_start) * slope / duration
             active = True
-        if not math.isfinite(q_ref):
+            q_ref, qd_ref = self._apply_scenario(time_s, onset, duration, target, q_ref, qd_ref)
+        if not math.isfinite(q_ref) or not math.isfinite(qd_ref):
             raise ValueError("synthetic reference is not finite")
         return IntentSample(
             source_label="synthetic",
@@ -106,3 +121,17 @@ class SyntheticStairIntent(IntentSource):
             ascent_active=active,
             phase=phase,
         )
+
+    def _apply_scenario(self, time_s, onset, duration, target, q_ref, qd_ref):
+        midpoint = onset + 0.5 * duration
+        if self.scenario == "nominal" or time_s < midpoint:
+            return q_ref, qd_ref
+        q_mid = self.q_start + 0.5 * (target - self.q_start)
+        if self.scenario == "sudden_change":
+            return self.q_start, 0.0
+        if self.scenario == "mid_stop":
+            return q_mid, 0.0
+        remaining = max(duration * 0.5, 1e-9)
+        phase = min(1.0, (time_s - midpoint) / remaining)
+        shaped, slope = _smoothstep(phase)
+        return q_mid + (self.q_start - q_mid) * shaped, (self.q_start - q_mid) * slope / remaining

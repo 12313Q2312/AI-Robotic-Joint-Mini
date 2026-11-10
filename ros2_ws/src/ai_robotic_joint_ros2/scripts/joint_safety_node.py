@@ -16,7 +16,8 @@ from pathlib import Path
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float64, Float64MultiArray, String
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Float64, String
 
 
 def _ensure_layer1_path() -> None:
@@ -35,9 +36,11 @@ _ensure_layer1_path()
 from knee_stair_l1.config import load_config
 from knee_stair_l1.safe_publish import on_assist_command, republish_supervised
 from knee_stair_l1.safety import JointSafetyCore
+from knee_stair_l1.stamp import stamped_packet_time
 from knee_stair_l1.topics import (
     TOPIC_ASSIST_COMMAND_RAW,
     TOPIC_ASSIST_COMMAND_SAFE,
+    TOPIC_INTENT_SYNTHETIC,
     TOPIC_LEGACY_SAFE_TARGET,
     TOPIC_LEGACY_TARGET,
     TOPIC_PLANT_STATE,
@@ -60,7 +63,10 @@ class JointSafety(Node):
             Float64, TOPIC_ASSIST_COMMAND_RAW, self.on_assist, 10
         )
         self.plant_subscription = self.create_subscription(
-            Float64MultiArray, TOPIC_PLANT_STATE, self.on_plant, 10
+            JointState, TOPIC_PLANT_STATE, self.on_plant, 10
+        )
+        self.intent_subscription = self.create_subscription(
+            JointState, TOPIC_INTENT_SYNTHETIC, self.on_intent, 10
         )
         self.timer = self.create_timer(0.05, self.publish_supervised)
 
@@ -75,12 +81,26 @@ class JointSafety(Node):
         # on_assist_command catches ValueError from clamp_actuator_torque.
         self._emit(on_assist_command(self.core, self._config, self._now(), message.data))
 
-    def on_plant(self, message: Float64MultiArray) -> None:
-        values = list(message.data)
-        if len(values) < 2:
-            self.get_logger().warn("Rejected plant state with fewer than 2 fields")
+    def on_plant(self, message: JointState) -> None:
+        if len(message.position) < 1 or len(message.velocity) < 1:
+            self.get_logger().warn("Rejected plant state without position and velocity")
             return
-        self.core.observe_sensor(values[0], values[1], self._now())
+        now = self._now()
+        packet_time, reason = stamped_packet_time(
+            self.core, message, now, float(self._config["safety"]["stamp_future_tolerance_s"]),
+        )
+        if reason is not None:
+            self.get_logger().warn("Plant stamp is stale (%s); using source time, not receipt time", reason)
+        self.core.observe_sensor(message.position[0], message.velocity[0], now, packet_time=packet_time)
+
+    def on_intent(self, message: JointState) -> None:
+        now = self._now()
+        packet_time, reason = stamped_packet_time(
+            self.core, message, now, float(self._config["safety"]["stamp_future_tolerance_s"]),
+        )
+        if reason is not None:
+            self.get_logger().warn("Intent stamp is stale (%s); using source time, not receipt time", reason)
+        self.core.observe_intent(packet_time, now)
 
     def publish_supervised(self) -> None:
         self._emit(republish_supervised(self.core, self._config, self._now()))

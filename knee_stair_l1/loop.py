@@ -23,7 +23,7 @@ from knee_stair_l1.controller import CONDITIONS, AssistController, ControllerCom
 from knee_stair_l1.human import BoundedHumanKnee
 from knee_stair_l1.intent import IntentSample, IntentSource, SyntheticStairIntent
 from knee_stair_l1.plant import HardStopEvent, KneePlant
-from knee_stair_l1.randomization import SeedFactors, draw_factors, gaussian, jitter_rng, noise_rng
+from knee_stair_l1.randomization import SeedFactors, draw_factors, gaussian, noise_rng
 from knee_stair_l1.safety import LIMITED_ASSIST, NORMAL, JointSafetyCore
 from knee_stair_l1.topics import (
     TOPIC_ASSIST_COMMAND_RAW,
@@ -66,12 +66,13 @@ def run_trial(
     condition: str,
     intent: IntentSource | None = None,
     bus=None,
-    jitter_max_s: float | None = None,
+    signal_delay_s: float | None = None,
+    scenario: str = "nominal",
 ) -> TrialResult:
     if condition not in CONDITIONS:
         raise ValueError(f"unknown assist condition: {condition}")
     factors = draw_factors(seed, config)
-    source = intent if intent is not None else SyntheticStairIntent(config)
+    source = intent if intent is not None else SyntheticStairIntent(config, scenario=scenario)
     source.reset(seed)
     plant = KneePlant(config, factors)
     human = BoundedHumanKnee(config)
@@ -86,7 +87,6 @@ def run_trial(
     noise = noise_rng(seed)
     angle_std = factors.angle_noise_std_rad
     velocity_std = factors.velocity_noise_std_rad_s
-    delays = jitter_rng(seed)
     pending: deque[IntentSample] = deque(source.step(-(delay - index) * dt) for index in range(delay))
     signal_log: list[dict] = []
     steady_counts: dict[str, int] = {}
@@ -120,32 +120,25 @@ def run_trial(
             "qde": qde_meas,
             "human_extension": human_extension,
         })
-        if jitter_max_s is None:
+        if signal_delay_s is None:
             pending.append(fresh)
             used = pending.popleft()
-            safety.observe_sensor(qe_meas, qde_meas, time_s)
+            safety.observe_sensor(qe_meas, qde_meas, time_s, packet_time=time_s)
+            safety.observe_intent(used.time_s, time_s)
             raw = controller.command(used, qe_meas, qde_meas, human_extension, dt)
             safety.observe_command(raw.torque_extension_nm, time_s)
             intent_time_s = used.time_s
         else:
-            drawn = 0.0 if jitter_max_s <= 0.0 else delays.uniform(0.0, float(jitter_max_s))
-            target_time = time_s - drawn
-            released = None
-            for sample in signal_log:
-                if sample["t"] <= target_time + 1e-12:
-                    released = sample
-                else:
-                    break
+            delay_steps = int(round(float(signal_delay_s) / dt))
+            target_index = index - delay_steps
+            released = signal_log[target_index] if target_index >= 0 else None
             if released is None:
-                # Nothing has aged into the delay window. Do not refresh the clocks.
                 used = fresh
                 raw = ControllerCommand(0.0, None, None, False, False, fresh.time_s, fresh.source_label)
                 intent_time_s = fresh.time_s
             else:
-                # Receipt time is now. Payload is the delayed intent and sensor.
-                # Freshness is stamped on receipt, so a steady stream of late
-                # packets does not by itself look stale to this supervisor.
-                safety.observe_sensor(released["qe"], released["qde"], time_s)
+                safety.observe_sensor(released["qe"], released["qde"], time_s, packet_time=released["t"])
+                safety.observe_intent(released["intent"].time_s, time_s)
                 used = released["intent"]
                 raw = controller.command(
                     used, released["qe"], released["qde"], released["human_extension"], dt,
@@ -179,7 +172,7 @@ def run_trial(
         if decision.state != NORMAL:
             non_normal_steps += 1
         all_counts[decision.state] = all_counts.get(decision.state, 0) + 1
-        if jitter_max_s is None or time_s + 1e-12 >= float(jitter_max_s):
+        if signal_delay_s is None or time_s + 1e-12 >= float(signal_delay_s):
             steady_counts[decision.state] = steady_counts.get(decision.state, 0) + 1
         max_command = max(max_command, abs(plant.last_motor_extension_nm))
         latencies.append(latency_s)
