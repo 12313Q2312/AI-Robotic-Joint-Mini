@@ -23,7 +23,10 @@ TOPIC_ASSIST_COMMAND_RAW = "/knee_stair/assist_command_raw"
 # Float64, extension-positive newton metres, before the supervisor.
 
 TOPIC_ASSIST_COMMAND_SAFE = "/knee_stair/assist_command_safe"
-# Float64, the only exo torque the plant may apply.
+# Float64 on the ROS topic: torque after clamp_actuator_torque, the value the
+# knee-stair plant may apply. The in-process payload also carries
+# supervisor_command_nm, which can still be the 40 Nm plausibility clamp.
+# Legacy C++ controllers do not publish this topic and do not use this clamp.
 
 TOPIC_PLANT_STATE = "/knee_stair/plant_state"
 # Float64MultiArray: flexion_rad, flexion_velocity_rad_s, interaction_extension_nm

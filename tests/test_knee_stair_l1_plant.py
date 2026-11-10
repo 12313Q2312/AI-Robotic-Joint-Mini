@@ -40,14 +40,15 @@ class KneePlantTests(unittest.TestCase):
         )
         self.assertNotEqual(plant.strap_torque_flexion_nm, plant.last_motor_extension_nm)
 
-    def test_motor_command_above_the_supervisor_limit_is_rejected(self):
+    def test_motor_command_above_the_actuator_limit_is_clamped(self):
         config = load_config()
         plant = KneePlant(config)
-        limit = config["plant"]["boundary_abs_limit_nm"]
-        plant.advance(0.0, limit, 0.005, 0.0)
+        limit = plant.actuator_limit
+        plant.advance(0.0, 80.0, 0.005, 0.0)
         self.assertAlmostEqual(plant.last_motor_extension_nm, limit)
-        with self.assertRaises(BoundaryError):
-            plant.advance(0.0, limit + 0.01, 0.005, 0.01)
+        self.assertLessEqual(abs(plant.last_motor_extension_nm), 24.0)
+        plant.advance(0.0, -80.0, 0.005, 0.01)
+        self.assertAlmostEqual(plant.last_motor_extension_nm, -limit)
         with self.assertRaises(BoundaryError):
             plant.advance(0.0, float("nan"), 0.005, 0.02)
 

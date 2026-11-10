@@ -61,8 +61,20 @@ def validate_config(data: dict) -> None:
         raise ValueError('intent.source_label must be "synthetic" for v1')
     safety = data["safety"]
     plant = data["plant"]
-    if float(plant["boundary_abs_limit_nm"]) != float(safety["command_limit_nm"]):
-        raise ValueError("plant boundary limit and supervisor command limit must match")
+    if "actuator_torque_limit_nm" not in data:
+        raise ValueError("missing config key: actuator_torque_limit_nm")
+    actuator_limit = float(data["actuator_torque_limit_nm"])
+    if not 0.0 < actuator_limit <= 24.0:
+        raise ValueError("actuator_torque_limit_nm must satisfy 0 < limit <= 24")
+    # The plant boundary is the actuator hard limit. The supervisor's
+    # command_limit_nm stays a wider plausibility check and is not required
+    # to equal this boundary.
+    if float(plant["boundary_abs_limit_nm"]) != actuator_limit:
+        raise ValueError("plant boundary_abs_limit_nm must equal actuator_torque_limit_nm")
+    if float(safety["command_limit_nm"]) < actuator_limit:
+        raise ValueError("supervisor command_limit_nm is a plausibility check and must be at least the actuator limit")
+    if float(data["assist_policy"]["limit_nm"]) > actuator_limit:
+        raise ValueError("assist_policy.limit_nm must be <= actuator_torque_limit_nm")
     if float(plant["initial_flexion_rad"]) != float(intent["q_start_rad"]):
         raise ValueError("plant initial flexion and intent q_start_rad must match")
     if float(data["pid"]["torque_limit_nm"]) != 24.0:

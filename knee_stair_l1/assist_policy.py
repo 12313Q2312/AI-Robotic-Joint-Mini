@@ -1,8 +1,11 @@
 """Proportional-share assist policy.
 
 Copied from PR #3 (branch demo/cooperative-assistance-v0.1,
-mobility_demo/include/AssistPolicy.hpp). The gain, saturation clamp and
-slew-rate limit follow that header. This file does not modify PR #3.
+mobility_demo/include/AssistPolicy.hpp). The gain and slew follow that header.
+The knee config passes an internal cap of 24 Nm instead of the header's 80 Nm
+so the policy does not aim above the actuator. This cap is not the plant
+boundary; clamp_actuator_torque still runs on the delivered command.
+This file does not modify PR #3.
 """
 
 from __future__ import annotations

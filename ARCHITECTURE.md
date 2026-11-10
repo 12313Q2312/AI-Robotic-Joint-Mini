@@ -28,9 +28,9 @@ ROS 2 包位于 `ros2_ws/src/ai_robotic_joint_ros2`；头文件 `ManualReference
 | `/knee_stair/intent_synthetic` | 意图源 → 控制器。v1 的 `source_label` 为 synthetic |
 | `/knee_stair/desired_motion` | 导纳期望屈膝运动。关闭和 AssistPolicy 不生成该运动 |
 | `/knee_stair/assist_command_raw` | 控制器提案 |
-| `/knee_stair/assist_command_safe` | 监督器发出的唯一外骨骼力矩 |
+| `/knee_stair/assist_command_safe` | `knee_stair_l1` 与 `joint_safety_node` 在执行器钳位之后发出的力矩。历史 C++ 控制器不使用这个话题 |
 | `/knee_stair/plant_state` | 植物的屈膝角、角速度和边界力矩 |
 | `/joint/safety_state` | 同一个监督器的状态 |
 | `/joint/target_angle` → `/joint/safe_target_angle` | 原角度口，数字行为保持 |
 
-命令归属：意图源给出合成期望轨迹，有界人体跟踪器产生人体力矩，控制器只提案，`JointSafetyCore` 是外骨骼电机力矩的唯一出口。植物把人体力矩、重力矩、绑带约束和这份电机力矩分开积分。交互力矩是绑带力矩。`E_STOP` 时电机力矩为 0，外骨骼只剩被动阻尼，`/joint/safe_target_angle` 沿用原合同。`/joint/safety_state` 只发布。故障时状态按 `E_STOP`、`DAMPING_ONLY`、`LIMITED_ASSIST`、`NORMAL` 的优先顺序取更严格者。
+命令归属：意图源给出合成期望轨迹，有界人体跟踪器产生人体力矩，控制器只提案，`JointSafetyCore` 做合理性检查。`knee_stair_l1` 和 `joint_safety_node` 再经 `clamp_actuator_torque` 把力矩送进植物或安全命令话题。这不是全仓库电机的共同出口。植物把人体力矩、重力矩、绑带约束和这份电机力矩分开积分。交互力矩是绑带力矩。`E_STOP` 时电机力矩为 0，外骨骼只剩被动阻尼，`/joint/safe_target_angle` 沿用原合同。`/joint/safety_state` 只发布。故障时状态按 `E_STOP`、`DAMPING_ONLY`、`LIMITED_ASSIST`、`NORMAL` 的优先顺序取更严格者。
