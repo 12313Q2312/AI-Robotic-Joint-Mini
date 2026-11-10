@@ -2,7 +2,9 @@
 
 ## 2026-11-10 — 执行器力矩硬上限 24 Nm
 
-- 新增 `actuator_torque_limit_nm = 24`。进入植物或电机话题的力矩只经过 `clamp_actuator_torque`。
+- 新增 `actuator_torque_limit_nm = 24`。`knee_stair_l1` 闭环和 `joint_safety_node` 在进入植物或 `/knee_stair/assist_command_safe` 之前调用 `clamp_actuator_torque`。历史 C++ 控制器不在这条路径上。
+- 该话题和遥测记录钳位后的力矩。`supervisor_command_nm` 单独保留监督器输出。NaN 和 inf 让钳位函数抛出 `ValueError`；回调接住后发布 0 并进入 `E_STOP`。函数不把非有限值变成 0。
+- 历史 C++ 控制器的后续统一记在 https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11 ，不阻塞这次合并。
 - 植物边界改为 24 Nm，不再要求等于监督器的 40 Nm。40 Nm 仍是命令合理性检查。
 - AssistPolicy 内部上限从抄来的 80 Nm 改为 24 Nm。增益和变化率未改。PID 的 24 Nm 未改。
 - Webots 单膝世界的 `maxTorque` 改为 24。

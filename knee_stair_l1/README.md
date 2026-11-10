@@ -12,7 +12,7 @@
 | 有界人体力矩 | `human.py` | 跟踪上述轨迹，并被 `human.torque_limit_nm` 截断 |
 | 助力 | `admittance.py`、`torque_pid.py`、`assist_policy.py`、`controller.py` | 期望运动和 `/knee_stair/assist_command_raw`。PID 上限保持 24 Nm |
 | 安全监督 | `safety.py` | 唯一发出监督后命令的对象，并发布只读的 `/joint/safety_state`。40 Nm 是命令合理性检查，不是力矩上限 |
-| 执行器上限 | `actuator.py` | `clamp_actuator_torque`。进入植物或电机话题前的唯一力矩钳位，默认 24 Nm |
+| 执行器上限 | `actuator.py` | `clamp_actuator_torque`。只用于 `knee_stair_l1` 和 `joint_safety_node`，默认 24 Nm。历史 C++ 控制器不调用 |
 | 植物 | `plant.py` | 人体小腿、外骨骼连杆、重力矩和弹簧阻尼绑带。边界等于执行器上限 |
 | 遥测 | `telemetry.py`、`../scripts/run_knee_stair_l1_metrics.py` | 仓库里是汇总和小样本。逐步原始 JSON 只在 CI artifact `knee-stair-l1-metrics-raw` |
 
@@ -34,7 +34,11 @@
 
 ## 力矩上限
 
-执行器硬上限是 `actuator_torque_limit_nm`，必须满足 `0 < 上限 <= 24`。关闭、导纳、AssistPolicy 和 ROS 节点发出的力矩，在进入植物或电机话题之前都经过 `clamp_actuator_torque`。植物的 `boundary_abs_limit_nm` 与这个上限相等。它以前被要求等于监督器的 `command_limit_nm`；那条等式已经取消。
+执行器硬上限是 `actuator_torque_limit_nm`，必须满足 `0 < 上限 <= 24`。这条钳位只覆盖 `knee_stair_l1` 的关闭、导纳、AssistPolicy 闭环，以及 `joint_safety_node`。历史 C++ 控制器不调用它，跟踪问题是 https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11 。`/knee_stair/assist_command_safe` 和遥测里的 `applied_torque_nm` 都是钳位之后的力矩。`supervisor_command_nm` 仍可以是监督器的 40 Nm 合理性输出。
+
+`clamp_actuator_torque` 遇到 NaN 或 inf 会抛出 `ValueError`，不会返回 0。`on_assist_command` 接住这个异常，锁存 `E_STOP`，节点再发布 0。
+
+植物的 `boundary_abs_limit_nm` 与执行器上限相等。它以前被要求等于监督器的 `command_limit_nm`；那条等式已经取消。
 
 `command_limit_nm` 仍是 40 Nm。有限命令超出 ±40 Nm 时进入 `LIMITED_ASSIST`。这是命令合理性检查，不是执行器力矩上限。监督器在这个状态下仍可输出到 40 Nm，随后由执行器钳位收到 24 Nm。
 

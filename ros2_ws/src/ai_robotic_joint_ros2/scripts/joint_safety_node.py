@@ -3,10 +3,13 @@
 
 The numeric legacy map is unchanged: non-finite targets are ignored, finite
 targets are clamped to the configured angle window, and a command older than
-the configured timeout publishes 0 rad. Knee torque is published only after
-JointSafetyCore has evaluated it. On E_STOP the assist torque is 0 and the
-state topic reports the latch; the safe target angle is not rewritten.
-/joint/safety_state is published for readers and is not a command input.
+the configured timeout publishes 0 rad. /knee_stair/assist_command_safe carries
+the torque after clamp_actuator_torque, the same value the headless plant
+applies. That clamp raises ValueError on NaN or inf and does not return 0.
+on_assist_command catches the exception, latches E_STOP, and this node
+publishes 0. The safe target angle is not rewritten. /joint/safety_state is
+published for readers and is not a command input. Legacy C++ controllers do
+not use this clamp.
 """
 import sys
 from pathlib import Path
@@ -29,8 +32,8 @@ def _ensure_layer1_path() -> None:
 
 _ensure_layer1_path()
 
-from knee_stair_l1.actuator import torque_to_motor
 from knee_stair_l1.config import load_config
+from knee_stair_l1.safe_publish import on_assist_command, republish_supervised
 from knee_stair_l1.safety import JointSafetyCore
 from knee_stair_l1.topics import (
     TOPIC_ASSIST_COMMAND_RAW,
@@ -69,7 +72,8 @@ class JointSafety(Node):
             self.get_logger().warn("Rejected non-finite target angle")
 
     def on_assist(self, message: Float64) -> None:
-        self.core.observe_command(message.data, self._now())
+        # on_assist_command catches ValueError from clamp_actuator_torque.
+        self._emit(on_assist_command(self.core, self._config, self._now(), message.data))
 
     def on_plant(self, message: Float64MultiArray) -> None:
         values = list(message.data)
@@ -79,23 +83,23 @@ class JointSafety(Node):
         self.core.observe_sensor(values[0], values[1], self._now())
 
     def publish_supervised(self) -> None:
-        decision = self.core.evaluate(self._now())
+        self._emit(republish_supervised(self.core, self._config, self._now()))
+
+    def _emit(self, outcome) -> None:
         angle = Float64()
-        angle.data = decision.legacy_safe_target_rad
+        angle.data = outcome.legacy_safe_target_rad
         self.publisher.publish(angle)
         state = String()
-        state.data = decision.state
+        state.data = outcome.state
         self.state_publisher.publish(state)
         torque = Float64()
-        torque.data = torque_to_motor(
-            decision.safe_extension_torque_nm,
-            self._config,
-            passive_damping=decision.passive_damping,
-        )
+        torque.data = outcome.applied_torque_nm
         self.safe_torque_publisher.publish(torque)
-        if decision.state != self._previous_state:
-            self.get_logger().info("safety state %s reasons=%s", decision.state, ",".join(decision.reasons))
-            self._previous_state = decision.state
+        if outcome.state != self._previous_state:
+            self.get_logger().info(
+                "safety state %s reasons=%s", outcome.state, ",".join(outcome.reasons),
+            )
+            self._previous_state = outcome.state
 
 
 def main():

@@ -184,7 +184,9 @@ def run_trial(
         max_command = max(max_command, abs(plant.last_motor_extension_nm))
         latencies.append(latency_s)
         if bus is not None:
-            _publish(bus, fresh, raw, decision, plant, time_s, command_time_s, used.time_s)
+            _publish(
+                bus, fresh, raw, decision, plant, time_s, command_time_s, used.time_s, applied_torque,
+            )
 
     return TrialResult(
         seed=int(seed),
@@ -218,7 +220,7 @@ def _require_labeled_sample(sample: IntentSample) -> None:
         raise ValueError("intent sample is missing source_label")
 
 
-def _publish(bus, sample, raw, decision, plant, time_s, command_time_s, intent_time_s) -> None:
+def _publish(bus, sample, raw, decision, plant, time_s, command_time_s, intent_time_s, applied_torque) -> None:
     import json
 
     bus.publish(
@@ -245,7 +247,11 @@ def _publish(bus, sample, raw, decision, plant, time_s, command_time_s, intent_t
     bus.publish(TOPIC_ASSIST_COMMAND_RAW, raw.torque_extension_nm)
     bus.publish(
         TOPIC_ASSIST_COMMAND_SAFE,
-        {"torque_extension_nm": decision.safe_extension_torque_nm, "command_time_s": command_time_s},
+        {
+            "torque_extension_nm": applied_torque,
+            "supervisor_command_nm": decision.safe_extension_torque_nm,
+            "command_time_s": command_time_s,
+        },
     )
     bus.publish(
         TOPIC_PLANT_STATE,
@@ -266,7 +272,9 @@ def _publish(bus, sample, raw, decision, plant, time_s, command_time_s, intent_t
                 "command_time_s": command_time_s,
                 "source_label": sample.source_label,
                 "state": decision.state,
-                "safe_extension_torque_nm": decision.safe_extension_torque_nm,
+                "applied_torque_nm": applied_torque,
+                "safe_extension_torque_nm": applied_torque,
+                "supervisor_command_nm": decision.safe_extension_torque_nm,
                 "passive_damping": decision.passive_damping,
             },
             sort_keys=True,
