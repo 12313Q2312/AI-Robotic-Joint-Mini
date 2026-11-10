@@ -8,4 +8,4 @@ Seeds 1000–1019 are not in the reported set 0–29. They were used only to che
 
 The flexion stop is 2.2 rad. The previous 1.55 rad stop had been placed just above an earlier non-randomized trajectory. The wider stop is a model-range assumption, about 126 degrees, so a heavier drawn body and a higher step are not clipped by that old wall. It was set before the reported 0–29 run.
 
-A separate probe on seeds 1000–1005 extended the command-hold delay to 1.5 s. Human-torque RMS reduction stayed positive and the supervisor stayed in NORMAL. No controller change followed from that probe. The committed sweep itself stops at 50 ms, which is the requested range.
+A separate probe on seeds 1000–1005 extended the command-hold delay to 1.5 s. Human-torque RMS reduction stayed positive and the supervisor stayed in NORMAL. No controller change followed from that probe. The committed sweep is the 0–50 ms grid plus 100, 200 and 500 ms. The 1.5 s probe is not one of those committed points.

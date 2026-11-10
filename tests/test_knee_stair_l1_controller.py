@@ -1,13 +1,15 @@
 """Admittance, the existing PID recurrence, and the copied AssistPolicy."""
 
+import json
 import pathlib
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 from knee_stair_l1.assist_policy import AssistPolicy
-from knee_stair_l1.config import load_config
+from knee_stair_l1.config import effective_torque_limit_nm, load_config
 from knee_stair_l1.controller import AssistController
 from knee_stair_l1.intent import IntentSample
 from knee_stair_l1.torque_pid import TorquePid
@@ -91,3 +93,28 @@ class AssistControllerTests(unittest.TestCase):
         self.assertLess(admit_command.desired_flexion_rad, 1.0)
         self.assertGreater(admit_command.torque_extension_nm, 0.0)
         self.assertEqual(admit_command.source_label, "unit-test-double")
+
+
+class EffectiveTorqueLimitTests(unittest.TestCase):
+    def test_shipped_config_minimum_of_the_three_caps_is_24_nm(self):
+        config = load_config()
+        self.assertEqual(config["pid"]["torque_limit_nm"], 24.0)
+        self.assertEqual(config["safety"]["command_limit_nm"], 40.0)
+        self.assertEqual(config["assist_policy"]["limit_nm"], 80.0)
+        self.assertEqual(config["plant"]["boundary_abs_limit_nm"], 40.0)
+        self.assertEqual(effective_torque_limit_nm(config), 24.0)
+
+    def test_config_whose_effective_limit_exceeds_24_nm_is_rejected(self):
+        config = load_config()
+        config.pop("_config_path", None)
+        config["pid"]["torque_limit_nm"] = 30.0
+        config["safety"]["command_limit_nm"] = 50.0
+        config["plant"]["boundary_abs_limit_nm"] = 50.0
+        config["assist_policy"]["limit_nm"] = 90.0
+        self.assertGreater(effective_torque_limit_nm(config), 24.0)
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "over_limit.json"
+            path.write_text(json.dumps(config), encoding="utf-8")
+            with self.assertRaises(ValueError) as caught:
+                load_config(path)
+        self.assertIn("must not exceed 24", str(caught.exception))
