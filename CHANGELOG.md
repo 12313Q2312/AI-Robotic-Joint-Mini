@@ -1,10 +1,21 @@
 # 变更记录
 
-## 2026-11-10 — 改正 L1 文档并守住 24 Nm 有效上限
+## 2026-11-10 — 文档与 PR #10 的执行器硬上限对齐
 
-- `knee_stair_l1` 说明改为 30 个种子、df=29，传感噪声水平按种子抽取，重力矩写上台阶高度缩放。
-- 写明力矩限幅分层：PID 24 Nm、监督器 40 Nm、AssistPolicy 80 Nm。三层最小值是 24 Nm；AssistPolicy 到植物的命令仍受监督器 40 Nm 约束。数值未改。
-- 配置加载拒绝三层最小值超过 24 Nm 的配置。控制增益和指标定义未改。
+- 力矩分层表改为最终硬上限 `clamp_actuator_torque`（`actuator_torque_limit_nm` = 24）。它覆盖 `knee_stair_l1` 的关闭、导纳、AssistPolicy，以及 `joint_safety_node`。
+- 监督器 40 Nm 只写成合理性检查。AssistPolicy 内 cap 和 Webots `maxTorque` 写成 24 Nm。NaN 和 inf 写成 `ValueError`，由 `safe_publish` 发布 0 并锁存 `E_STOP`。
+- PR #10 之前“AssistPolicy 到植物不超过 40 Nm”的说法标成合并前历史。历史 C++ 控制器仍不走这条钳位，见 https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11 。
+- 30 个种子的 95% 区间写明 df=n−1，因此 df=29。传感噪声水平按种子抽取。重力矩写上台阶高度缩放。配置加载继续使用 main 已有的 `actuator_torque_limit_nm` 检查，不另加一套断言。
+
+## 2026-11-10 — 执行器力矩硬上限 24 Nm
+
+- 新增 `actuator_torque_limit_nm = 24`。`knee_stair_l1` 闭环和 `joint_safety_node` 在进入植物或 `/knee_stair/assist_command_safe` 之前调用 `clamp_actuator_torque`。历史 C++ 控制器不在这条路径上。
+- 该话题和遥测记录钳位后的力矩。`supervisor_command_nm` 单独保留监督器输出。NaN 和 inf 让钳位函数抛出 `ValueError`；回调接住后发布 0 并进入 `E_STOP`。函数不把非有限值变成 0。
+- 历史 C++ 控制器的后续统一记在 https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11 ，不阻塞这次合并。
+- 植物边界改为 24 Nm，不再要求等于监督器的 40 Nm。40 Nm 仍是命令合理性检查。
+- AssistPolicy 内部上限从抄来的 80 Nm 改为 24 Nm。增益和变化率未改。PID 的 24 Nm 未改。
+- Webots 单膝世界的 `maxTorque` 改为 24。
+- 95% t 临界值按自由度计算，不再使用只含 df=11 和 df=29 的表。
 
 ## 2026-11-09 — 噪声幅度按种子抽取，延迟改到监督器之前
 

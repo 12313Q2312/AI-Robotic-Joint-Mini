@@ -10,10 +10,11 @@
 - 历史仿真环境曾出现启动故障，本轮未重新启动核查，不承诺一键演示或故障已修复。
 - `knee_stair_l1` 是单侧膝关节的离线仿真闭环。30 个种子各自抽取体重、台阶高度、意图幅度、意图起始时间、绑带刚度和传感噪声水平（角度标准差与角速度标准差）。噪声序列按种子配对。意图仍是合成轨迹，人体力矩仍是有界跟踪器，不是表面肌电或真人测量。它不提供防跌倒、真人减负或机械安全结论。
 - 汇总 JSON 和小样本在仓库里。逐步原始 JSON 只作为 CI artifact `knee-stair-l1-metrics-raw` 上传，不进 git。
-- 上楼负载在有种子因子时先按 `plant.py` 第 59–61 行缩放力臂：`reference_height = float(load["reference_step_height_m"])`，`self.moment_arm *= float(factors.step_height_m) / reference_height`。屈曲力矩是 `self.weight_share * self.body_mass * self.gravity * self.moment_arm * math.sin(flexion_rad)`。70 kg、份额和名义力臂写在配置里，是理论假设，不是测得的地面反力或老人数据。没有因子时不乘台阶高度。
+- 上楼负载在有种子因子时先按 `plant.py` 第 66–68 行缩放力臂：`reference_height = float(load["reference_step_height_m"])`，`self.moment_arm *= float(factors.step_height_m) / reference_height`。屈曲力矩是 `self.weight_share * self.body_mass * self.gravity * self.moment_arm * math.sin(flexion_rad)`（第 92 行）。70 kg、份额和名义力臂写在配置里，是理论假设，不是测得的地面反力或老人数据。没有因子时不乘台阶高度。
 - 人机之间是弹簧阻尼绑带。交互力矩是这条约束的力矩，不是电机输出。绑带不是跌倒缓冲机构。15 Nm 上限是 0.08 m 力臂乘 187.5 N 的设计假设，不是舒适性试验。
 - 髋关节固定，只有一个屈伸自由度。硬限位接触记为异常。一次仿真里接触数为 0，只说明这组参数没有顶到限位。
-- 导纳内环力矩上限保持 24 Nm。这是安全参数，不靠放宽上限来降低饱和时间。导纳的正功降幅小于 AssistPolicy，这是结果，不是调参目标。
+- `knee_stair_l1` 的关闭、导纳、AssistPolicy 和 `joint_safety_node` 在进入植物或 `/knee_stair/assist_command_safe` 之前调用 `clamp_actuator_torque`。`actuator_torque_limit_nm` 为 24 Nm。监督器 40 Nm 只让有限越界命令进入 `LIMITED_ASSIST`。NaN 和 inf 让钳位函数抛出 `ValueError`，`safe_publish` 发布 0 并锁存 `E_STOP`。历史 C++ 控制器不调用这个函数，见 https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11 。PR #10 合并前，AssistPolicy 内 cap 是 80 Nm、植物边界是 40 Nm；那是当时的历史。当前内 cap、植物边界和 Webots `maxTorque` 都是 24 Nm。
+- 导纳内环 PID 抗饱和上限保持 24 Nm。这是安全参数，不靠放宽上限来降低饱和时间。导纳的正功降幅小于 AssistPolicy，这是结果，不是调参目标。
 - 全部结果都只是仿真。意图是合成的，CI 不运行 ROS 2 或 Webots。
 - 导纳在正功降幅上差于 AssistPolicy 基线，在力矩 RMS 上与它相当。
 - 即使 1.5 s 的延迟下助力仍然有效，说明合成意图太可预测，助力接近重力补偿。L2 必须加入意图突变和动作中途停止。
