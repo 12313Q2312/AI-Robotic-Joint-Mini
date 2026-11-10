@@ -32,6 +32,7 @@ import statistics
 
 from knee_stair_l1.config import load_config
 from knee_stair_l1.loop import TrialResult, run_trial
+from knee_stair_l1.student_t import student_t_crit_95
 
 PRIMARY = ("human_torque_rms_nm", "human_positive_work_j")
 SECONDARY = (
@@ -49,7 +50,6 @@ BOOLEAN_CRITERIA = (
     "peak_interaction_below_comfort",
     "saturation_time_fraction_below_5_percent",
 )
-T_CRIT_95 = {11: 2.200985160082949, 29: 2.045229642132703}
 
 
 def run_study(config: dict | None = None) -> list[TrialResult]:
@@ -79,10 +79,7 @@ def percentile(values: list[float], percent: float) -> float:
 
 
 def _t_crit(n: int) -> float:
-    df = n - 1
-    if df not in T_CRIT_95:
-        raise ValueError(f"no 95% t critical value tabulated for df={df}")
-    return T_CRIT_95[df]
+    return student_t_crit_95(n - 1)
 
 
 def _stats(values: list[float]) -> dict:
@@ -174,6 +171,8 @@ def summarize(trials: list[TrialResult], config: dict) -> dict:
     if not _primary_std_positive(absolute):
         raise AssertionError("primary metrics must have std > 0 across seeds")
     require_boolean_criteria({"criteria": criteria})
+    sample_size = len(config["seeds"])
+    t_crit = student_t_crit_95(sample_size - 1)
     return {
         "evidence_label": "experimental",
         "simulation_only": True,
@@ -184,7 +183,12 @@ def summarize(trials: list[TrialResult], config: dict) -> dict:
         "seeds": list(config["seeds"]),
         "conditions": list(CONDITIONS),
         "std_ddof": 1,
-        "ci_method": "Student t, df=n-1. For 30 seeds df=29 and t_0.975=2.045229642132703. mean ± t*std/sqrt(n)",
+        "ci_method": (
+            f"Student t computed for df=n-1. n={sample_size}, df={sample_size - 1}, "
+            f"t_0.975={t_crit:.12f}. mean ± t*std/sqrt(n)"
+        ),
+        "actuator_torque_limit_nm": config["actuator_torque_limit_nm"],
+        "supervisor_command_plausibility_nm": config["safety"]["command_limit_nm"],
         "latency_definition": "simulation loop latency, not real-system latency: command_timestamp_s - intent_timestamp_s of the sample consumed by that command",
         "percentile_method": "linear interpolation, rank (n-1)*p/100",
         "interaction_definition": "peak absolute spring-damper strap torque on the human knee",

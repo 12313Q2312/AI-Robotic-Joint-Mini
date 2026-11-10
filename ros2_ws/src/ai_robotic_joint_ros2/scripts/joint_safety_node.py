@@ -29,6 +29,7 @@ def _ensure_layer1_path() -> None:
 
 _ensure_layer1_path()
 
+from knee_stair_l1.actuator import torque_to_motor
 from knee_stair_l1.config import load_config
 from knee_stair_l1.safety import JointSafetyCore
 from knee_stair_l1.topics import (
@@ -44,7 +45,8 @@ from knee_stair_l1.topics import (
 class JointSafety(Node):
     def __init__(self):
         super().__init__("joint_safety")
-        self.core = JointSafetyCore(load_config(), legacy_enabled=True)
+        self._config = load_config()
+        self.core = JointSafetyCore(self._config, legacy_enabled=True)
         self.core.reset(self._now())
         self._previous_state = None
         self.publisher = self.create_publisher(Float64, TOPIC_LEGACY_SAFE_TARGET, 10)
@@ -85,7 +87,11 @@ class JointSafety(Node):
         state.data = decision.state
         self.state_publisher.publish(state)
         torque = Float64()
-        torque.data = decision.safe_extension_torque_nm
+        torque.data = torque_to_motor(
+            decision.safe_extension_torque_nm,
+            self._config,
+            passive_damping=decision.passive_damping,
+        )
         self.safe_torque_publisher.publish(torque)
         if decision.state != self._previous_state:
             self.get_logger().info("safety state %s reasons=%s", decision.state, ",".join(decision.reasons))

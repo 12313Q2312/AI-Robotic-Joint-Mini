@@ -7,7 +7,10 @@ The legacy angle port of joint_safety_node and the knee torque port share this
 object. There is not a second supervisor beside it.
 
 Fault mapping used by the injection suite:
-- finite command outside command_limit_nm -> LIMITED_ASSIST, torque clamped
+- finite command outside command_limit_nm -> LIMITED_ASSIST.
+  command_limit_nm is a plausibility check, not the actuator torque limit.
+  The supervisor may still emit up to that check. clamp_actuator_torque is
+  what limits the torque that reaches the plant or the motor topic.
 - sensor dropout (last finite sample older than sensor_dropout_s) -> DAMPING_ONLY
 - communication timeout (last finite command older than command_timeout_s) -> DAMPING_ONLY
 - non-finite sensor or command -> E_STOP, assist torque 0, latched until reset()
@@ -165,6 +168,7 @@ class JointSafetyCore:
             viscous = self.damping * self.last_qd
             return min(self.damping_limit_nm, max(-self.damping_limit_nm, viscous))
         if state == LIMITED_ASSIST or clamped:
+            # Plausibility clamp only. The actuator clamp is clamp_actuator_torque.
             return min(self.command_limit_nm, max(-self.command_limit_nm, self.last_command))
         return self.last_command
 
