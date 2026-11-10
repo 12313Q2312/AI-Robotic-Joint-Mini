@@ -65,6 +65,12 @@ install(PROGRAMS scripts/study_panel_server.py DESTINATION lib/${PROJECT_NAME})
 install(FILES scripts/study_panel_core.py DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY study_web DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY web DESTINATION share/${PROJECT_NAME})
+# Source checkout keeps knee_stair_l1 at the repo root. An install places it
+# next to this node's executable so the merged supervisor can import it.
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../knee_stair_l1
+  DESTINATION lib/${PROJECT_NAME}
+  PATTERN "__pycache__" EXCLUDE
+  PATTERN "webots" EXCLUDE)
 ament_export_dependencies(rosidl_default_runtime)
 
 if(BUILD_TESTING)
