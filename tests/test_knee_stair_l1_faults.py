@@ -80,5 +80,6 @@ class FaultInjectionTests(unittest.TestCase):
         config = load_config()
         config["duration_s"] = 0.2
         trial = run_trial(config, seed=0, condition="assist_policy")
-        self.assertLessEqual(trial.max_abs_motor_command_nm, config["safety"]["command_limit_nm"] + 1e-9)
+        self.assertLessEqual(trial.max_abs_motor_command_nm, config["actuator_torque_limit_nm"] + 1e-9)
+        self.assertLessEqual(trial.max_abs_motor_command_nm, 24.0)
         self.assertEqual(trial.source_label, "synthetic")

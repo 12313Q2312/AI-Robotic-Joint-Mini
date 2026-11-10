@@ -1,12 +1,13 @@
-"""Closed loop. Every exo motor torque is a JointSafetyCore output.
+"""Closed loop. Supervisor output is not yet motor torque.
 
 Command ownership
 - IntentSource emits a synthetic desired trajectory. It does not move the plant.
 - BoundedHumanKnee turns that trajectory into a clipped knee torque.
 - AssistController proposes a raw exo torque from a delayed intent sample.
-- JointSafetyCore is the only writer of the motor torque that enters the plant.
-- KneePlant integrates the human torque, the gravity load, the strap, and that
-  motor torque. On E_STOP the motor torque is 0 and the exo damper is passive.
+- JointSafetyCore may clamp that proposal to its plausibility limit and may
+  replace it with damping or zero. It does not apply the actuator limit.
+- torque_to_motor is the only conversion into the torque KneePlant integrates.
+  On E_STOP that value is 0 and the exo damper is passive.
 
 Latency is measured as command_time minus the timestamp on the intent sample
 the command consumed. It is not filled in from the delay parameter.
@@ -17,6 +18,7 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass, field
 
+from knee_stair_l1.actuator import torque_to_motor
 from knee_stair_l1.controller import CONDITIONS, AssistController, ControllerCommand
 from knee_stair_l1.human import BoundedHumanKnee
 from knee_stair_l1.intent import IntentSample, IntentSource, SyntheticStairIntent
@@ -146,7 +148,11 @@ def run_trial(
         decision = safety.evaluate(time_s)
         command_time_s = time_s
         latency_s = command_time_s - intent_time_s
-        applied_torque = 0.0 if decision.passive_damping else decision.safe_extension_torque_nm
+        applied_torque = torque_to_motor(
+            decision.safe_extension_torque_nm,
+            config,
+            passive_damping=decision.passive_damping,
+        )
         plant.advance(
             human_flexion,
             applied_torque,
@@ -168,10 +174,12 @@ def run_trial(
         all_counts[decision.state] = all_counts.get(decision.state, 0) + 1
         if signal_delay_s is None or time_s + 1e-12 >= float(signal_delay_s):
             steady_counts[decision.state] = steady_counts.get(decision.state, 0) + 1
-        max_command = max(max_command, abs(decision.safe_extension_torque_nm))
+        max_command = max(max_command, abs(plant.last_motor_extension_nm))
         latencies.append(latency_s)
         if bus is not None:
-            _publish(bus, fresh, raw, decision, plant, time_s, command_time_s, used.time_s)
+            _publish(
+                bus, fresh, raw, decision, plant, time_s, command_time_s, used.time_s, applied_torque,
+            )
 
     return TrialResult(
         seed=int(seed),
@@ -205,7 +213,7 @@ def _require_labeled_sample(sample: IntentSample) -> None:
         raise ValueError("intent sample is missing source_label")
 
 
-def _publish(bus, sample, raw, decision, plant, time_s, command_time_s, intent_time_s) -> None:
+def _publish(bus, sample, raw, decision, plant, time_s, command_time_s, intent_time_s, applied_torque) -> None:
     import json
 
     bus.publish(
@@ -232,7 +240,11 @@ def _publish(bus, sample, raw, decision, plant, time_s, command_time_s, intent_t
     bus.publish(TOPIC_ASSIST_COMMAND_RAW, raw.torque_extension_nm)
     bus.publish(
         TOPIC_ASSIST_COMMAND_SAFE,
-        {"torque_extension_nm": decision.safe_extension_torque_nm, "command_time_s": command_time_s},
+        {
+            "torque_extension_nm": applied_torque,
+            "supervisor_command_nm": decision.safe_extension_torque_nm,
+            "command_time_s": command_time_s,
+        },
     )
     bus.publish(
         TOPIC_PLANT_STATE,
@@ -253,7 +265,9 @@ def _publish(bus, sample, raw, decision, plant, time_s, command_time_s, intent_t
                 "command_time_s": command_time_s,
                 "source_label": sample.source_label,
                 "state": decision.state,
-                "safe_extension_torque_nm": decision.safe_extension_torque_nm,
+                "applied_torque_nm": applied_torque,
+                "safe_extension_torque_nm": applied_torque,
+                "supervisor_command_nm": decision.safe_extension_torque_nm,
                 "passive_damping": decision.passive_damping,
             },
             sort_keys=True,

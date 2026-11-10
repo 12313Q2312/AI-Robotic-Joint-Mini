@@ -2,7 +2,9 @@
 
 The strap is a rotational spring-damper. Its torque is the interaction torque.
 The exoskeleton motor torque is a different quantity and is not the interaction
-metric. A motor command above the supervisor limit is rejected.
+metric. Every motor command is passed through clamp_actuator_torque before it
+enters the dynamics. boundary_abs_limit_nm is that actuator limit. It is no
+longer equal to the supervisor's 40 Nm plausibility check.
 
 Gravity torque is a flexion moment:
     share * body_mass * g * moment_arm * sin(flexion)
@@ -16,6 +18,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import logging
 import math
+
+from knee_stair_l1.actuator import clamp_actuator_torque
 
 logger = logging.getLogger("knee_stair_l1.plant")
 
@@ -44,7 +48,10 @@ class KneePlant:
         self.exo_viscous = float(plant["exo_viscous_nm_s_per_rad"])
         self.q_min = float(plant["min_flexion_rad"])
         self.q_max = float(plant["max_flexion_rad"])
+        self.actuator_limit = float(config["actuator_torque_limit_nm"])
         self.boundary_limit = float(plant["boundary_abs_limit_nm"])
+        if self.boundary_limit != self.actuator_limit:
+            raise ValueError("plant boundary_abs_limit_nm must equal actuator_torque_limit_nm")
         self.q_h = float(plant["initial_flexion_rad"])
         self.q_e = float(plant["initial_flexion_rad"])
         self.qd_h = 0.0
@@ -102,9 +109,10 @@ class KneePlant:
     ) -> None:
         if not all(math.isfinite(value) for value in (human_flexion_nm, exo_extension_nm, dt, time_s)) or dt <= 0:
             raise BoundaryError("plant step requires finite torques, a finite time and a positive dt")
-        if abs(exo_extension_nm) > self.boundary_limit + 1e-9:
-            raise BoundaryError("exo motor torque above the supervisor limit")
-        motor_extension = 0.0 if passive_damping else float(exo_extension_nm)
+        if passive_damping:
+            motor_extension = 0.0
+        else:
+            motor_extension = clamp_actuator_torque(float(exo_extension_nm), self.actuator_limit)
         self.last_motor_extension_nm = motor_extension
         strap = self.strap_k * (self.q_e - self.q_h) + self.strap_b * (self.qd_e - self.qd_h)
         self.strap_torque_flexion_nm = strap

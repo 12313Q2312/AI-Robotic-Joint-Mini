@@ -169,6 +169,7 @@
       }
     }
   },
+  "actuator_torque_limit_nm": 24.0,
   "admittance_minus_assist_policy": {
     "mid_stop": {
       "human_positive_work_j": {
@@ -225,7 +226,7 @@
       }
     }
   },
-  "ci_method": "Student t, df=n-1. For 30 seeds df=29 and t_0.975=2.045229642132703. mean \u00b1 t*std/sqrt(n)",
+  "ci_method": "Student t computed for df=n-1. n=30, df=29, t_0.975=2.045229642133. mean \u00b1 t*std/sqrt(n)",
   "comfort_basis": "Design assumption only, not a comfort study: 15 Nm is 0.08 m cuff moment arm times 187.5 N strap force. Peaks at or above this value fail the interaction criterion.",
   "comfort_peak_interaction_nm": 15.0,
   "conditions": [
@@ -233,7 +234,7 @@
     "admittance",
     "assist_policy"
   ],
-  "config_sha256": "8f7088fa52aa5bdab4bb6575f1136763931af77100fac50f8793d74f17a2ec6f",
+  "config_sha256": "e5a7e56ab63c0ac0b28752fef0788436b9bcb490fad2d4ceb986003b88e8fc2c",
   "criteria": {
     "admittance": {
       "comfort_peak_interaction_nm": 15.0,
@@ -1249,5 +1250,6 @@
     29
   ],
   "simulation_only": true,
-  "std_ddof": 1
+  "std_ddof": 1,
+  "supervisor_command_plausibility_nm": 40.0
 }

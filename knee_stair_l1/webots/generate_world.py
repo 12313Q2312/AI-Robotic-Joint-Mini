@@ -50,7 +50,7 @@ Robot {
     DEF EXO_KNEE HingeJoint {
       jointParameters HingeJointParameters { axis 0 1 0 anchor 0 0 -0.14 minStop 0.05 maxStop 2.2 dampingConstant 0.2 }
       device [
-        RotationalMotor { name "exo_knee" maxTorque 40 maxVelocity 6 }
+        RotationalMotor { name "exo_knee" maxTorque 24 maxVelocity 6 }
         PositionSensor { name "exo_knee_sensor" }
       ]
       endPoint DEF HUMAN_SHANK Solid {
