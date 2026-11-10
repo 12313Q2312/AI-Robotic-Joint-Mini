@@ -1,5 +1,12 @@
 # 变更记录
 
+## 2026-11-10 — 文档与 PR #10 的执行器硬上限对齐
+
+- 力矩分层表改为最终硬上限 `clamp_actuator_torque`（`actuator_torque_limit_nm` = 24）。它覆盖 `knee_stair_l1` 的关闭、导纳、AssistPolicy，以及 `joint_safety_node`。
+- 监督器 40 Nm 只写成合理性检查。AssistPolicy 内 cap 和 Webots `maxTorque` 写成 24 Nm。NaN 和 inf 写成 `ValueError`，由 `safe_publish` 发布 0 并锁存 `E_STOP`。
+- PR #10 之前“AssistPolicy 到植物不超过 40 Nm”的说法标成合并前历史。历史 C++ 控制器仍不走这条钳位，见 https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11 。
+- 30 个种子的 95% 区间写明 df=n−1，因此 df=29。传感噪声水平按种子抽取。重力矩写上台阶高度缩放。配置加载继续使用 main 已有的 `actuator_torque_limit_nm` 检查，不另加一套断言。
+
 ## 2026-11-10 — 执行器力矩硬上限 24 Nm
 
 - 新增 `actuator_torque_limit_nm = 24`。`knee_stair_l1` 闭环和 `joint_safety_node` 在进入植物或 `/knee_stair/assist_command_safe` 之前调用 `clamp_actuator_torque`。历史 C++ 控制器不在这条路径上。

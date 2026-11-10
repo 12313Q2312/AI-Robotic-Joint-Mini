@@ -1,7 +1,9 @@
 """Admittance, the existing PID recurrence, and the copied AssistPolicy."""
 
+import json
 import pathlib
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
@@ -91,3 +93,24 @@ class AssistControllerTests(unittest.TestCase):
         self.assertLess(admit_command.desired_flexion_rad, 1.0)
         self.assertGreater(admit_command.torque_extension_nm, 0.0)
         self.assertEqual(admit_command.source_label, "unit-test-double")
+
+
+class ActuatorConfigLoadTests(unittest.TestCase):
+    def test_shipped_actuator_hard_limit_is_24_nm(self):
+        config = load_config()
+        self.assertEqual(config["actuator_torque_limit_nm"], 24.0)
+        self.assertEqual(config["plant"]["boundary_abs_limit_nm"], 24.0)
+        self.assertEqual(config["assist_policy"]["limit_nm"], 24.0)
+        self.assertEqual(config["pid"]["torque_limit_nm"], 24.0)
+        self.assertEqual(config["safety"]["command_limit_nm"], 40.0)
+
+    def test_load_config_rejects_actuator_limit_above_24_nm(self):
+        config = load_config()
+        config.pop("_config_path", None)
+        config["actuator_torque_limit_nm"] = 30.0
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "over_limit.json"
+            path.write_text(json.dumps(config), encoding="utf-8")
+            with self.assertRaises(ValueError) as caught:
+                load_config(path)
+        self.assertIn("actuator_torque_limit_nm must satisfy 0 < limit <= 24", str(caught.exception))

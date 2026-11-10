@@ -10,19 +10,29 @@
 |---|---|---|
 | 意图源 | `intent.py` | `/knee_stair/intent_synthetic`。v1 是合成期望轨迹，日志写明 synthetic |
 | 有界人体力矩 | `human.py` | 跟踪上述轨迹，并被 `human.torque_limit_nm` 截断 |
-| 助力 | `admittance.py`、`torque_pid.py`、`assist_policy.py`、`controller.py` | 期望运动和 `/knee_stair/assist_command_raw`。PID 上限保持 24 Nm |
-| 安全监督 | `safety.py` | 唯一发出监督后命令的对象，并发布只读的 `/joint/safety_state`。40 Nm 是命令合理性检查，不是力矩上限 |
-| 执行器上限 | `actuator.py` | `clamp_actuator_torque`。只用于 `knee_stair_l1` 和 `joint_safety_node`，默认 24 Nm。历史 C++ 控制器不调用 |
+| 助力 | `admittance.py`、`torque_pid.py`、`assist_policy.py`、`controller.py` | 期望运动和 `/knee_stair/assist_command_raw`。PID 抗饱和上限保持 24 Nm |
+| 安全监督 | `safety.py` | 发出监督后命令，并发布只读的 `/joint/safety_state`。40 Nm 是命令合理性检查，不是力矩上限 |
+| 执行器上限 | `actuator.py` | `clamp_actuator_torque`。用于 `knee_stair_l1` 的关闭、导纳、AssistPolicy，以及 `joint_safety_node`。默认 24 Nm。历史 C++ 控制器不调用，见 [issue #11](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11) |
 | 植物 | `plant.py` | 人体小腿、外骨骼连杆、重力矩和弹簧阻尼绑带。边界等于执行器上限 |
 | 遥测 | `telemetry.py`、`../scripts/run_knee_stair_l1_metrics.py` | 仓库里是汇总和小样本。逐步原始 JSON 只在 CI artifact `knee-stair-l1-metrics-raw` |
 
 ## 负载、意图和交互
 
-重力矩使膝关节屈曲：
+重力矩使膝关节屈曲。有种子因子时，`plant.py` 先按台阶高度缩放力臂（第 66–68 行）：
 
-`knee_weight_share * body_mass_kg * gravity_m_s2 * moment_arm_m * sin(flexion)`
+```text
+reference_height = float(load["reference_step_height_m"])
+self.body_mass = float(factors.body_mass_kg)
+self.moment_arm *= float(factors.step_height_m) / reference_height
+```
 
-伸直时力矩为 0，90° 时力臂等于 `moment_arm_m`。文字假设在配置的 `load.assumption`。这是 **theoretical**。
+屈曲力矩再用缩放后的力臂（`gravity_flexion_nm`，第 92 行）：
+
+```text
+self.weight_share * self.body_mass * self.gravity * self.moment_arm * math.sin(flexion_rad)
+```
+
+没有因子时不乘台阶高度，力臂保持配置里的 `moment_arm_m`。伸直时 `sin` 为 0，力矩为 0。文字假设在配置的 `load.assumption`。这是 **theoretical**。
 
 合成意图是一条平滑的屈膝下降轨迹，种子只改变下降幅度，而且终点离伸膝限位还有余量。人体力矩是 PD 跟踪并限幅。关闭助力时，这组参数不把膝推到限位；一旦碰到限位，植物记一条 `anomaly hard_stop_contact`。
 
@@ -30,21 +40,9 @@
 
 ## 指标
 
-同一种子的轨迹在关闭、导纳和 AssistPolicy 之间相同。标准差用 n−1。降幅是关闭减去助力。95% 区间是学生 t 区间，自由度是 n−1，临界值按这个自由度计算。
+同一种子的轨迹在关闭、导纳和 AssistPolicy 之间相同。标准差用 n−1。降幅是关闭减去助力。95% 区间是学生 t 区间，自由度是 n−1，临界值按这个自由度计算。报告用 30 个种子，所以 df=29。
 
-## 力矩上限
-
-执行器硬上限是 `actuator_torque_limit_nm`，必须满足 `0 < 上限 <= 24`。这条钳位只覆盖 `knee_stair_l1` 的关闭、导纳、AssistPolicy 闭环，以及 `joint_safety_node`。历史 C++ 控制器不调用它，跟踪问题是 https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11 。`/knee_stair/assist_command_safe` 和遥测里的 `applied_torque_nm` 都是钳位之后的力矩。`supervisor_command_nm` 仍可以是监督器的 40 Nm 合理性输出。
-
-`clamp_actuator_torque` 遇到 NaN 或 inf 会抛出 `ValueError`，不会返回 0。`on_assist_command` 接住这个异常，锁存 `E_STOP`，节点再发布 0。
-
-植物的 `boundary_abs_limit_nm` 与执行器上限相等。它以前被要求等于监督器的 `command_limit_nm`；那条等式已经取消。
-
-`command_limit_nm` 仍是 40 Nm。有限命令超出 ±40 Nm 时进入 `LIMITED_ASSIST`。这是命令合理性检查，不是执行器力矩上限。监督器在这个状态下仍可输出到 40 Nm，随后由执行器钳位收到 24 Nm。
-
-AssistPolicy 从 PR #3 抄来的内 cap 是 80 Nm。这里把它改成 24 Nm，与执行器上限相同，增益和变化率没有改。内 cap 挡不住绕过策略直接注入的命令；那种命令仍由 `clamp_actuator_torque` 截住。PID 的 24 Nm 抗饱和上限没有改。
-
-30 个种子（0–29）。每个种子抽取一次体重、台阶高、意图幅度、起始时间和绑带刚度，关闭、导纳和 AssistPolicy 共用。传感噪声水平固定，序列也按种子配对。
+30 个种子（0–29）。每个种子抽取一次体重、台阶高、意图幅度、起始时间、绑带刚度和传感噪声水平，关闭、导纳和 AssistPolicy 共用。噪声序列也按种子配对。
 
 主指标：人体膝关节力矩 RMS 的降幅，人体膝关节正功的降幅。跨种子标准差必须大于 0。导纳的正功降幅小于 AssistPolicy，这是结果。
 
@@ -61,14 +59,33 @@ AssistPolicy 从 PR #3 抄来的内 cap 是 80 Nm。这里把它改成 24 Nm，�
 
 导纳饱和时间比例还要低于 5%。做到这一点时没有提高 24 Nm 上限。结果无论通过与否都写在原始 JSON 的 `criteria` 里。
 
+## 力矩限幅分层表
+
+最终硬上限只有一处：`clamp_actuator_torque`，配置键 `actuator_torque_limit_nm`，当前值 24 Nm。关闭、导纳、AssistPolicy 进入植物之前都走 `torque_to_motor`（`loop.py` 第 158–162 行）。`joint_safety_node` 发布到 `/knee_stair/assist_command_safe` 的也是钳位后的 `applied_torque_nm`（`joint_safety_node.py` 第 96 行）。历史 C++ 控制器不调用这个函数，后续记在 [issue #11](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11)。
+
+| 层 | 值 | 作用 | 代码 |
+|---|---|---|---|
+| 执行器硬上限 | 24 Nm | `clamp_actuator_torque` 把送到植物或安全话题的力矩收到 ±24 Nm。NaN 和 inf 抛出 `ValueError`，函数本身不返回 0 | `config/default.json` 第 25 行；`actuator.py` 第 15–28 行；植物侧 `plant.py` 第 115 行 |
+| 非有限命令的发布 | 0 Nm，并锁存 `E_STOP` | `on_assist_command` 接住上面的 `ValueError`，再发布 0 | `safe_publish.py` 第 28–35 行 |
+| 监督器合理性检查 | 40 Nm | 有限命令超出 ±`command_limit_nm` 时进入 `LIMITED_ASSIST`。这不是力矩上限。监督器输出仍可到 40 Nm，随后由执行器钳位收到 24 Nm | `config/default.json` 第 74–75 行；判断 `safety.py` 第 157–158 行；合理性钳位 `safety.py` 第 170–172 行 |
+| PID 抗饱和上限 | 24 Nm | 只约束导纳内环的提案，不是唯一的最终出口 | `config/default.json` 第 67 行；`torque_pid.py` 第 80–83 行；`controller.py` 第 53 行 |
+| AssistPolicy 内部上限 | 24 Nm | 策略目标钳在 ±24 Nm。PR #3 抄来的头文件是 80 Nm；PR #10 起本树改为 24 Nm。绕过策略直接注入的命令仍由 `clamp_actuator_torque` 截住 | `config/default.json` 第 54 行；`assist_policy.py` 第 42–45 行；`controller.py` 第 55 行 |
+| 植物边界 | 24 Nm | 必须等于 `actuator_torque_limit_nm` | `config/default.json` 第 90 行；`plant.py` 第 51–54 行；`config.py` 第 72–73 行 |
+| Webots 单膝电机 | 24 Nm | 可选几何的 `maxTorque`。该世界没有绑带动力学，CI 不运行它 | `webots/generate_world.py` 第 53 行；`webots/worlds/knee_stair_l1.wbt` 第 36 行 |
+
+PR #10 合并之前，AssistPolicy 内 cap 是 80 Nm，植物边界等于监督器的 40 Nm，文档曾把 AssistPolicy 到植物的命令写成不超过 40 Nm。那是合并前的历史。当前三条 `knee_stair_l1` 路径和 `joint_safety_node` 的最终硬上限都是 24 Nm。
+
+配置加载沿用 `load_config` 里已有的检查：`0 < actuator_torque_limit_nm <= 24`（`config.py` 第 67–68 行）。这里不再另写一套 `min()` 断言。
+
 ## 状态
 
 `E_STOP` 高于 `DAMPING_ONLY`，再高于 `LIMITED_ASSIST`，再高于 `NORMAL`。
 
-| 注入 | 状态 | 电机力矩 |
+| 注入 | 状态 | 送到植物或安全话题的力矩 |
 |---|---|---|
-| 有限但超出命令上限 | `LIMITED_ASSIST` | 钳位 |
+| 有限但超出 40 Nm 合理性检查 | `LIMITED_ASSIST` | 监督器先收到 40 Nm，执行器再收到 24 Nm |
 | 传感器非有限 | `E_STOP` | 0，被动阻尼，锁存到 `reset` |
+| 命令为 NaN 或 inf | `E_STOP` | `clamp_actuator_torque` 抛出 `ValueError`；`safe_publish` 发布 0 并锁存 |
 | 传感器掉线 | `DAMPING_ONLY` | 粘性力矩，不保留助力 |
 | 通信超时 | `DAMPING_ONLY` | 同上 |
 
@@ -84,6 +101,8 @@ AssistPolicy 从 PR #3 抄来的内 cap 是 80 Nm。这里把它改成 24 Nm，�
 | 30 种子汇总、`criteria`、延迟图和敏感性扫描 | experimental |
 | 重力矩公式、15 Nm 舒适假设、固定髋的单自由度 | theoretical |
 
+历史 C++ 控制器不在上表的 implemented 钳位里。那是 [issue #11](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11)，不是已完成项。
+
 ## 复现
 
 ```text
@@ -95,4 +114,4 @@ python -m unittest tests.test_knee_stair_l1_faults tests.test_knee_stair_l1_safe
 
 ## 回退
 
-关闭本改动的草稿 PR，并删除分支 `fix/actuator-torque-hard-limit`。`main` 不会被这些提交改写。
+PR #10 已在 `main`（`d79d5c9`）。本分支只改正文档，并沿用 main 的配置检查。回退时撤销本分支的提交，不要改写 `main` 历史，也不要强推。
