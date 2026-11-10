@@ -16,6 +16,12 @@
       "git_blob_sha1": "7ebebaee553a6282cf1d18496ecd58fc0cd042dd"
     },
     {
+      "path": ".github/branch-protection.json",
+      "bytes": 436,
+      "sha256": "46becf2505dc789f20de0a3cbf7d9dbe265e005ccf5eacba771e1367d5a2e268",
+      "git_blob_sha1": "904b547096aa21e773f4ffabd8b4c6242bbb57a3"
+    },
+    {
       "path": ".github/CODEOWNERS",
       "bytes": 92,
       "sha256": "0c9b5a55ca047e483054c19447183e6368c7bac8549e75a40aa8f53a087c0fce",
@@ -77,9 +83,9 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 771,
-      "sha256": "ecda102d38cc3f99b2e20d345b3d4b98cd8cef4a8113328180b55e4cf6a39a67",
-      "git_blob_sha1": "9bb2b5ccfdba792220c5c90828bf539cf9a3e309"
+      "bytes": 1450,
+      "sha256": "5ae9af930db2f497d850753be20ad07f91738688058016d8367c375c4e8e39c5",
+      "git_blob_sha1": "cc1ceb51191cb9bc85882c2ffbfd34bb2886bae8"
     },
     {
       "path": "ARCHITECTURE.md",
@@ -107,15 +113,15 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 544,
-      "sha256": "2c5c91cf04801cd8b42fce73498abf99c705208e1d2e3ded6ff508b196828b7b",
-      "git_blob_sha1": "382b55483284e29a8aeab1adb6970934e6b52eec"
+      "bytes": 1493,
+      "sha256": "4930dec7d31f5f185d094a9b7636ec8f717acde2b118a7231aa4e697b2a76ae2",
+      "git_blob_sha1": "dfd0ab5a68317292f145bff9838d2973e80532ab"
     },
     {
       "path": "CONTRIBUTING.md",
-      "bytes": 1206,
-      "sha256": "00213372f9dada171fb6ff24d1186fc01b46b550fbf7bae17cf9f43dd22f6143",
-      "git_blob_sha1": "db04ce622ede7cd7c4053e080686c49a68395b5a"
+      "bytes": 1277,
+      "sha256": "81fed8351aa57462d0540c55532ed78f5bede8e94c2e88d7d11ca5d53cc794a4",
+      "git_blob_sha1": "adaf03cc5173473ef8ba27dc42b935d1b7b7f15c"
     },
     {
       "path": "data/processed/experiment_0002_p_control.csv",
@@ -196,6 +202,12 @@
       "git_blob_sha1": "4fb9a2dcfce925f3d60baa50c153c6d9019b9db2"
     },
     {
+      "path": "docs/GITHUB_SETTINGS.md",
+      "bytes": 2046,
+      "sha256": "ed45bd847a02d4b2d5346ca583a4ee3f0d39ab1d6003f4a731c3ef0602afc144",
+      "git_blob_sha1": "3dd256b248def9669ee42746ad1b3ddb40edca3e"
+    },
+    {
       "path": "docs/LIMITATIONS.md",
       "bytes": 1214,
       "sha256": "73c19f28fc3a8c46ca49e962f423bcc4a80ef7e5397cb31a077c30a99d2f1205",
@@ -203,9 +215,9 @@
     },
     {
       "path": "docs/REPOSITORY_DELIVERY.md",
-      "bytes": 1198,
-      "sha256": "b388d64f89ae13b49139ab23441e34c785090136cbaae8c402050411e5ac4848",
-      "git_blob_sha1": "73b400f293f6be0ec267392c0e6b71cb5c70e93b"
+      "bytes": 2525,
+      "sha256": "63594a5f19c6bc918b70199b5de5a200c3b20373167cfa2653f50f8aa54d6a4a",
+      "git_blob_sha1": "e6ca18091e58018864295e740153f3d896861b05"
     },
     {
       "path": "docs/REPRODUCIBILITY.md",
@@ -251,15 +263,15 @@
     },
     {
       "path": "PROJECT_STATUS.md",
-      "bytes": 811,
-      "sha256": "7925f5f7afabd604b38388dc170a4f96b403c77171bf9a553b025c9de981168c",
-      "git_blob_sha1": "948fe82441c2f61253b558e4e745fa9339d4936b"
+      "bytes": 2063,
+      "sha256": "c70e7d862ff31ea53a78cd7e6eb280dfbf61b23021ebbf1b45f7b8b7cb34dc45",
+      "git_blob_sha1": "f6b6d28fd53a9b5b415c8f7adb5d4aa59ceaca29"
     },
     {
       "path": "README.md",
-      "bytes": 3391,
-      "sha256": "c9f5aac525d147e8f5279a1719245321abf200b395ceda9deff1e5952b0e42b9",
-      "git_blob_sha1": "81d088f859c3cfc0defbe73af24a74fb751799fa"
+      "bytes": 10980,
+      "sha256": "e823a0706f304f4967573cf7ef4b4dd3313c4c53a5b943f5b0a171d011118773",
+      "git_blob_sha1": "a546b423a45dff4a1260e24de6f37312163bdd33"
     },
     {
       "path": "research/__init__.py",

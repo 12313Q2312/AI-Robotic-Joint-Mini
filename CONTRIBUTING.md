@@ -8,6 +8,6 @@
 
 保留历史数据，新增证据需记录配置、版本、单位和处理方式。普通本地输出写入 `data/verification/local-check.json`、`data/raw/local/`，默认忽略。不要提交编译文件、安装包、密钥、个人记录或未经许可的第三方材料。
 
-当前只有一位维护者，CODEOWNERS 标识责任人。是否强制评审和 CI 检查以 GitHub 服务端规则为准，见 [交付记录](docs/REPOSITORY_DELIVERY.md)。
+当前只有一位维护者，CODEOWNERS 标识责任人。服务端分支保护尚未启用；可应用配置与单人维护设置见 [GitHub 设置](docs/GITHUB_SETTINGS.md)，实际交付证据见 [交付记录](docs/REPOSITORY_DELIVERY.md)。
 
 不得用合成测试声称真实运动、机械安全、测得节能或用户掌握已验收。使用/贡献前先阅读 [许可状态](LICENSE.md)。

@@ -1,0 +1,103 @@
+{
+  "evidence_label": "experimental",
+  "note": "One paired seed. The full per-step raw file is a CI artifact, not a committed file.",
+  "sample_seed": 0,
+  "trials": [
+    {
+      "condition": "off",
+      "factors": {
+        "angle_noise_std_rad": 0.0052394731,
+        "body_mass_kg": 79.5547648034,
+        "intent_amplitude_scale": 0.9682286323,
+        "intent_onset_s": 0.2017833501,
+        "seed": 0,
+        "step_height_m": 0.1678977201,
+        "strap_stiffness_scale": 1.0067648328,
+        "velocity_noise_std_rad_s": 0.0827038871
+      },
+      "hard_stop_contact_count": 0,
+      "human_positive_work_j": 5.2431443652,
+      "human_torque_rms_nm": 13.0749456554,
+      "latency_note": "simulation loop latency, not real-system latency",
+      "latency_samples_head_s": [
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01
+      ],
+      "peak_interaction_torque_nm": 1.2340739708,
+      "saturation_time_fraction": 0.0,
+      "seed": 0,
+      "source_label": "synthetic",
+      "tracking_error_rms_rad": 0.3528951724
+    },
+    {
+      "condition": "admittance",
+      "factors": {
+        "angle_noise_std_rad": 0.0052394731,
+        "body_mass_kg": 79.5547648034,
+        "intent_amplitude_scale": 0.9682286323,
+        "intent_onset_s": 0.2017833501,
+        "seed": 0,
+        "step_height_m": 0.1678977201,
+        "strap_stiffness_scale": 1.0067648328,
+        "velocity_noise_std_rad_s": 0.0827038871
+      },
+      "hard_stop_contact_count": 0,
+      "human_positive_work_j": 2.9973233411,
+      "human_torque_rms_nm": 7.228413062,
+      "latency_note": "simulation loop latency, not real-system latency",
+      "latency_samples_head_s": [
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01
+      ],
+      "peak_interaction_torque_nm": 6.5986162171,
+      "saturation_time_fraction": 0.0,
+      "seed": 0,
+      "source_label": "synthetic",
+      "tracking_error_rms_rad": 0.1933710582
+    },
+    {
+      "condition": "assist_policy",
+      "factors": {
+        "angle_noise_std_rad": 0.0052394731,
+        "body_mass_kg": 79.5547648034,
+        "intent_amplitude_scale": 0.9682286323,
+        "intent_onset_s": 0.2017833501,
+        "seed": 0,
+        "step_height_m": 0.1678977201,
+        "strap_stiffness_scale": 1.0067648328,
+        "velocity_noise_std_rad_s": 0.0827038871
+      },
+      "hard_stop_contact_count": 0,
+      "human_positive_work_j": 2.5613483079,
+      "human_torque_rms_nm": 7.3637618771,
+      "latency_note": "simulation loop latency, not real-system latency",
+      "latency_samples_head_s": [
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01,
+        0.01
+      ],
+      "peak_interaction_torque_nm": 6.2959799634,
+      "saturation_time_fraction": 0.0,
+      "seed": 0,
+      "source_label": "synthetic",
+      "tracking_error_rms_rad": 0.1984955323
+    }
+  ]
+}

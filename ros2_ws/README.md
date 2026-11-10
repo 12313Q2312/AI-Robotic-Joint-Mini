@@ -7,6 +7,7 @@
 | 早期单关节 | `joint_launch.py` / `joint_minimal_ros2.wbt` |
 | 人工面板 | `manual_demo_launch.py` / `joint_manual_demo.wbt` |
 | 配对夹具 | `study_demo_launch.py` / `joint_study.wbt` |
+| 单侧膝仿真监督 | 同一 `joint_safety_node.py`。膝话题见仓库根目录 `knee_stair_l1/README.md`。离线闭环不需要本包构建 |
 
 在已配置兼容依赖的 Linux/WSL 环境，常规构建入口是：
 

@@ -24,6 +24,17 @@ Linux 可用 `python3`。检查只使用 Python 标准库和 Node.js 内置模�
 
 基础 CI 只验证离线逻辑，不把 ROS 2 插件构建、Webots 联通或机械运动写成已通过。当前仓库不是一键运行整机演示。
 
+## 单侧膝上楼助力闭环
+
+在仓库根目录用标准库复现合成闭环。`--check` 对照已提交的原始试验行和汇总，不启动 Webots 或 ROS 2。
+
+```text
+python scripts/run_knee_stair_l1_metrics.py --check
+python -m unittest tests.test_knee_stair_l1_faults -v
+```
+
+结果说明见 [knee_stair_l1/README.md](../knee_stair_l1/README.md)、[汇总 JSON](../data/verification/knee_stair_l1/metrics_summary.json) 和 [指标表](../data/verification/knee_stair_l1/metrics_summary.md)。逐步原始 JSON 不进仓库，由 CI 重新生成并上传为 artifact `knee-stair-l1-metrics-raw`。这组数字是仿真实验，不是真人、肌电或防跌倒证据。CI 是否通过以该次工作流记录为准。
+
 ## CAD 和绘图
 
 `mechanical/cad_native/import_test/T001_test_link_r01.SLDPRT` 为保留的原生文件。名义规格为180×30×8 mm、两孔直径12/6 mm、孔距150 mm；材料、质量/惯量与完整装配仍需独立核对。
