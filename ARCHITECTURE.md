@@ -18,3 +18,19 @@ ROS 2 包位于 `ros2_ws/src/ai_robotic_joint_ros2`；头文件 `ManualReference
 历史 `JointState.effort` 表示合成 API 命令，不能当作传感器测得的电机力矩。监督、STOP、回零和硬件急停的语义不同，见 `docs/LIMITATIONS.md`。
 
 几何补偿通过弹簧势能关于角度的导数得到等效力矩；当前模型没有验证真实凸轮接触、摩擦滞回或制造误差。几何模块与控制器的可复用边界，以现有头文件/CSV为准，不宣称已经建立跨平台通用框架。
+
+## 单侧膝仿真闭环
+
+`knee_stair_l1` 与既有单关节场景分开。模块之间的合同是下列话题；无 ROS 2 时，同一字段走进程内总线，CI 不启动 Webots。
+
+| 话题 | 方向 |
+|---|---|
+| `/knee_stair/intent_synthetic` | 意图源 → 控制器。v1 的 `source_label` 为 synthetic |
+| `/knee_stair/desired_motion` | 导纳期望屈膝运动。关闭和 AssistPolicy 不生成该运动 |
+| `/knee_stair/assist_command_raw` | 控制器提案 |
+| `/knee_stair/assist_command_safe` | 监督器发出的唯一外骨骼力矩 |
+| `/knee_stair/plant_state` | 植物的屈膝角、角速度和边界力矩 |
+| `/joint/safety_state` | 同一个监督器的状态 |
+| `/joint/target_angle` → `/joint/safe_target_angle` | 原角度口，数字行为保持 |
+
+命令归属：意图源给出合成期望轨迹，有界人体跟踪器产生人体力矩，控制器只提案，`JointSafetyCore` 是外骨骼电机力矩的唯一出口。植物把人体力矩、重力矩、绑带约束和这份电机力矩分开积分。交互力矩是绑带力矩。`E_STOP` 时电机力矩为 0，外骨骼只剩被动阻尼，`/joint/safe_target_angle` 沿用原合同。`/joint/safety_state` 只发布。故障时状态按 `E_STOP`、`DAMPING_ONLY`、`LIMITED_ASSIST`、`NORMAL` 的优先顺序取更严格者。

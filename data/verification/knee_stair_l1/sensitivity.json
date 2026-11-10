@@ -1,0 +1,191 @@
+{
+  "cases": [
+    {
+      "criteria": {
+        "admittance": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.098295872604,
+            4.817969173633
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.596925457078
+        },
+        "assist_policy": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.130640500984,
+            4.820061826509
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.574553667053
+        }
+      },
+      "kind": "baseline",
+      "name": "nominal",
+      "scale": 1.0
+    },
+    {
+      "criteria": {
+        "admittance": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            2.63054932131,
+            3.115843556524
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.622547202995
+        },
+        "assist_policy": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            2.732426577625,
+            3.177088138911
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.581740746495
+        }
+      },
+      "flips": [],
+      "kind": "load",
+      "name": "load_moment_arm_x0.7",
+      "scale": 0.7
+    },
+    {
+      "criteria": {
+        "admittance": {
+          "comfort_peak_interaction_nm": 10.5,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.098295872604,
+            4.817969173633
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.596925457078
+        },
+        "assist_policy": {
+          "comfort_peak_interaction_nm": 10.5,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.130640500984,
+            4.820061826509
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.574553667053
+        }
+      },
+      "flips": [],
+      "kind": "comfort",
+      "name": "comfort_threshold_x0.7",
+      "scale": 0.7
+    },
+    {
+      "criteria": {
+        "admittance": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            5.47435826925,
+            6.156347004046
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.60180676323
+        },
+        "assist_policy": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            5.614188574473,
+            6.50534838995
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.568469730729
+        }
+      },
+      "flips": [],
+      "kind": "load",
+      "name": "load_moment_arm_x1.3",
+      "scale": 1.3
+    },
+    {
+      "criteria": {
+        "admittance": {
+          "comfort_peak_interaction_nm": 19.5,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.098295872604,
+            4.817969173633
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.596925457078
+        },
+        "assist_policy": {
+          "comfort_peak_interaction_nm": 19.5,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.130640500984,
+            4.820061826509
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.574553667053
+        }
+      },
+      "flips": [],
+      "kind": "comfort",
+      "name": "comfort_threshold_x1.3",
+      "scale": 1.3
+    }
+  ],
+  "comfort_parameter": "metrics.comfort_peak_interaction_nm. Rescored on the nominal trials because the threshold does not change the motion.",
+  "conclusion": "No pass/fail conclusion flips when the load moment arm or the comfort threshold is scaled by \u00b130%.",
+  "evidence_label": "experimental",
+  "load_parameter": "load.moment_arm_m, which scales the gravity-torque profile. Body-mass and step-height draws stay active.",
+  "primary_metrics_checked": [
+    "human_torque_rms_nm",
+    "human_positive_work_j"
+  ]
+}

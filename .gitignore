@@ -40,3 +40,4 @@ Thumbs.db
 # Optional local adapters and private runtime logs
 local/
 data/verification/local-*.json
+data/verification/knee_stair_l1/local_raw/
