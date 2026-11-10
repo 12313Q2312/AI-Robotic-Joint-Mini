@@ -22,4 +22,4 @@
 
 服务端实查仓库为公开、默认分支main；main的protected=false，rulesets为空。当前连接器对分支保护管理接口返回权限不足。CODEOWNERS与贡献规范不代表强制保护已启用；可应用规则和设置步骤见[GITHUB_SETTINGS.md](GITHUB_SETTINGS.md)，尚未执行该服务端修改。
 
-没有将公开可读误称为已选择项目级开源许可证，具体许可状态见 `LICENSE.md`。
+2026-11-04 的交付没有把公开可读写成项目级开源许可证。当前决定是：项目代码、CAD、图纸和数据适用 Apache-2.0，见 `LICENSE`；第三方材料保留各自许可证，见 `THIRD_PARTY_NOTICES.md`。

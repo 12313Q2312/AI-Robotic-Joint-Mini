@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP = {'.git', '__pycache__', '.venv', 'node_modules', 'build', 'install', 'log'}
 BANNED = {'.pem', '.key', '.exe', '.dll', '.so', '.o', '.obj', '.pyc', '.zip'}
 REQUIRED = ('README.md', 'PROJECT_STATUS.md', 'CONTRIBUTING.md', 'SECURITY.md',
-            'LICENSE.md', 'THIRD_PARTY_NOTICES.md', 'docs/REPRODUCIBILITY.md',
+            'LICENSE', 'THIRD_PARTY_NOTICES.md', 'docs/REPRODUCIBILITY.md',
             'docs/LIMITATIONS.md', '.github/CODEOWNERS', '.github/workflows/ci.yml')
 SECRET_PATTERNS = (
     re.compile(r'\bgh[pousr]_[A-Za-z0-9]{30,}\b'),
