@@ -169,6 +169,62 @@
       }
     }
   },
+  "admittance_minus_assist_policy": {
+    "mid_stop": {
+      "human_positive_work_j": {
+        "ci95_excludes_0": true,
+        "ci95_high": -0.402467069331,
+        "ci95_low": -0.561158673684,
+        "mean": -0.481812871507,
+        "n": 30,
+        "std": 0.212491960805
+      },
+      "human_torque_rms_nm": {
+        "ci95_excludes_0": true,
+        "ci95_high": 0.194005518572,
+        "ci95_low": 0.088780107586,
+        "mean": 0.141392813079,
+        "n": 30,
+        "std": 0.140899413036
+      }
+    },
+    "reverse": {
+      "human_positive_work_j": {
+        "ci95_excludes_0": true,
+        "ci95_high": -0.410513322899,
+        "ci95_low": -0.572870618851,
+        "mean": -0.491691970875,
+        "n": 30,
+        "std": 0.217400412004
+      },
+      "human_torque_rms_nm": {
+        "ci95_excludes_0": true,
+        "ci95_high": 0.322574697819,
+        "ci95_low": 0.208634684318,
+        "mean": 0.265604691068,
+        "n": 30,
+        "std": 0.152568480114
+      }
+    },
+    "sudden_change": {
+      "human_positive_work_j": {
+        "ci95_excludes_0": true,
+        "ci95_high": -0.528714305036,
+        "ci95_low": -0.719291493073,
+        "mean": -0.624002899054,
+        "n": 30,
+        "std": 0.255187541495
+      },
+      "human_torque_rms_nm": {
+        "ci95_excludes_0": true,
+        "ci95_high": 0.274086327987,
+        "ci95_low": 0.163605527436,
+        "mean": 0.218845927712,
+        "n": 30,
+        "std": 0.147936508905
+      }
+    }
+  },
   "ci_method": "Student t, df=n-1. For 30 seeds df=29 and t_0.975=2.045229642132703. mean \u00b1 t*std/sqrt(n)",
   "comfort_basis": "Design assumption only, not a comfort study: 15 Nm is 0.08 m cuff moment arm times 187.5 N strap force. Peaks at or above this value fail the interaction criterion.",
   "comfort_peak_interaction_nm": 15.0,
@@ -177,7 +233,7 @@
     "admittance",
     "assist_policy"
   ],
-  "config_sha256": "7fbd2156c2929cc3b9fc052421c9630b890beefbc83884be23e901fa530a7b54",
+  "config_sha256": "8f7088fa52aa5bdab4bb6575f1136763931af77100fac50f8793d74f17a2ec6f",
   "criteria": {
     "admittance": {
       "comfort_peak_interaction_nm": 15.0,
@@ -207,6 +263,12 @@
       "tracking_error_no_more_than_10_percent_worse": true,
       "tracking_error_ratio_max": 0.574553667053
     }
+  },
+  "default_controller": {
+    "configured": "assist_policy",
+    "promoted_admittance": false,
+    "recommended": "assist_policy",
+    "rule": "Promote admittance only if, on every new scenario and both primary metrics, the 95% CI of admittance reduction minus AssistPolicy reduction is entirely above 0."
   },
   "evidence_label": "experimental",
   "intent_source_label": "synthetic",
@@ -263,6 +325,896 @@
   "removed_metrics": [
     "assist_timing_error_s"
   ],
+  "scenarios": {
+    "mid_stop": {
+      "absolute": {
+        "admittance": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.86901100653,
+            "ci95_low": 1.51607192508,
+            "mean": 1.692541465805,
+            "n": 30,
+            "std": 0.472594109613
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 6.378065522478,
+            "ci95_low": 5.554823495177,
+            "mean": 5.966444508827,
+            "n": 30,
+            "std": 1.102341319895
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 5.572276717917,
+            "ci95_low": 4.793698387027,
+            "mean": 5.182987552472,
+            "n": 30,
+            "std": 1.042535532022
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.170437495085,
+            "ci95_low": 0.148448322041,
+            "mean": 0.159442908563,
+            "n": 30,
+            "std": 0.029444043468
+          }
+        },
+        "assist_policy": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.31732508109,
+            "ci95_low": 1.104132107506,
+            "mean": 1.210728594298,
+            "n": 30,
+            "std": 0.285470634515
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 6.54256473661,
+            "ci95_low": 5.673109907203,
+            "mean": 6.107837321906,
+            "n": 30,
+            "std": 1.164221398388
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 5.501292045724,
+            "ci95_low": 4.802426668102,
+            "mean": 5.151859356913,
+            "n": 30,
+            "std": 0.935797927278
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.175982108337,
+            "ci95_low": 0.152593048018,
+            "mean": 0.164287578177,
+            "n": 30,
+            "std": 0.031318526956
+          }
+        },
+        "off": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 2.978704087685,
+            "ci95_low": 2.461288152638,
+            "mean": 2.719996120161,
+            "n": 30,
+            "std": 0.692832661427
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 11.45100443828,
+            "ci95_low": 9.898460899409,
+            "mean": 10.674732668845,
+            "n": 30,
+            "std": 2.07889397902
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.055939854019,
+            "ci95_low": 0.913376555531,
+            "mean": 0.984658204775,
+            "n": 30,
+            "std": 0.190895762622
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.308742992984,
+            "ci95_low": 0.266903714243,
+            "mean": 0.287823353613,
+            "n": 30,
+            "std": 0.056023823155
+          }
+        }
+      },
+      "criteria": {
+        "admittance": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.337928893109,
+            5.078647426926
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.580002490048
+        },
+        "assist_policy": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.225242428175,
+            4.908548265702
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.577115038753
+        }
+      },
+      "reduction_versus_off": {
+        "admittance": {
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.119608329071,
+            "ci95_low": 0.935300979641,
+            "mean": 1.027454654356,
+            "n": 30,
+            "std": 0.246792073412
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 5.078647426926,
+            "ci95_low": 4.337928893109,
+            "mean": 4.708288160017,
+            "n": 30,
+            "std": 0.991840332685
+          }
+        },
+        "assist_policy": {
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.662896035243,
+            "ci95_low": 1.355639016484,
+            "mean": 1.509267525863,
+            "n": 30,
+            "std": 0.411424704246
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 4.908548265702,
+            "ci95_low": 4.225242428175,
+            "mean": 4.566895346939,
+            "n": 30,
+            "std": 0.914963320446
+          }
+        }
+      }
+    },
+    "nominal": {
+      "absolute": {
+        "admittance": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 2.596018280941,
+            "ci95_low": 2.162197209753,
+            "mean": 2.379107745347,
+            "n": 30,
+            "std": 0.580897082937
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 6.295424945005,
+            "ci95_low": 5.473341750604,
+            "mean": 5.884383347804,
+            "n": 30,
+            "std": 1.100789614143
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 5.572276717917,
+            "ci95_low": 4.793698387027,
+            "mean": 5.182987552472,
+            "n": 30,
+            "std": 1.042535532022
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.168438675896,
+            "ci95_low": 0.146517070929,
+            "mean": 0.157477873412,
+            "n": 30,
+            "std": 0.029353568152
+          }
+        },
+        "assist_policy": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 2.23801454789,
+            "ci95_low": 1.880062745071,
+            "mean": 2.059038646481,
+            "n": 30,
+            "std": 0.4793062668
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 6.287804733828,
+            "ci95_low": 5.446524680524,
+            "mean": 5.867164707176,
+            "n": 30,
+            "std": 1.126494680306
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 5.501292045724,
+            "ci95_low": 4.802426668102,
+            "mean": 5.151859356913,
+            "n": 30,
+            "std": 0.935797927278
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.169502674044,
+            "ci95_low": 0.146850804104,
+            "mean": 0.158176739074,
+            "n": 30,
+            "std": 0.03033141091
+          }
+        },
+        "off": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 4.550110268678,
+            "ci95_low": 3.793641059109,
+            "mean": 4.171875663894,
+            "n": 30,
+            "std": 1.01293087486
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 11.107620992852,
+            "ci95_low": 9.577410748994,
+            "mean": 10.342515870923,
+            "n": 30,
+            "std": 2.048989147772
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.055939854019,
+            "ci95_low": 0.913376555531,
+            "mean": 0.984658204775,
+            "n": 30,
+            "std": 0.190895762622
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.299954792721,
+            "ci95_low": 0.25869497067,
+            "mean": 0.279324881695,
+            "n": 30,
+            "std": 0.055247916396
+          }
+        }
+      },
+      "criteria": {
+        "admittance": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.098295872604,
+            4.817969173633
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.596925457078
+        },
+        "assist_policy": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.130640500984,
+            4.820061826509
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.574553667053
+        }
+      },
+      "reduction_versus_off": {
+        "admittance": {
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.959559710221,
+            "ci95_low": 1.625976126872,
+            "mean": 1.792767918547,
+            "n": 30,
+            "std": 0.44667662166
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 4.817969173633,
+            "ci95_low": 4.098295872604,
+            "mean": 4.458132523118,
+            "n": 30,
+            "std": 0.963660248432
+          }
+        },
+        "assist_policy": {
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 2.313039677099,
+            "ci95_low": 1.912634357727,
+            "mean": 2.112837017413,
+            "n": 30,
+            "std": 0.536152569489
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 4.820061826509,
+            "ci95_low": 4.130640500984,
+            "mean": 4.475351163747,
+            "n": 30,
+            "std": 0.92315210927
+          }
+        }
+      }
+    },
+    "reverse": {
+      "absolute": {
+        "admittance": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.934230754413,
+            "ci95_low": 1.568079587497,
+            "mean": 1.751155170955,
+            "n": 30,
+            "std": 0.490285416966
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 6.445117779869,
+            "ci95_low": 5.611939569582,
+            "mean": 6.028528674726,
+            "n": 30,
+            "std": 1.115646113265
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 5.645199618405,
+            "ci95_low": 4.901375546776,
+            "mean": 5.27328758259,
+            "n": 30,
+            "std": 0.995998724186
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.171956207467,
+            "ci95_low": 0.149686410465,
+            "mean": 0.160821308966,
+            "n": 30,
+            "std": 0.029819805849
+          }
+        },
+        "assist_policy": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.370181558552,
+            "ci95_low": 1.148744841608,
+            "mean": 1.25946320008,
+            "n": 30,
+            "std": 0.296509209606
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 6.736760641203,
+            "ci95_low": 5.851506090385,
+            "mean": 6.294133365794,
+            "n": 30,
+            "std": 1.185377613908
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 5.501292045724,
+            "ci95_low": 4.802426668102,
+            "mean": 5.151859356913,
+            "n": 30,
+            "std": 0.935797927278
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.180840079954,
+            "ci95_low": 0.157036407703,
+            "mean": 0.168938243829,
+            "n": 30,
+            "std": 0.031873702528
+          }
+        },
+        "off": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 3.204528748854,
+            "ci95_low": 2.65244003375,
+            "mean": 2.928484391302,
+            "n": 30,
+            "std": 0.739260366604
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 11.673873129783,
+            "ci95_low": 10.124165566112,
+            "mean": 10.899019347948,
+            "n": 30,
+            "std": 2.075096538484
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.055939854019,
+            "ci95_low": 0.913376555531,
+            "mean": 0.984658204775,
+            "n": 30,
+            "std": 0.190895762622
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.314385821714,
+            "ci95_low": 0.272611663954,
+            "mean": 0.293498742834,
+            "n": 30,
+            "std": 0.055936624559
+          }
+        }
+      },
+      "criteria": {
+        "admittance": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.50575516811,
+            5.235226178334
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.568292215937
+        },
+        "assist_policy": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.272632820061,
+            4.937139144246
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.57979001252
+        }
+      },
+      "reduction_versus_off": {
+        "admittance": {
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.279451370971,
+            "ci95_low": 1.075207069725,
+            "mean": 1.177329220348,
+            "n": 30,
+            "std": 0.273488142186
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 5.235226178334,
+            "ci95_low": 4.50575516811,
+            "mean": 4.870490673222,
+            "n": 30,
+            "std": 0.976779621991
+          }
+        },
+        "assist_policy": {
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.835502812654,
+            "ci95_low": 1.502539569791,
+            "mean": 1.669021191223,
+            "n": 30,
+            "std": 0.445845970494
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 4.937139144246,
+            "ci95_low": 4.272632820061,
+            "mean": 4.604885982154,
+            "n": 30,
+            "std": 0.889790309761
+          }
+        }
+      }
+    },
+    "sudden_change": {
+      "absolute": {
+        "admittance": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 2.014589562397,
+            "ci95_low": 1.632981622143,
+            "mean": 1.82378559227,
+            "n": 30,
+            "std": 0.510982416581
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 6.608678978404,
+            "ci95_low": 5.782346754174,
+            "mean": 6.195512866289,
+            "n": 30,
+            "std": 1.106479169576
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 5.639184953075,
+            "ci95_low": 4.888222401691,
+            "mean": 5.263703677383,
+            "n": 30,
+            "std": 1.00555732413
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.172740508752,
+            "ci95_low": 0.150880472476,
+            "mean": 0.161810490614,
+            "n": 30,
+            "std": 0.029271126161
+          }
+        },
+        "assist_policy": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.303041450235,
+            "ci95_low": 1.096523936196,
+            "mean": 1.199782693216,
+            "n": 30,
+            "std": 0.27653203002
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 6.854392920885,
+            "ci95_low": 5.974324667116,
+            "mean": 6.414358794001,
+            "n": 30,
+            "std": 1.178433034617
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 5.615271639182,
+            "ci95_low": 4.994970507181,
+            "mean": 5.305121073182,
+            "n": 30,
+            "std": 0.830598470322
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.179424126646,
+            "ci95_low": 0.155948311677,
+            "mean": 0.167686219162,
+            "n": 30,
+            "std": 0.031434693565
+          }
+        },
+        "off": {
+          "hard_stop_contact_count": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 2.979442648067,
+            "ci95_low": 2.468146662884,
+            "mean": 2.723794655475,
+            "n": 30,
+            "std": 0.684637898056
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 11.772940234808,
+            "ci95_low": 10.227711614788,
+            "mean": 11.000325924798,
+            "n": 30,
+            "std": 2.069099122789
+          },
+          "peak_interaction_torque_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.056590875539,
+            "ci95_low": 0.916806203999,
+            "mean": 0.986698539769,
+            "n": 30,
+            "std": 0.187175112806
+          },
+          "saturation_time_fraction": {
+            "ci95_excludes_0": false,
+            "ci95_high": 0.0,
+            "ci95_low": 0.0,
+            "mean": 0.0,
+            "n": 30,
+            "std": 0.0
+          },
+          "tracking_error_rms_rad": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.312018014785,
+            "ci95_low": 0.270517501274,
+            "mean": 0.291267758029,
+            "n": 30,
+            "std": 0.055570208181
+          }
+        }
+      },
+      "criteria": {
+        "admittance": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.439527702458,
+            5.17009841456
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.584276129015
+        },
+        "assist_policy": {
+          "comfort_peak_interaction_nm": 15.0,
+          "hard_stop_contacts_zero": true,
+          "human_torque_rms_reduction_ci95": [
+            4.253359325052,
+            4.918574936543
+          ],
+          "human_torque_rms_reduction_ci_excludes_0": true,
+          "peak_interaction_below_comfort": true,
+          "saturation_time_fraction_below_5_percent": true,
+          "saturation_time_fraction_mean": 0.0,
+          "tracking_error_no_more_than_10_percent_worse": true,
+          "tracking_error_ratio_max": 0.583934101247
+        }
+      },
+      "reduction_versus_off": {
+        "admittance": {
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 0.982900867773,
+            "ci95_low": 0.817117258638,
+            "mean": 0.900009063205,
+            "n": 30,
+            "std": 0.221988329616
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 5.17009841456,
+            "ci95_low": 4.439527702458,
+            "mean": 4.804813058509,
+            "n": 30,
+            "std": 0.978252149851
+          }
+        },
+        "assist_policy": {
+          "human_positive_work_j": {
+            "ci95_excludes_0": true,
+            "ci95_high": 1.678572387028,
+            "ci95_low": 1.369451537491,
+            "mean": 1.524011962259,
+            "n": 30,
+            "std": 0.413920419495
+          },
+          "human_torque_rms_nm": {
+            "ci95_excludes_0": true,
+            "ci95_high": 4.918574936543,
+            "ci95_low": 4.253359325052,
+            "mean": 4.585967130797,
+            "n": 30,
+            "std": 0.890740062906
+          }
+        }
+      }
+    }
+  },
   "seed_count": 30,
   "seeds": [
     0,

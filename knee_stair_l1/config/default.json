@@ -22,6 +22,7 @@
     "level_note": "Each seed draws an angle-noise standard deviation uniformly from 0.002 to 0.01 rad and a velocity-noise standard deviation from 0.02 to 0.1 rad/s. The draw and the noise sequence are shared by OFF, admittance and AssistPolicy. This is not a measured encoder specification. The plant truth is not noised."
   },
   "command_transport_delay_steps": 2,
+  "default_controller": "assist_policy",
   "intent": {
     "source_label": "synthetic",
     "onset_s": 0.25,
@@ -75,7 +76,9 @@
     "sensor_dropout_s": 0.04,
     "damping_nm_s_per_rad": 2.0,
     "damping_limit_nm": 8.0,
-    "estop_passive_damping_nm_s_per_rad": 1.2
+    "estop_passive_damping_nm_s_per_rad": 1.2,
+    "freshness_threshold_s": 0.05,
+    "stale_safe_duration_s": 0.2
   },
   "plant": {
     "human_inertia_kg_m2": 0.45,

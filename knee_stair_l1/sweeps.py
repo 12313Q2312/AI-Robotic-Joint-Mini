@@ -44,7 +44,7 @@ def latency_sweep(config: dict, delays_s: list[float] | None = None) -> dict:
     first_failure = None
     for delay in grid:
         trials = [
-            run_trial(config, int(seed), condition, jitter_max_s=delay)
+            run_trial(config, int(seed), condition, signal_delay_s=delay)
             for seed in config["seeds"]
             for condition in CONDITIONS
         ]
@@ -91,16 +91,17 @@ def latency_sweep(config: dict, delays_s: list[float] | None = None) -> dict:
             "Layer 2 item and is not implemented in this layer."
         )
     else:
+        seen = {name: row["state"] for name, row in first_supervisor["supervisor_state"].items()}
         conclusion = (
-            f"Steady supervisor state first leaves NORMAL at {first_supervisor['delay_ms']:.0f} ms."
+            f"Steady supervisor state first leaves NORMAL at {first_supervisor['delay_ms']:.0f} ms: {seen}."
         )
     return {
         "evidence_label": "experimental",
         "delay_model": (
-            "Each step draws a delay uniformly from 0 to the sweep value. The intent sample and the "
-            "noisy sensor sample from that earlier time are what enter the controller and the safety "
-            "supervisor. The supervisor stamps them on receipt. Torque is not delayed again after approval. "
-            "The same draw is paired across conditions. The fixed two-step simulation-loop queue is not added on top."
+            "Each sweep level holds intent and sensor packets for an integer number of 5 ms steps "
+            "equal to that delay. Packet age is the production timestamp, so 50 ms is exactly the "
+            "freshness threshold and is still fresh. The same delay is paired across conditions. "
+            "The fixed two-step simulation-loop queue is not added on top of this sweep."
         ),
         "first_steady_supervisor_degradation": None if first_supervisor is None else {
             "delay_ms": first_supervisor["delay_ms"],

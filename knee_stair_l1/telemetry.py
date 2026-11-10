@@ -52,12 +52,12 @@ BOOLEAN_CRITERIA = (
 T_CRIT_95 = {11: 2.200985160082949, 29: 2.045229642132703}
 
 
-def run_study(config: dict | None = None) -> list[TrialResult]:
+def run_study(config: dict | None = None, scenario: str = "nominal") -> list[TrialResult]:
     cfg = config if config is not None else load_config()
     trials = []
     for seed in cfg["seeds"]:
         for condition in CONDITIONS:
-            trials.append(run_trial(cfg, int(seed), condition))
+            trials.append(run_trial(cfg, int(seed), condition, scenario=scenario))
     return trials
 
 
@@ -201,18 +201,24 @@ def summarize(trials: list[TrialResult], config: dict) -> dict:
     }
 
 
-def require_boolean_criteria(summary: dict) -> None:
-    """Pass-criterion flags are booleans for every condition, including AssistPolicy."""
-    criteria = summary.get("criteria")
+def _check_criteria_block(criteria: dict, label: str) -> None:
     if not isinstance(criteria, dict) or not criteria:
-        raise ValueError("summary criteria must be a non-empty object")
+        raise ValueError(f"{label} criteria must be a non-empty object")
     for condition, row in criteria.items():
         if not isinstance(row, dict):
-            raise ValueError(f"{condition} criteria must be an object")
+            raise ValueError(f"{label}.{condition} criteria must be an object")
         for key in BOOLEAN_CRITERIA:
             value = row.get(key)
             if not isinstance(value, bool):
-                raise ValueError(f"{condition}.{key} must be a boolean, got {value!r}")
+                raise ValueError(f"{label}.{condition}.{key} must be a boolean, got {value!r}")
+
+
+def require_boolean_criteria(summary: dict) -> None:
+    """Pass-criterion flags are booleans for every condition, including AssistPolicy."""
+    _check_criteria_block(summary.get("criteria"), "summary")
+    for name, block in summary.get("scenarios", {}).items():
+        if isinstance(block, dict) and "criteria" in block:
+            _check_criteria_block(block["criteria"], f"scenarios.{name}")
 
 
 def _primary_std_positive(absolute: dict) -> bool:
@@ -234,6 +240,60 @@ def _work_comparison(reductions: dict) -> str:
     if admit > policy:
         return "Admittance has a larger positive-work reduction than AssistPolicy in this run."
     return "Admittance and AssistPolicy have the same positive-work reduction in this run."
+
+
+def scenario_advantage(trials: list[TrialResult], config: dict) -> dict:
+    """Per-seed admittance reduction minus AssistPolicy reduction. Positive favours admittance."""
+    by_key = {(trial.seed, trial.condition): trial for trial in trials}
+    compared = {}
+    for metric in PRIMARY:
+        deltas = []
+        for seed in config["seeds"]:
+            off = by_key[(int(seed), "off")]
+            admit = by_key[(int(seed), "admittance")]
+            policy = by_key[(int(seed), "assist_policy")]
+            admit_reduction = getattr(off, metric) - getattr(admit, metric)
+            policy_reduction = getattr(off, metric) - getattr(policy, metric)
+            deltas.append(admit_reduction - policy_reduction)
+        compared[metric] = _stats(deltas)
+    return compared
+
+
+def attach_l2_scenarios(summary: dict, config: dict) -> dict:
+    """Add the three L2 scenarios and the default-controller decision. Nominal stays the top level."""
+    from knee_stair_l1.intent import SCENARIOS
+
+    scenarios = {}
+    advantages = {}
+    for scenario in SCENARIOS:
+        trials = run_study(config, scenario=scenario)
+        block = summarize(trials, config)
+        scenarios[scenario] = {
+            "reduction_versus_off": block["reduction_versus_off"],
+            "absolute": {condition: {metric: block["absolute"][condition][metric] for metric in METRICS} for condition in CONDITIONS},
+            "criteria": block["criteria"],
+        }
+        if scenario != "nominal":
+            advantages[scenario] = scenario_advantage(trials, config)
+    promoted = True
+    for scenario, compared in advantages.items():
+        for metric in PRIMARY:
+            if compared[metric]["ci95_low"] <= 0.0:
+                promoted = False
+    configured = config.get("default_controller", "assist_policy")
+    summary["scenarios"] = scenarios
+    summary["admittance_minus_assist_policy"] = advantages
+    summary["default_controller"] = {
+        "configured": configured,
+        "recommended": "admittance" if promoted else "assist_policy",
+        "promoted_admittance": promoted,
+        "rule": (
+            "Promote admittance only if, on every new scenario and both primary metrics, "
+            "the 95% CI of admittance reduction minus AssistPolicy reduction is entirely above 0."
+        ),
+    }
+    require_boolean_criteria(summary)
+    return summary
 
 
 def _event_dict(event) -> dict:
@@ -351,6 +411,19 @@ def format_summary_markdown(summary: dict) -> str:
         for key, value in result.items():
             lines.append(f"- {key}: {value}")
         lines.append("")
+    if "scenarios" in summary:
+        lines.extend(["## L2 scenarios, primary reduction versus OFF", ""])
+        lines.append("| Scenario | Metric | admittance | AssistPolicy |")
+        lines.append("|---|---|---:|---:|")
+        for scenario, block in summary["scenarios"].items():
+            for metric in PRIMARY:
+                cells = []
+                for condition in ("admittance", "assist_policy"):
+                    stats = block["reduction_versus_off"][condition][metric]
+                    cells.append(f"{stats['mean']:.6f} ± {stats['std']:.6f}")
+                lines.append("| " + " | ".join([scenario, metric, *cells]) + " |")
+        decision = summary.get("default_controller", {})
+        lines.extend(["", f"Configured default controller: {decision.get('configured')}.", f"Recommended: {decision.get('recommended')}.", ""])
     return "\n".join(lines)
 
 

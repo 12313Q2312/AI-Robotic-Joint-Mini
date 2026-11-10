@@ -13,6 +13,6 @@ Bottom panel:
 - orange: admittance peak strap torque, Nm
 - brown: AssistPolicy peak strap torque, Nm
 
-Through 500 ms the steady supervisor state stays NORMAL. The supervisor has no signal-freshness or staleness check: a steady stream of late intent and sensor packets is stamped on receipt. A check of packet age is a required Layer 2 item and is not implemented in this layer.
+Steady supervisor state first leaves NORMAL at 100 ms: {'off': 'SAFE_HOLD', 'admittance': 'SAFE_HOLD', 'assist_policy': 'SAFE_HOLD'}.
 
 Admittance's positive-work reduction stays below AssistPolicy across this sweep. That ordering is reported as it is.

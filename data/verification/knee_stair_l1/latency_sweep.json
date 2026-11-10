@@ -1,8 +1,33 @@
 {
-  "conclusion": "Through 500 ms the steady supervisor state stays NORMAL. The supervisor has no signal-freshness or staleness check: a steady stream of late intent and sensor packets is stamped on receipt. A check of packet age is a required Layer 2 item and is not implemented in this layer.",
-  "delay_model": "Each step draws a delay uniformly from 0 to the sweep value. The intent sample and the noisy sensor sample from that earlier time are what enter the controller and the safety supervisor. The supervisor stamps them on receipt. Torque is not delayed again after approval. The same draw is paired across conditions. The fixed two-step simulation-loop queue is not added on top.",
+  "conclusion": "Steady supervisor state first leaves NORMAL at 100 ms: {'off': 'SAFE_HOLD', 'admittance': 'SAFE_HOLD', 'assist_policy': 'SAFE_HOLD'}.",
+  "delay_model": "Each sweep level holds intent and sensor packets for an integer number of 5 ms steps equal to that delay. Packet age is the production timestamp, so 50 ms is exactly the freshness threshold and is still fresh. The same delay is paired across conditions. The fixed two-step simulation-loop queue is not added on top of this sweep.",
   "evidence_label": "experimental",
-  "first_steady_supervisor_degradation": null,
+  "first_steady_supervisor_degradation": {
+    "delay_ms": 100.0,
+    "supervisor_state": {
+      "admittance": {
+        "counts": {
+          "DEGRADED": 1230,
+          "SAFE_HOLD": 10170
+        },
+        "state": "SAFE_HOLD"
+      },
+      "assist_policy": {
+        "counts": {
+          "DEGRADED": 1230,
+          "SAFE_HOLD": 10170
+        },
+        "state": "SAFE_HOLD"
+      },
+      "off": {
+        "counts": {
+          "DEGRADED": 1230,
+          "SAFE_HOLD": 10170
+        },
+        "state": "SAFE_HOLD"
+      }
+    }
+  },
   "points": [
     {
       "admittance": {
@@ -82,16 +107,16 @@
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.784379512,
-        "human_torque_rms_ci95": 4.087720747933,
-        "human_torque_rms_reduction_nm": 4.445861288993,
-        "peak_interaction_torque_nm": 5.224877822700903
+        "human_positive_work_reduction_j": 1.781467825996,
+        "human_torque_rms_ci95": 4.083267305767,
+        "human_torque_rms_reduction_nm": 4.440610163354,
+        "peak_interaction_torque_nm": 5.233556594740596
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 2.100929026711,
-        "human_torque_rms_ci95": 4.121108221099,
-        "human_torque_rms_reduction_nm": 4.465039932809,
-        "peak_interaction_torque_nm": 5.250512797939911
+        "human_positive_work_reduction_j": 2.095813200606,
+        "human_torque_rms_ci95": 4.118102273385,
+        "human_torque_rms_reduction_nm": 4.461837015647,
+        "peak_interaction_torque_nm": 5.279510659657359
       },
       "delay_ms": 10.0,
       "delay_s": 0.01,
@@ -120,16 +145,16 @@
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.779969845175,
-        "human_torque_rms_ci95": 4.081863945143,
-        "human_torque_rms_reduction_nm": 4.439146748053,
-        "peak_interaction_torque_nm": 5.236085716356751
+        "human_positive_work_reduction_j": 1.774802965332,
+        "human_torque_rms_ci95": 4.073025859993,
+        "human_torque_rms_reduction_nm": 4.429181889897,
+        "peak_interaction_torque_nm": 5.260065934705326
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 2.093170437373,
-        "human_torque_rms_ci95": 4.117366477893,
-        "human_torque_rms_reduction_nm": 4.461061572545,
-        "peak_interaction_torque_nm": 5.291954781809938
+        "human_positive_work_reduction_j": 2.08491016937,
+        "human_torque_rms_ci95": 4.11131692139,
+        "human_torque_rms_reduction_nm": 4.454529535707,
+        "peak_interaction_torque_nm": 5.35155374003193
       },
       "delay_ms": 15.0,
       "delay_s": 0.015,
@@ -158,16 +183,16 @@
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.777669226811,
-        "human_torque_rms_ci95": 4.077916242338,
-        "human_torque_rms_reduction_nm": 4.434407918562,
-        "peak_interaction_torque_nm": 5.250377757042609
+        "human_positive_work_reduction_j": 1.768282675368,
+        "human_torque_rms_ci95": 4.062625217326,
+        "human_torque_rms_reduction_nm": 4.417630645689,
+        "peak_interaction_torque_nm": 5.287449492574654
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 2.088462138357,
-        "human_torque_rms_ci95": 4.115092020975,
-        "human_torque_rms_reduction_nm": 4.458096169771,
-        "peak_interaction_torque_nm": 5.333033864093013
+        "human_positive_work_reduction_j": 2.07216057154,
+        "human_torque_rms_ci95": 4.104149773432,
+        "human_torque_rms_reduction_nm": 4.446814602018,
+        "peak_interaction_torque_nm": 5.4271269860646125
       },
       "delay_ms": 20.0,
       "delay_s": 0.02,
@@ -196,16 +221,16 @@
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.775134852998,
-        "human_torque_rms_ci95": 4.074275765111,
-        "human_torque_rms_reduction_nm": 4.429459900613,
-        "peak_interaction_torque_nm": 5.279223303206518
+        "human_positive_work_reduction_j": 1.76182168386,
+        "human_torque_rms_ci95": 4.05200689365,
+        "human_torque_rms_reduction_nm": 4.40583928816,
+        "peak_interaction_torque_nm": 5.3156447164505405
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 2.083938717187,
-        "human_torque_rms_ci95": 4.113439434425,
-        "human_torque_rms_reduction_nm": 4.455710048791,
-        "peak_interaction_torque_nm": 5.366924548561809
+        "human_positive_work_reduction_j": 2.057458460984,
+        "human_torque_rms_ci95": 4.096567799797,
+        "human_torque_rms_reduction_nm": 4.438656941383,
+        "peak_interaction_torque_nm": 5.507727682385497
       },
       "delay_ms": 25.0,
       "delay_s": 0.025,
@@ -234,16 +259,16 @@
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.770493133792,
-        "human_torque_rms_ci95": 4.066369140679,
-        "human_torque_rms_reduction_nm": 4.421438502524,
-        "peak_interaction_torque_nm": 5.28682416172165
+        "human_positive_work_reduction_j": 1.755442606488,
+        "human_torque_rms_ci95": 4.041143044719,
+        "human_torque_rms_reduction_nm": 4.393772893105,
+        "peak_interaction_torque_nm": 5.344886113093671
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 2.077937377513,
-        "human_torque_rms_ci95": 4.107614634487,
-        "human_torque_rms_reduction_nm": 4.450064121536,
-        "peak_interaction_torque_nm": 5.3955192958852765
+        "human_positive_work_reduction_j": 2.040976168131,
+        "human_torque_rms_ci95": 4.088533652887,
+        "human_torque_rms_reduction_nm": 4.430015887121,
+        "peak_interaction_torque_nm": 5.5947878723988795
       },
       "delay_ms": 30.0,
       "delay_s": 0.03,
@@ -272,16 +297,16 @@
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.766255390562,
-        "human_torque_rms_ci95": 4.061479566875,
-        "human_torque_rms_reduction_nm": 4.415340788115,
-        "peak_interaction_torque_nm": 5.2999908284729
+        "human_positive_work_reduction_j": 1.749251336884,
+        "human_torque_rms_ci95": 4.03006568768,
+        "human_torque_rms_reduction_nm": 4.381507354996,
+        "peak_interaction_torque_nm": 5.3738424304083585
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 2.068564942543,
-        "human_torque_rms_ci95": 4.103928565711,
-        "human_torque_rms_reduction_nm": 4.445549399519,
-        "peak_interaction_torque_nm": 5.415420806967473
+        "human_positive_work_reduction_j": 2.022973842481,
+        "human_torque_rms_ci95": 4.080006729165,
+        "human_torque_rms_reduction_nm": 4.420847548412,
+        "peak_interaction_torque_nm": 5.6857845510822305
       },
       "delay_ms": 35.0,
       "delay_s": 0.035,
@@ -310,16 +335,16 @@
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.76393401921,
-        "human_torque_rms_ci95": 4.055540871172,
-        "human_torque_rms_reduction_nm": 4.409713083181,
-        "peak_interaction_torque_nm": 5.316452876637153
+        "human_positive_work_reduction_j": 1.74320720639,
+        "human_torque_rms_ci95": 4.018732382925,
+        "human_torque_rms_reduction_nm": 4.368963096937,
+        "peak_interaction_torque_nm": 5.405813745397319
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 2.060336477419,
-        "human_torque_rms_ci95": 4.098973059182,
-        "human_torque_rms_reduction_nm": 4.441093567796,
-        "peak_interaction_torque_nm": 5.452838598319931
+        "human_positive_work_reduction_j": 2.003858981126,
+        "human_torque_rms_ci95": 4.070939972679,
+        "human_torque_rms_reduction_nm": 4.411101889834,
+        "peak_interaction_torque_nm": 5.782349299892977
       },
       "delay_ms": 40.0,
       "delay_s": 0.04,
@@ -348,16 +373,16 @@
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.761797869831,
-        "human_torque_rms_ci95": 4.051744817819,
-        "human_torque_rms_reduction_nm": 4.40547472606,
-        "peak_interaction_torque_nm": 5.33513853931621
+        "human_positive_work_reduction_j": 1.737321208419,
+        "human_torque_rms_ci95": 4.007133230623,
+        "human_torque_rms_reduction_nm": 4.356130935961,
+        "peak_interaction_torque_nm": 5.434941661161954
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 2.054743597057,
-        "human_torque_rms_ci95": 4.097255744885,
-        "human_torque_rms_reduction_nm": 4.439404762657,
-        "peak_interaction_torque_nm": 5.479061212898915
+        "human_positive_work_reduction_j": 1.984229446177,
+        "human_torque_rms_ci95": 4.061278767252,
+        "human_torque_rms_reduction_nm": 4.40072095118,
+        "peak_interaction_torque_nm": 5.883378002892467
       },
       "delay_ms": 45.0,
       "delay_s": 0.045,
@@ -386,16 +411,16 @@
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.757221488445,
-        "human_torque_rms_ci95": 4.044118238663,
-        "human_torque_rms_reduction_nm": 4.397302756729,
-        "peak_interaction_torque_nm": 5.346617369292717
+        "human_positive_work_reduction_j": 1.731617934461,
+        "human_torque_rms_ci95": 3.995252527872,
+        "human_torque_rms_reduction_nm": 4.342998788677,
+        "peak_interaction_torque_nm": 5.464908564804184
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 2.044785936179,
-        "human_torque_rms_ci95": 4.091676956055,
-        "human_torque_rms_reduction_nm": 4.433419721133,
-        "peak_interaction_torque_nm": 5.522487205771289
+        "human_positive_work_reduction_j": 1.964561033509,
+        "human_torque_rms_ci95": 4.050961108455,
+        "human_torque_rms_reduction_nm": 4.389638960454,
+        "peak_interaction_torque_nm": 5.984673037624634
       },
       "delay_ms": 50.0,
       "delay_s": 0.05,
@@ -424,120 +449,144 @@
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.727515938117,
-        "human_torque_rms_ci95": 3.990381980008,
-        "human_torque_rms_reduction_nm": 4.336276747484,
-        "peak_interaction_torque_nm": 5.551315712560441
+        "human_positive_work_reduction_j": 0.657396668879,
+        "human_torque_rms_ci95": 0.310536573201,
+        "human_torque_rms_reduction_nm": 0.330587910846,
+        "peak_interaction_torque_nm": 3.5769468008813865
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 1.956001109702,
-        "human_torque_rms_ci95": 4.051954762009,
-        "human_torque_rms_reduction_nm": 4.387631297036,
-        "peak_interaction_torque_nm": 5.865212441384123
+        "human_positive_work_reduction_j": 1.147351096269,
+        "human_torque_rms_ci95": 0.626627699883,
+        "human_torque_rms_reduction_nm": 0.66715789993,
+        "peak_interaction_torque_nm": 6.559110772284737
       },
       "delay_ms": 100.0,
       "delay_s": 0.1,
-      "failed": false,
-      "reasons": [],
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
       "supervisor_state": {
         "admittance": {
           "counts": {
-            "NORMAL": 11400
+            "DEGRADED": 1230,
+            "SAFE_HOLD": 10170
           },
-          "state": "NORMAL"
+          "state": "SAFE_HOLD"
         },
         "assist_policy": {
           "counts": {
-            "NORMAL": 11400
+            "DEGRADED": 1230,
+            "SAFE_HOLD": 10170
           },
-          "state": "NORMAL"
+          "state": "SAFE_HOLD"
         },
         "off": {
           "counts": {
-            "NORMAL": 11400
+            "DEGRADED": 1230,
+            "SAFE_HOLD": 10170
           },
-          "state": "NORMAL"
+          "state": "SAFE_HOLD"
         }
       }
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.696932269548,
-        "human_torque_rms_ci95": 3.868464353803,
-        "human_torque_rms_reduction_nm": 4.203591036651,
-        "peak_interaction_torque_nm": 6.0295413111657155
+        "human_positive_work_reduction_j": 0.331107670442,
+        "human_torque_rms_ci95": 0.295672634941,
+        "human_torque_rms_reduction_nm": 0.314764875247,
+        "peak_interaction_torque_nm": 3.700309116554508
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 1.923326339702,
-        "human_torque_rms_ci95": 3.979478876653,
-        "human_torque_rms_reduction_nm": 4.311175974194,
-        "peak_interaction_torque_nm": 6.036316071470514
+        "human_positive_work_reduction_j": 0.79146006117,
+        "human_torque_rms_ci95": 0.600621839562,
+        "human_torque_rms_reduction_nm": 0.639227251635,
+        "peak_interaction_torque_nm": 6.67265156629479
       },
       "delay_ms": 200.0,
       "delay_s": 0.2,
-      "failed": false,
-      "reasons": [],
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
       "supervisor_state": {
         "admittance": {
           "counts": {
-            "NORMAL": 10800
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 9600
           },
-          "state": "NORMAL"
+          "state": "SAFE_HOLD"
         },
         "assist_policy": {
           "counts": {
-            "NORMAL": 10800
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 9600
           },
-          "state": "NORMAL"
+          "state": "SAFE_HOLD"
         },
         "off": {
           "counts": {
-            "NORMAL": 10800
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 9600
           },
-          "state": "NORMAL"
+          "state": "SAFE_HOLD"
         }
       }
     },
     {
       "admittance": {
-        "human_positive_work_reduction_j": 1.647068754982,
-        "human_torque_rms_ci95": 3.56721590881,
-        "human_torque_rms_reduction_nm": 3.88330432699,
-        "peak_interaction_torque_nm": 7.473885041729047
+        "human_positive_work_reduction_j": 0.352041978454,
+        "human_torque_rms_ci95": 0.249598628288,
+        "human_torque_rms_reduction_nm": 0.267540260642,
+        "peak_interaction_torque_nm": 4.053962036111023
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 1.77894566092,
-        "human_torque_rms_ci95": 3.869389335786,
-        "human_torque_rms_reduction_nm": 4.19494264479,
-        "peak_interaction_torque_nm": 6.146465790217787
+        "human_positive_work_reduction_j": 0.768838880135,
+        "human_torque_rms_ci95": 0.490985338291,
+        "human_torque_rms_reduction_nm": 0.526711286759,
+        "peak_interaction_torque_nm": 7.0230638997114685
       },
       "delay_ms": 500.0,
       "delay_s": 0.5,
-      "failed": false,
-      "reasons": [],
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
       "supervisor_state": {
         "admittance": {
           "counts": {
-            "NORMAL": 9000
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 7800
           },
-          "state": "NORMAL"
+          "state": "SAFE_HOLD"
         },
         "assist_policy": {
           "counts": {
-            "NORMAL": 9000
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 7800
           },
-          "state": "NORMAL"
+          "state": "SAFE_HOLD"
         },
         "off": {
           "counts": {
-            "NORMAL": 9000
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 7800
           },
-          "state": "NORMAL"
+          "state": "SAFE_HOLD"
         }
       }
     }
   ],
-  "required_l2_if_no_degradation_by_500_ms": true,
-  "threshold": null,
+  "required_l2_if_no_degradation_by_500_ms": false,
+  "threshold": {
+    "delay_s": 0.1,
+    "reasons": [
+      "admittance: supervisor steady state left NORMAL",
+      "assist_policy: supervisor steady state left NORMAL"
+    ]
+  },
   "worse_than_off_means": "Torque-RMS reduction CI does not stay above 0, tracking is more than 10% worse than OFF, a hard stop occurs, admittance saturation reaches 5%, interaction reaches the comfort threshold, or the supervisor leaves NORMAL."
 }
