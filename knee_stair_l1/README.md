@@ -66,7 +66,7 @@ self.weight_share * self.body_mass * self.gravity * self.moment_arm * math.sin(f
 | 层 | 值 | 作用 | 代码 |
 |---|---|---|---|
 | 执行器硬上限 | 24 Nm | `clamp_actuator_torque` 把送到植物或安全话题的力矩收到 ±24 Nm。NaN 和 inf 抛出 `ValueError`，函数本身不返回 0 | `config/default.json` 第 25 行；`actuator.py` 第 15–28 行；植物侧 `plant.py` 第 115 行 |
-| 非有限命令的发布 | 0 Nm，并锁存 `E_STOP` | `on_assist_command` 接住上面的 `ValueError`，再发布 0 | `safe_publish.py` 第 28–35 行 |
+| 非有限命令的发布 | 0 Nm，并锁存 `E_STOP` | `on_assist_command` 接住上面的 `ValueError`，再发布 0 | `safe_publish.py` 的 `_estop_after_rejected_clamp`，第 59–68 行 |
 | 监督器合理性检查 | 40 Nm | 有限命令超出 ±`command_limit_nm` 时进入 `LIMITED_ASSIST`。这不是力矩上限。监督器输出仍可到 40 Nm，随后由执行器钳位收到 24 Nm | `config/default.json` 第 74–75 行；判断 `safety.py` 第 157–158 行；合理性钳位 `safety.py` 第 170–172 行 |
 | PID 抗饱和上限 | 24 Nm | 只约束导纳内环的提案，不是唯一的最终出口 | `config/default.json` 第 67 行；`torque_pid.py` 第 80–83 行；`controller.py` 第 53 行 |
 | AssistPolicy 内部上限 | 24 Nm | 策略目标钳在 ±24 Nm。PR #3 抄来的头文件是 80 Nm；PR #10 起本树改为 24 Nm。绕过策略直接注入的命令仍由 `clamp_actuator_torque` 截住 | `config/default.json` 第 54 行；`assist_policy.py` 第 42–45 行；`controller.py` 第 55 行 |
