@@ -20,8 +20,10 @@ Fault mapping used by the injection suite:
 E_STOP outranks SAFE_HOLD, which outranks DAMPING_ONLY, which outranks
 DEGRADED, which outranks LIMITED_ASSIST.
 On E_STOP and SAFE_HOLD the assist command is 0 and passive_damping is true.
-DEGRADED still passes the clamped assist command and returns to NORMAL, or
-LIMITED_ASSIST, on the first evaluation where both packet ages are fresh.
+DEGRADED caps torque at degraded_torque_fraction times the 24 Nm PID limit
+(0.5 * 24 = 12 Nm) and slews into and out of that cap at degraded_slew_nm_per_s.
+It returns to NORMAL only after both packets have stayed fresh for
+fresh_recover_duration_s. The actuator clamp still runs after this output.
 SAFE_HOLD does not clear when fresh packets return; reset() clears it.
 DAMPING_ONLY, used for a receipt gap or command timeout, still publishes a
 viscous command and does not latch. The legacy safe target angle is left on
@@ -70,6 +72,14 @@ class JointSafetyCore:
         self.damping_limit_nm = float(safety["damping_limit_nm"])
         self.freshness_threshold_s = float(safety.get("freshness_threshold_s", 0.05))
         self.stale_safe_duration_s = float(safety.get("stale_safe_duration_s", 0.2))
+        fraction = float(safety.get("degraded_torque_fraction", 0.5))
+        pid_limit = float(config["pid"]["torque_limit_nm"])
+        self.degraded_cap_nm = fraction * pid_limit
+        actuator_limit = float(config.get("actuator_torque_limit_nm", pid_limit))
+        if self.degraded_cap_nm > actuator_limit:
+            self.degraded_cap_nm = actuator_limit
+        self.degraded_slew_nm_per_s = float(safety.get("degraded_slew_nm_per_s", 200.0))
+        self.fresh_recover_s = float(safety.get("fresh_recover_duration_s", 0.10))
         self.reset(0.0)
 
     def reset(self, now: float) -> None:
@@ -93,6 +103,12 @@ class JointSafetyCore:
         self.last_intent_packet_time = float(now)
         self.last_sensor_packet_time = float(now)
         self._stale_since = None
+        self._fresh_since = None
+        self._needs_fresh_recover = False
+        self._slew_output = 0.0
+        self._slew_time = float(now)
+        self._slew_initialized = False
+        self._recover_slew = False
 
     def observe_legacy_target(self, angle_rad: float, now: float) -> bool:
         """Accept a finite angle. Non-finite samples are ignored, matching the historical node."""
@@ -161,7 +177,7 @@ class JointSafetyCore:
         if self._estop_latched:
             state = E_STOP
         reasons = tuple(dict.fromkeys((*knee_reasons, *legacy_reasons, *(("e_stop_latched",) if self._estop_latched else ()))))
-        torque = self._torque_for(state, clamped)
+        torque = self._torque_for(state, clamped, now)
         return self._decision(state, reasons, torque, legacy_angle, clamped and state == LIMITED_ASSIST)
 
     def _legacy(self, now: float) -> tuple[str, float, tuple[str, ...]]:
@@ -197,11 +213,13 @@ class JointSafetyCore:
         if reasons:
             return DAMPING_ONLY, tuple(reasons), False
         if stale_reasons:
-            over_limit = abs(self.last_command) > self.command_limit_nm
-            reasons = list(stale_reasons)
-            if over_limit:
-                reasons.append("command_out_of_range")
-            return DEGRADED, tuple(reasons), over_limit
+            self._needs_fresh_recover = True
+            return DEGRADED, tuple(stale_reasons), False
+        if self._needs_fresh_recover:
+            fresh_for = 0.0 if self._fresh_since is None else now - self._fresh_since
+            if fresh_for + 1e-12 < self.fresh_recover_s:
+                return DEGRADED, ("fresh_recover_pending",), False
+            self._needs_fresh_recover = False
         if abs(self.last_command) > self.command_limit_nm:
             return LIMITED_ASSIST, ("command_out_of_range",), True
         return NORMAL, (), False
@@ -218,14 +236,21 @@ class JointSafetyCore:
             reasons.append("stale_intent")
         if not reasons:
             self._stale_since = None
+            if self._fresh_since is None:
+                self._fresh_since = now
             return ()
+        self._fresh_since = None
         if self._stale_since is None:
             self._stale_since = now
         if now - self._stale_since >= self.stale_safe_duration_s:
             self._safe_hold_latched = True
         return tuple(reasons)
 
-    def _torque_for(self, state: str, clamped: bool) -> float:
+    def _torque_for(self, state: str, clamped: bool, now: float) -> float:
+        target = self._target_torque(state, clamped)
+        return self._slew_if_degraded(state, target, now)
+
+    def _target_torque(self, state: str, clamped: bool) -> float:
         if not self.knee_port_enabled:
             return 0.0
         if state in (E_STOP, SAFE_HOLD):
@@ -234,11 +259,45 @@ class JointSafetyCore:
             # Oppose flexion: positive flexion velocity produces extension torque.
             viscous = self.damping * self.last_qd
             return min(self.damping_limit_nm, max(-self.damping_limit_nm, viscous))
+        if state == DEGRADED:
+            return min(self.degraded_cap_nm, max(-self.degraded_cap_nm, self.last_command))
         if state == LIMITED_ASSIST or clamped:
             # Plausibility clamp only. The actuator clamp is clamp_actuator_torque.
-            # DEGRADED has its own cap, applied below.
             return min(self.command_limit_nm, max(-self.command_limit_nm, self.last_command))
         return self.last_command
+
+    def _slew_if_degraded(self, state: str, target: float, now: float) -> float:
+        """Slew only while entering or leaving DEGRADED.
+
+        E_STOP and SAFE_HOLD still go to 0 immediately. NORMAL tracking is
+        unchanged until a DEGRADED interval has to be left.
+        """
+        if state in (E_STOP, SAFE_HOLD, DAMPING_ONLY) or not self.knee_port_enabled:
+            self._recover_slew = False
+            self._slew_output = target
+            self._slew_time = now
+            self._slew_initialized = True
+            return target
+        if state == DEGRADED:
+            self._recover_slew = True
+        rate_limited = state == DEGRADED or self._recover_slew
+        dt = now - self._slew_time
+        if rate_limited and self._slew_initialized and dt > 0.0:
+            max_delta = self.degraded_slew_nm_per_s * dt
+            delta = target - self._slew_output
+            if delta > max_delta:
+                delta = max_delta
+            elif delta < -max_delta:
+                delta = -max_delta
+            self._slew_output += delta
+        else:
+            self._slew_output = target
+        self._slew_time = now
+        self._slew_initialized = True
+        if state != DEGRADED and abs(self._slew_output - target) <= 1e-9:
+            self._recover_slew = False
+            self._slew_output = target
+        return self._slew_output
 
     def _decision(self, state, reasons, torque, angle, clamped) -> SafetyDecision:
         return SafetyDecision(

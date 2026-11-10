@@ -234,7 +234,7 @@
     "admittance",
     "assist_policy"
   ],
-  "config_sha256": "e5a7e56ab63c0ac0b28752fef0788436b9bcb490fad2d4ceb986003b88e8fc2c",
+  "config_sha256": "6c9843083e3f5fef020380abe890960e6ffd794e8c614c71e7ba080c4d8637f0",
   "criteria": {
     "admittance": {
       "comfort_peak_interaction_nm": 15.0,
@@ -449,7 +449,7 @@
           "human_torque_rms_nm": {
             "ci95_excludes_0": true,
             "ci95_high": 11.45100443828,
-            "ci95_low": 9.898460899409,
+            "ci95_low": 9.89846089941,
             "mean": 10.674732668845,
             "n": 30,
             "std": 2.07889397902

@@ -1,28 +1,28 @@
 {
-  "conclusion": "Steady supervisor state first leaves NORMAL at 100 ms: {'off': 'SAFE_HOLD', 'admittance': 'SAFE_HOLD', 'assist_policy': 'SAFE_HOLD'}.",
+  "conclusion": "Steady supervisor state first leaves NORMAL at 55 ms: {'off': 'SAFE_HOLD', 'admittance': 'SAFE_HOLD', 'assist_policy': 'SAFE_HOLD'}. The freshness threshold is 0.05 s and a packet is stale only when its age is greater than that. On this 5 ms grid, 50 ms is exactly the threshold and stays fresh. The next step, 55 ms, is the first age that exceeds 0.05 s.",
   "delay_model": "Each sweep level holds intent and sensor packets for an integer number of 5 ms steps equal to that delay. Packet age is the production timestamp, so 50 ms is exactly the freshness threshold and is still fresh. The same delay is paired across conditions. The fixed two-step simulation-loop queue is not added on top of this sweep.",
   "evidence_label": "experimental",
   "first_steady_supervisor_degradation": {
-    "delay_ms": 100.0,
+    "delay_ms": 55.0,
     "supervisor_state": {
       "admittance": {
         "counts": {
-          "DEGRADED": 1230,
-          "SAFE_HOLD": 10170
+          "DEGRADED": 1200,
+          "SAFE_HOLD": 10470
         },
         "state": "SAFE_HOLD"
       },
       "assist_policy": {
         "counts": {
-          "DEGRADED": 1230,
-          "SAFE_HOLD": 10170
+          "DEGRADED": 1200,
+          "SAFE_HOLD": 10470
         },
         "state": "SAFE_HOLD"
       },
       "off": {
         "counts": {
-          "DEGRADED": 1230,
-          "SAFE_HOLD": 10170
+          "DEGRADED": 1200,
+          "SAFE_HOLD": 10470
         },
         "state": "SAFE_HOLD"
       }
@@ -449,16 +449,412 @@
     },
     {
       "admittance": {
+        "human_positive_work_reduction_j": 0.569201641699,
+        "human_torque_rms_ci95": 0.258708851703,
+        "human_torque_rms_reduction_nm": 0.275595825879,
+        "peak_interaction_torque_nm": 2.988499821361353
+      },
+      "assist_policy": {
+        "human_positive_work_reduction_j": 1.06304976444,
+        "human_torque_rms_ci95": 0.559756480737,
+        "human_torque_rms_reduction_nm": 0.596267199193,
+        "peak_interaction_torque_nm": 5.963069202072025
+      },
+      "delay_ms": 55.0,
+      "delay_s": 0.055,
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
+      "supervisor_state": {
+        "admittance": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10470
+          },
+          "state": "SAFE_HOLD"
+        },
+        "assist_policy": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10470
+          },
+          "state": "SAFE_HOLD"
+        },
+        "off": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10470
+          },
+          "state": "SAFE_HOLD"
+        }
+      }
+    },
+    {
+      "admittance": {
+        "human_positive_work_reduction_j": 0.586172323973,
+        "human_torque_rms_ci95": 0.264006651659,
+        "human_torque_rms_reduction_nm": 0.281203468293,
+        "peak_interaction_torque_nm": 3.0447154635471034
+      },
+      "assist_policy": {
+        "human_positive_work_reduction_j": 1.096563678662,
+        "human_torque_rms_ci95": 0.566715525363,
+        "human_torque_rms_reduction_nm": 0.60363476468,
+        "peak_interaction_torque_nm": 6.0361871829050715
+      },
+      "delay_ms": 60.0,
+      "delay_s": 0.06,
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
+      "supervisor_state": {
+        "admittance": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10440
+          },
+          "state": "SAFE_HOLD"
+        },
+        "assist_policy": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10440
+          },
+          "state": "SAFE_HOLD"
+        },
+        "off": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10440
+          },
+          "state": "SAFE_HOLD"
+        }
+      }
+    },
+    {
+      "admittance": {
+        "human_positive_work_reduction_j": 0.60178719119,
+        "human_torque_rms_ci95": 0.269049384761,
+        "human_torque_rms_reduction_nm": 0.28654270876,
+        "peak_interaction_torque_nm": 3.1038604596069805
+      },
+      "assist_policy": {
+        "human_positive_work_reduction_j": 1.126984724724,
+        "human_torque_rms_ci95": 0.573108623839,
+        "human_torque_rms_reduction_nm": 0.610401153408,
+        "peak_interaction_torque_nm": 6.1061364231157595
+      },
+      "delay_ms": 65.0,
+      "delay_s": 0.065,
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
+      "supervisor_state": {
+        "admittance": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10410
+          },
+          "state": "SAFE_HOLD"
+        },
+        "assist_policy": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10410
+          },
+          "state": "SAFE_HOLD"
+        },
+        "off": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10410
+          },
+          "state": "SAFE_HOLD"
+        }
+      }
+    },
+    {
+      "admittance": {
+        "human_positive_work_reduction_j": 0.615631018479,
+        "human_torque_rms_ci95": 0.273772603265,
+        "human_torque_rms_reduction_nm": 0.291545498802,
+        "peak_interaction_torque_nm": 3.163314167714904
+      },
+      "assist_policy": {
+        "human_positive_work_reduction_j": 1.149263043531,
+        "human_torque_rms_ci95": 0.578940718162,
+        "human_torque_rms_reduction_nm": 0.616571721832,
+        "peak_interaction_torque_nm": 6.171522629449578
+      },
+      "delay_ms": 70.0,
+      "delay_s": 0.07,
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
+      "supervisor_state": {
+        "admittance": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10380
+          },
+          "state": "SAFE_HOLD"
+        },
+        "assist_policy": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10380
+          },
+          "state": "SAFE_HOLD"
+        },
+        "off": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10380
+          },
+          "state": "SAFE_HOLD"
+        }
+      }
+    },
+    {
+      "admittance": {
+        "human_positive_work_reduction_j": 0.62715074322,
+        "human_torque_rms_ci95": 0.278126839072,
+        "human_torque_rms_reduction_nm": 0.296159648912,
+        "peak_interaction_torque_nm": 3.2230360089052446
+      },
+      "assist_policy": {
+        "human_positive_work_reduction_j": 1.162048798479,
+        "human_torque_rms_ci95": 0.584221326829,
+        "human_torque_rms_reduction_nm": 0.622156552096,
+        "peak_interaction_torque_nm": 6.233555794416357
+      },
+      "delay_ms": 75.0,
+      "delay_s": 0.075,
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
+      "supervisor_state": {
+        "admittance": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10350
+          },
+          "state": "SAFE_HOLD"
+        },
+        "assist_policy": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10350
+          },
+          "state": "SAFE_HOLD"
+        },
+        "off": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10350
+          },
+          "state": "SAFE_HOLD"
+        }
+      }
+    },
+    {
+      "admittance": {
+        "human_positive_work_reduction_j": 0.635860728534,
+        "human_torque_rms_ci95": 0.282082208172,
+        "human_torque_rms_reduction_nm": 0.300351199859,
+        "peak_interaction_torque_nm": 3.278349203262769
+      },
+      "assist_policy": {
+        "human_positive_work_reduction_j": 1.165763945315,
+        "human_torque_rms_ci95": 0.588966311343,
+        "human_torque_rms_reduction_nm": 0.627172370072,
+        "peak_interaction_torque_nm": 6.288837340779784
+      },
+      "delay_ms": 80.0,
+      "delay_s": 0.08,
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
+      "supervisor_state": {
+        "admittance": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10320
+          },
+          "state": "SAFE_HOLD"
+        },
+        "assist_policy": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10320
+          },
+          "state": "SAFE_HOLD"
+        },
+        "off": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10320
+          },
+          "state": "SAFE_HOLD"
+        }
+      }
+    },
+    {
+      "admittance": {
+        "human_positive_work_reduction_j": 0.641265947864,
+        "human_torque_rms_ci95": 0.285630704144,
+        "human_torque_rms_reduction_nm": 0.304111879041,
+        "peak_interaction_torque_nm": 3.3323090468110745
+      },
+      "assist_policy": {
+        "human_positive_work_reduction_j": 1.163747522549,
+        "human_torque_rms_ci95": 0.59319426135,
+        "human_torque_rms_reduction_nm": 0.631638944433,
+        "peak_interaction_torque_nm": 6.341114915924409
+      },
+      "delay_ms": 85.0,
+      "delay_s": 0.085,
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
+      "supervisor_state": {
+        "admittance": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10290
+          },
+          "state": "SAFE_HOLD"
+        },
+        "assist_policy": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10290
+          },
+          "state": "SAFE_HOLD"
+        },
+        "off": {
+          "counts": {
+            "DEGRADED": 1200,
+            "SAFE_HOLD": 10290
+          },
+          "state": "SAFE_HOLD"
+        }
+      }
+    },
+    {
+      "admittance": {
+        "human_positive_work_reduction_j": 0.671275882013,
+        "human_torque_rms_ci95": 0.304912434438,
+        "human_torque_rms_reduction_nm": 0.324624186473,
+        "peak_interaction_torque_nm": 3.4784296498800695
+      },
+      "assist_policy": {
+        "human_positive_work_reduction_j": 1.170010003814,
+        "human_torque_rms_ci95": 0.620166803478,
+        "human_torque_rms_reduction_nm": 0.66034179108,
+        "peak_interaction_torque_nm": 6.46690633550436
+      },
+      "delay_ms": 90.0,
+      "delay_s": 0.09,
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
+      "supervisor_state": {
+        "admittance": {
+          "counts": {
+            "DEGRADED": 1230,
+            "SAFE_HOLD": 10230
+          },
+          "state": "SAFE_HOLD"
+        },
+        "assist_policy": {
+          "counts": {
+            "DEGRADED": 1230,
+            "SAFE_HOLD": 10230
+          },
+          "state": "SAFE_HOLD"
+        },
+        "off": {
+          "counts": {
+            "DEGRADED": 1230,
+            "SAFE_HOLD": 10230
+          },
+          "state": "SAFE_HOLD"
+        }
+      }
+    },
+    {
+      "admittance": {
+        "human_positive_work_reduction_j": 0.666466965774,
+        "human_torque_rms_ci95": 0.307923145129,
+        "human_torque_rms_reduction_nm": 0.327816698582,
+        "peak_interaction_torque_nm": 3.528729054195347
+      },
+      "assist_policy": {
+        "human_positive_work_reduction_j": 1.159912122381,
+        "human_torque_rms_ci95": 0.623614068731,
+        "human_torque_rms_reduction_nm": 0.663981211969,
+        "peak_interaction_torque_nm": 6.514408592259773
+      },
+      "delay_ms": 95.0,
+      "delay_s": 0.095,
+      "failed": true,
+      "reasons": [
+        "admittance: supervisor steady state left NORMAL",
+        "assist_policy: supervisor steady state left NORMAL"
+      ],
+      "supervisor_state": {
+        "admittance": {
+          "counts": {
+            "DEGRADED": 1230,
+            "SAFE_HOLD": 10200
+          },
+          "state": "SAFE_HOLD"
+        },
+        "assist_policy": {
+          "counts": {
+            "DEGRADED": 1230,
+            "SAFE_HOLD": 10200
+          },
+          "state": "SAFE_HOLD"
+        },
+        "off": {
+          "counts": {
+            "DEGRADED": 1230,
+            "SAFE_HOLD": 10200
+          },
+          "state": "SAFE_HOLD"
+        }
+      }
+    },
+    {
+      "admittance": {
         "human_positive_work_reduction_j": 0.657396668879,
         "human_torque_rms_ci95": 0.310536573201,
         "human_torque_rms_reduction_nm": 0.330587910846,
         "peak_interaction_torque_nm": 3.5769468008813865
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 1.147351096269,
-        "human_torque_rms_ci95": 0.626627699883,
-        "human_torque_rms_reduction_nm": 0.66715789993,
-        "peak_interaction_torque_nm": 6.559110772284737
+        "human_positive_work_reduction_j": 1.147273971209,
+        "human_torque_rms_ci95": 0.626588433763,
+        "human_torque_rms_reduction_nm": 0.667118008242,
+        "peak_interaction_torque_nm": 6.559246665837753
       },
       "delay_ms": 100.0,
       "delay_s": 0.1,
@@ -499,10 +895,10 @@
         "peak_interaction_torque_nm": 3.700309116554508
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 0.79146006117,
-        "human_torque_rms_ci95": 0.600621839562,
-        "human_torque_rms_reduction_nm": 0.639227251635,
-        "peak_interaction_torque_nm": 6.67265156629479
+        "human_positive_work_reduction_j": 0.791369410086,
+        "human_torque_rms_ci95": 0.600571404769,
+        "human_torque_rms_reduction_nm": 0.639176949073,
+        "peak_interaction_torque_nm": 6.672619874943469
       },
       "delay_ms": 200.0,
       "delay_s": 0.2,
@@ -543,10 +939,10 @@
         "peak_interaction_torque_nm": 4.053962036111023
       },
       "assist_policy": {
-        "human_positive_work_reduction_j": 0.768838880135,
-        "human_torque_rms_ci95": 0.490985338291,
-        "human_torque_rms_reduction_nm": 0.526711286759,
-        "peak_interaction_torque_nm": 7.0230638997114685
+        "human_positive_work_reduction_j": 0.768790172923,
+        "human_torque_rms_ci95": 0.490945925785,
+        "human_torque_rms_reduction_nm": 0.526673142247,
+        "peak_interaction_torque_nm": 7.023033161475934
       },
       "delay_ms": 500.0,
       "delay_s": 0.5,
@@ -582,7 +978,7 @@
   ],
   "required_l2_if_no_degradation_by_500_ms": false,
   "threshold": {
-    "delay_s": 0.1,
+    "delay_s": 0.055,
     "reasons": [
       "admittance: supervisor steady state left NORMAL",
       "assist_policy: supervisor steady state left NORMAL"

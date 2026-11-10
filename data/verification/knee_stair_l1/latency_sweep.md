@@ -13,6 +13,6 @@ Bottom panel:
 - orange: admittance peak strap torque, Nm
 - brown: AssistPolicy peak strap torque, Nm
 
-Steady supervisor state first leaves NORMAL at 100 ms: {'off': 'SAFE_HOLD', 'admittance': 'SAFE_HOLD', 'assist_policy': 'SAFE_HOLD'}.
+Steady supervisor state first leaves NORMAL at 55 ms: {'off': 'SAFE_HOLD', 'admittance': 'SAFE_HOLD', 'assist_policy': 'SAFE_HOLD'}. The freshness threshold is 0.05 s and a packet is stale only when its age is greater than that. On this 5 ms grid, 50 ms is exactly the threshold and stays fresh. The next step, 55 ms, is the first age that exceeds 0.05 s.
 
 Admittance's positive-work reduction stays below AssistPolicy across this sweep. That ordering is reported as it is.

@@ -59,11 +59,15 @@ class FreshnessTests(unittest.TestCase):
         core.observe_sensor(1.0, 0.0, 0.10, packet_time=0.10)
         core.observe_intent(0.10, 0.10)
         core.observe_command(1.0, 0.10)
-        self.assertEqual(core.evaluate(0.10).state, NORMAL)
-        core.observe_sensor(1.0, 0.0, 0.20, packet_time=0.0)
+        self.assertEqual(core.evaluate(0.10).state, DEGRADED)
+        core.observe_sensor(1.0, 0.0, 0.20, packet_time=0.20)
         core.observe_intent(0.20, 0.20)
         core.observe_command(1.0, 0.20)
-        again = core.evaluate(0.20)
+        self.assertEqual(core.evaluate(0.20).state, NORMAL)
+        core.observe_sensor(1.0, 0.0, 0.21, packet_time=0.0)
+        core.observe_intent(0.21, 0.21)
+        core.observe_command(1.0, 0.21)
+        again = core.evaluate(0.21)
         self.assertEqual(again.state, DEGRADED)
         self.assertFalse(again.passive_damping)
 
@@ -112,7 +116,7 @@ class FreshnessTests(unittest.TestCase):
         core.observe_command(80.0, 0.08)
         decision = core.evaluate(0.08)
         self.assertEqual(decision.state, DEGRADED)
-        self.assertAlmostEqual(decision.safe_extension_torque_nm, 40.0)
+        self.assertAlmostEqual(decision.safe_extension_torque_nm, 12.0)
         self.assertFalse(decision.passive_damping)
 
     def test_degraded_recovers_without_reset(self):
@@ -124,7 +128,66 @@ class FreshnessTests(unittest.TestCase):
         core.observe_sensor(1.0, 0.0, 0.09, packet_time=0.09)
         core.observe_intent(0.09, 0.09)
         core.observe_command(2.0, 0.09)
-        recovered = core.evaluate(0.09)
+        held = core.evaluate(0.09)
+        self.assertEqual(held.state, DEGRADED)
+        self.assertIn("fresh_recover_pending", held.reasons)
+        core.observe_sensor(1.0, 0.0, 0.19, packet_time=0.19)
+        core.observe_intent(0.19, 0.19)
+        core.observe_command(2.0, 0.19)
+        recovered = core.evaluate(0.19)
         self.assertEqual(recovered.state, NORMAL)
         self.assertAlmostEqual(recovered.safe_extension_torque_nm, 2.0)
         self.assertFalse(recovered.passive_damping)
+
+    def test_degraded_entry_and_exit_respect_the_slew(self):
+        config = load_config()
+        core = _core()
+        slew = config["safety"]["degraded_slew_nm_per_s"]
+        dt = 0.005
+        core.observe_sensor(1.0, 0.0, 0.0, packet_time=0.0)
+        core.observe_intent(0.0, 0.0)
+        core.observe_command(30.0, 0.0)
+        previous = core.evaluate(0.0).safe_extension_torque_nm
+        self.assertAlmostEqual(previous, 30.0)
+        for step in range(1, 30):
+            now = step * dt
+            core.observe_sensor(1.0, 0.0, now, packet_time=now - 0.08)
+            core.observe_intent(now, now)
+            core.observe_command(30.0, now)
+            decision = core.evaluate(now)
+            self.assertEqual(decision.state, DEGRADED)
+            self.assertLessEqual(abs(decision.safe_extension_torque_nm - previous), slew * dt + 1e-9)
+            previous = decision.safe_extension_torque_nm
+        self.assertAlmostEqual(previous, 12.0)
+        first_normal = None
+        for step in range(30, 55):
+            now = step * dt
+            core.observe_sensor(1.0, 0.0, now, packet_time=now)
+            core.observe_intent(now, now)
+            core.observe_command(30.0, now)
+            decision = core.evaluate(now)
+            self.assertLessEqual(abs(decision.safe_extension_torque_nm - previous), slew * dt + 1e-9)
+            if decision.state == NORMAL and first_normal is None:
+                first_normal = decision.safe_extension_torque_nm
+            previous = decision.safe_extension_torque_nm
+        self.assertAlmostEqual(first_normal, 13.0)
+
+    def test_intermittent_staleness_transition_count_is_bounded(self):
+        core = _core()
+        previous = None
+        transitions = 0
+        step = 0
+        while step * 0.005 <= 1.0 + 1e-12:
+            now = round(step * 0.005, 10)
+            stale = (int(now / 0.04) % 2) == 1
+            packet = 0.0 if stale else now
+            core.observe_sensor(1.0, 0.0, now, packet_time=packet)
+            core.observe_intent(packet, now)
+            core.observe_command(5.0, now)
+            state = core.evaluate(now).state
+            if previous is not None and state != previous:
+                transitions += 1
+            previous = state
+            step += 1
+        self.assertLessEqual(transitions, 4)
+        self.assertGreaterEqual(transitions, 1)

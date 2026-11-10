@@ -80,7 +80,12 @@
     "damping_limit_nm": 8.0,
     "estop_passive_damping_nm_s_per_rad": 1.2,
     "freshness_threshold_s": 0.05,
-    "stale_safe_duration_s": 0.2
+    "stale_safe_duration_s": 0.2,
+    "fresh_recover_duration_s": 0.1,
+    "degraded_torque_fraction": 0.5,
+    "degraded_slew_nm_per_s": 200.0,
+    "stamp_future_tolerance_s": 0.02,
+    "degraded_cap_note": "DEGRADED torque cap is degraded_torque_fraction times pid.torque_limit_nm, so 0.5 * 24 Nm = 12 Nm. The slew is only the entry and exit ramp of that cap. It is not a controller gain. clamp_actuator_torque still runs afterward."
   },
   "plant": {
     "human_inertia_kg_m2": 0.45,
