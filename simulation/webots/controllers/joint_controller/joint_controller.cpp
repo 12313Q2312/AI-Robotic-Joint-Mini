@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <iostream>
 
+#include "../../../../knee_stair_l1/include/actuator_torque.hpp"
+
 int main() {
   webots::Robot robot;
   const int time_step = static_cast<int>(robot.getBasicTimeStep());
@@ -29,6 +31,7 @@ int main() {
   constexpr double torque_limit = 0.10;       // controller limit, N*m
   constexpr double load_torque = -0.02;       // external resisting load, N*m
 
+  actuator_torque::Gate actuator_gate = actuator_torque::gate_from_default_config();
   double error_integral = 0.0;
   double previous_angle = 0.0;
   bool have_previous_sample = false;
@@ -77,7 +80,7 @@ int main() {
 
     // Minimal plant disturbance model: net joint torque equals controller
     // torque plus the constant resisting load torque.
-    const double applied_torque = control_torque + load_torque;
+    const double applied_torque = actuator_gate.apply(control_torque + load_torque);
     motor->setTorque(applied_torque);
 
     if (print_counter++ % 2 == 0) {

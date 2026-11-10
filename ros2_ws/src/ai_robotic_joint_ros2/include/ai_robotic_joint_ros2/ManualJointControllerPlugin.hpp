@@ -6,6 +6,7 @@
 #include <webots_ros2_driver/PluginInterface.hpp>
 #include <webots/types.h>
 #include "ai_robotic_joint_ros2/ManualReference.hpp"
+#include "../../../../../knee_stair_l1/include/actuator_torque.hpp"
 #include "ai_robotic_joint_ros2/msg/manual_command.hpp"
 #include "ai_robotic_joint_ros2/msg/control_telemetry.hpp"
 
@@ -23,6 +24,7 @@ class ManualJointControllerPlugin final : public webots_ros2_driver::PluginInter
   bool initialized_ = false;
   double previous_time_ = -1, previous_angle_ = 0, integral_ = 0;
   double limit_ = 0.1, load_ = 0, kp_ = 0.15, ki_ = 0.05, kd_ = 0.04;
+  actuator_torque::Gate actuator_gate_{};
   bool gravity_enabled_ = false;
   double gravity_x_nm_ = 0, gravity_z_nm_ = 0;
   std::mutex mutex_;

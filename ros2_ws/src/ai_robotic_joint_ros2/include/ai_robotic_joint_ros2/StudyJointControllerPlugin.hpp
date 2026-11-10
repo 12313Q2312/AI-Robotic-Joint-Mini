@@ -1,5 +1,6 @@
 #pragma once
 #include "ai_robotic_joint_ros2/StudyPair.hpp"
+#include "../../../../../knee_stair_l1/include/actuator_torque.hpp"
 #include "ai_robotic_joint_ros2/msg/study_command.hpp"
 #include "ai_robotic_joint_ros2/msg/study_telemetry.hpp"
 #include <chrono>
@@ -24,6 +25,7 @@ class StudyJointControllerPlugin final : public webots_ros2_driver::PluginInterf
   void startReset(const msg::StudyCommand& command);
   webots_ros2_driver::WebotsNode* node_ = nullptr;
   std::array<WbDeviceTag, 2> motors_{}, sensors_{};
+  std::array<actuator_torque::Gate, 2> actuator_gates_{};
   std::array<PhysicalSide, 2> physical_{};
   std::array<std::array<Body, 2>, 3> bodies_{};
   std::array<std::unique_ptr<EnergyCurve>, 3> curves_;

@@ -8,8 +8,8 @@ the torque after clamp_actuator_torque, the same value the headless plant
 applies. That clamp raises ValueError on NaN or inf and does not return 0.
 on_assist_command catches the exception, latches E_STOP, and this node
 publishes 0. The safe target angle is not rewritten. /joint/safety_state is
-published for readers and is not a command input. Legacy C++ controllers do
-not use this clamp.
+published for readers and is not a command input. The legacy C++ controllers
+use actuator_torque::Gate on the same config key.
 """
 import sys
 from pathlib import Path

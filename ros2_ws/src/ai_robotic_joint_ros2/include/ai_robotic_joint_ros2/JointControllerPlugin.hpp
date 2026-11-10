@@ -11,6 +11,8 @@
 #include <webots/types.h>
 #include <webots_ros2_driver/PluginInterface.hpp>
 
+#include "../../../../../knee_stair_l1/include/actuator_torque.hpp"
+
 namespace webots_ros2_driver {
 class WebotsNode;
 }
@@ -47,6 +49,7 @@ class JointControllerPlugin final
   double previous_angle_rad_ = 0.0;
   bool have_previous_sample_ = false;
   int log_counter_ = 0;
+  actuator_torque::Gate actuator_gate_{};
 
   rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr target_subscription_;
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr state_publisher_;

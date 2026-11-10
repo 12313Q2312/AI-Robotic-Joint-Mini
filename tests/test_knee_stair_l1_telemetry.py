@@ -30,7 +30,7 @@ class MetricStudyTests(unittest.TestCase):
     def test_study_records_the_new_metrics_and_matches_committed_raw_json(self):
         config = load_config()
         self.assertEqual(list(config["seeds"]), list(range(30)))
-        self.assertEqual(config["pid"]["torque_limit_nm"], 24.0)
+        self.assertEqual(config["pid"]["torque_limit_nm"], config["actuator_torque_limit_nm"])
         trials = run_study(config)
         self.assertEqual(len(trials), 90)
         summary = summarize(trials, config)

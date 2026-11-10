@@ -52,9 +52,8 @@
   },
   "assist_policy": {
     "gain": 0.65,
-    "limit_nm": 24.0,
     "slew_nm_per_s": 350.0,
-    "source": "Gain 0.65 and slew 350 Nm/s are the PR #3 AssistPolicy values. The copied header capped torque at 80 Nm. This tree sets the internal cap to actuator_torque_limit_nm (24). That cap is not the plant boundary: clamp_actuator_torque still runs on every command that reaches the plant, including one injected past this policy."
+    "source": "Gain 0.65 and slew 350 Nm/s are the PR #3 AssistPolicy values. The copied header capped torque at 80 Nm. load_config sets this policy cap to actuator_torque_limit_nm. That cap is not a second hard-limit definition: clamp_actuator_torque still runs on every command that reaches the plant."
   },
   "admittance": {
     "mass_kg_m2": 0.35,
@@ -65,8 +64,7 @@
     "kp_nm_per_rad": 10.0,
     "ki_nm_per_rad_s": 0.0,
     "kd_nm_s_per_rad": 0.8,
-    "torque_limit_nm": 24.0,
-    "algorithm": "Same anti-windup recurrence as simulation/webots/controllers/joint_controller/joint_controller.cpp. The 24 Nm limit is a safety parameter. ki is 0 so a persistent gravity moment cannot wind the integrator into that limit."
+    "algorithm": "Same anti-windup recurrence as simulation/webots/controllers/joint_controller/joint_controller.cpp. load_config sets torque_limit_nm to actuator_torque_limit_nm. ki is 0 so a persistent gravity moment cannot wind the integrator into that limit."
   },
   "safety": {
     "legacy_min_angle_rad": -1.5707963267948966,
@@ -85,7 +83,7 @@
     "degraded_torque_fraction": 0.5,
     "degraded_slew_nm_per_s": 200.0,
     "stamp_future_tolerance_s": 0.02,
-    "degraded_cap_note": "DEGRADED torque cap is degraded_torque_fraction times pid.torque_limit_nm, so 0.5 * 24 Nm = 12 Nm. The slew is only the entry and exit ramp of that cap. It is not a controller gain. clamp_actuator_torque still runs afterward."
+    "degraded_cap_note": "DEGRADED torque cap is degraded_torque_fraction times the actuator torque limit. The slew is only the entry and exit ramp of that cap. It is not a controller gain. clamp_actuator_torque still runs afterward."
   },
   "plant": {
     "human_inertia_kg_m2": 0.45,
@@ -94,8 +92,7 @@
     "exo_viscous_nm_s_per_rad": 0.12,
     "initial_flexion_rad": 1.0,
     "min_flexion_rad": 0.2,
-    "max_flexion_rad": 2.2,
-    "boundary_abs_limit_nm": 24.0
+    "max_flexion_rad": 2.2
   },
   "metrics": {
     "comfort_peak_interaction_nm": 15.0,

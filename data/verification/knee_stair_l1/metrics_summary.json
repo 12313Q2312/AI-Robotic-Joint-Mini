@@ -234,7 +234,7 @@
     "admittance",
     "assist_policy"
   ],
-  "config_sha256": "6c9843083e3f5fef020380abe890960e6ffd794e8c614c71e7ba080c4d8637f0",
+  "config_sha256": "a5d5133f07f8a60a10ad9828d7f4270d46be7f25d2c2b3734134eb2aef905537",
   "criteria": {
     "admittance": {
       "comfort_peak_interaction_nm": 15.0,

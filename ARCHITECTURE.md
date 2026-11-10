@@ -33,4 +33,4 @@ ROS 2 包位于 `ros2_ws/src/ai_robotic_joint_ros2`；头文件 `ManualReference
 | `/joint/safety_state` | 同一个监督器的状态 |
 | `/joint/target_angle` → `/joint/safe_target_angle` | 原角度口，数字行为保持 |
 
-命令归属：意图源给出合成期望轨迹，有界人体跟踪器产生人体力矩，控制器只提案，`JointSafetyCore` 做合理性检查。`knee_stair_l1` 和 `joint_safety_node` 再经 `clamp_actuator_torque` 把力矩送进植物或安全命令话题。这不是全仓库电机的共同出口。植物把人体力矩、重力矩、绑带约束和这份电机力矩分开积分。交互力矩是绑带力矩。`E_STOP` 时电机力矩为 0，外骨骼只剩被动阻尼，`/joint/safe_target_angle` 沿用原合同。`/joint/safety_state` 只发布。故障时状态按 `E_STOP`、`DAMPING_ONLY`、`LIMITED_ASSIST`、`NORMAL` 的优先顺序取更严格者。
+命令归属：意图源给出合成期望轨迹，有界人体跟踪器产生人体力矩，控制器只提案，`JointSafetyCore` 做合理性检查。`knee_stair_l1` 和 `joint_safety_node` 再经 `clamp_actuator_torque` 把力矩送进植物或安全命令话题。四个历史 C++ 控制器在 `setTorque` 前使用同一个上限。研究连杆外力矩不是电机命令。植物把人体力矩、重力矩、绑带约束和这份电机力矩分开积分。交互力矩是绑带力矩。`E_STOP` 时电机力矩为 0，外骨骼只剩被动阻尼，`/joint/safe_target_angle` 沿用原合同。`/joint/safety_state` 只发布。故障时状态按 `E_STOP`、`DAMPING_ONLY`、`LIMITED_ASSIST`、`NORMAL` 的优先顺序取更严格者。

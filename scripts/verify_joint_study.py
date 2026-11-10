@@ -161,6 +161,24 @@ def run_verification(*, timeout=120.0):
                 checks.append(_blocked(name + "_run", "compilation did not pass"))
                 if name == "study_pair":
                     checks.append(_blocked("study_pid_surrogate", "compilation did not pass"))
+        actuator_source = ROOT / "tests/actuator_torque_test.cpp"
+        actuator_binary = Path(temporary) / ("actuator_torque_test" + (".exe" if os.name == "nt" else ""))
+        if not compiler:
+            checks.extend((_blocked("actuator_torque_compile", "C++ compiler not found"),
+                           _blocked("actuator_torque_run", "depends on unavailable compilation")))
+        else:
+            compiled = _capture(
+                "actuator_torque_compile",
+                [compiler, "-std=c++17", "-O2", "-Wall", "-Wextra", "-I", ROOT / "knee_stair_l1/include",
+                 actuator_source, "-o", actuator_binary],
+                timeout, env=cpp_env)
+            checks.append(compiled)
+            if compiled["status"] == "passed":
+                executed = _capture("actuator_torque_run", [actuator_binary], timeout, env=cpp_env)
+                _count(executed, "cpp")
+                checks.append(executed)
+            else:
+                checks.append(_blocked("actuator_torque_run", "compilation did not pass"))
     for name, source, kind in (("manual_frontend", "manual_frontend_test.js", "manual_js"),
                                ("study_frontend", "study_frontend_test.js", "study_js")):
         if not node:

@@ -28,6 +28,7 @@ void ManualJointControllerPlugin::init(webots_ros2_driver::WebotsNode* node,
   load_ = number("loadTorqueNm", 0);
   kp_ = number("kp", 0.15); ki_ = number("ki", 0.05); kd_ = number("kd", 0.04);
   if (limit_ <= 0 || kp_ < 0 || ki_ < 0 || kd_ < 0) throw std::invalid_argument("Invalid PID/torque limits");
+  actuator_gate_ = actuator_torque::gate_from_default_config();
   gravity_enabled_ = value("gravityFeedforwardEnabled", "false") == "true";
   gravity_x_nm_ = number("gravityMomentXNm", 0);
   gravity_z_nm_ = number("gravityMomentZNm", 0);
@@ -104,12 +105,13 @@ void ManualJointControllerPlugin::step() {
     const double total = p + i + d + ff;
     torque = std::clamp(total, -limit_, limit_);
     saturated = std::abs(total) > limit_;
-    wb_motor_set_torque(motor_, torque + load_);
+    const double motor_torque = actuator_gate_.apply(torque + load_);
+    wb_motor_set_torque(motor_, motor_torque);
     previous_time_ = time; previous_angle_ = actual;
   } catch (const std::exception& error) {
     status = "fault";
     initialized_ = false;
-    wb_motor_set_torque(motor_, 0);
+    wb_motor_set_torque(motor_, actuator_gate_.apply(0.0));
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 2000, "Manual controller fault: %s. Pause simulation.", error.what());
   }
   msg::ControlTelemetry telemetry;
@@ -120,7 +122,7 @@ void ManualJointControllerPlugin::step() {
   telemetry.actual_angle_rad = actual; telemetry.velocity_rad_s = velocity;
   telemetry.p_torque_nm = p; telemetry.i_torque_nm = i; telemetry.d_torque_nm = d;
   telemetry.feedforward_torque_nm = ff;
-  telemetry.commanded_torque_nm = torque + (status == "fault" ? 0 : load_);
+  telemetry.commanded_torque_nm = status == "fault" ? actuator_gate_.apply(0.0) : actuator_gate_.apply(torque + load_);
   telemetry.saturated = saturated; telemetry.anti_windup = anti;
   telemetry.mode = command.mode; telemetry.status = status;
   telemetry.command_sequence = consumed_sequence_;
