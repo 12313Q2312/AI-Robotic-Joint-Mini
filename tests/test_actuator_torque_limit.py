@@ -24,8 +24,9 @@ import knee_stair_l1.loop as loop_module
 class ActuatorLimitConfigTests(unittest.TestCase):
     def test_load_config_rejects_a_limit_above_24_or_not_positive(self):
         config = load_config()
-        self.assertEqual(config["actuator_torque_limit_nm"], 24.0)
-        for bad in (0.0, -1.0, 24.1, 80.0):
+        limit = config["actuator_torque_limit_nm"]
+        self.assertGreater(limit, 0.0)
+        for bad in (0.0, -1.0, limit + 0.1, 80.0):
             broken = dict(config)
             broken["actuator_torque_limit_nm"] = bad
             with self.assertRaises(ValueError):
@@ -33,10 +34,11 @@ class ActuatorLimitConfigTests(unittest.TestCase):
 
     def test_plant_boundary_matches_the_actuator_and_not_the_40_nm_check(self):
         config = load_config()
-        self.assertEqual(config["plant"]["boundary_abs_limit_nm"], 24.0)
+        limit = config["actuator_torque_limit_nm"]
+        self.assertEqual(config["plant"]["boundary_abs_limit_nm"], limit)
         self.assertEqual(config["safety"]["command_limit_nm"], 40.0)
         self.assertIn("plausibility", config["safety"]["command_limit_role"].lower())
-        self.assertLessEqual(config["assist_policy"]["limit_nm"], 24.0)
+        self.assertLessEqual(config["assist_policy"]["limit_nm"], limit)
 
 
 class DeliveredTorqueTests(unittest.TestCase):
@@ -62,15 +64,16 @@ class DeliveredTorqueTests(unittest.TestCase):
             for condition in CONDITIONS:
                 trial = run_trial(config, seed=0, condition=condition)
                 self.assertEqual(condition, trial.condition)
-                self.assertAlmostEqual(trial.max_abs_motor_command_nm, 24.0)
-                self.assertLessEqual(trial.max_abs_motor_command_nm, 24.0)
+                limit = config["actuator_torque_limit_nm"]
+                self.assertAlmostEqual(trial.max_abs_motor_command_nm, limit)
+                self.assertLessEqual(trial.max_abs_motor_command_nm, limit)
         finally:
             loop_module.AssistController.command = original
 
     def test_plant_measurement_of_an_80_nm_command_is_24(self):
         plant = KneePlant(load_config())
         plant.advance(0.0, 80.0, 0.005, 0.0)
-        self.assertAlmostEqual(plant.last_motor_extension_nm, 24.0)
+        self.assertAlmostEqual(plant.last_motor_extension_nm, load_config()["actuator_torque_limit_nm"])
 
     def test_published_safe_topic_and_telemetry_use_the_clamped_torque(self):
         config = load_config()
@@ -95,17 +98,18 @@ class DeliveredTorqueTests(unittest.TestCase):
             run_trial(config, seed=0, condition="assist_policy", bus=bus)
         finally:
             loop_module.AssistController.command = original
+        limit = config["actuator_torque_limit_nm"]
         safe = [payload for topic, payload in bus.messages if topic == TOPIC_ASSIST_COMMAND_SAFE]
         telemetry = [json.loads(payload) for topic, payload in bus.messages if topic == TOPIC_TELEMETRY]
         self.assertEqual(len(safe), 10)
         self.assertEqual(len(telemetry), 10)
         for payload in safe:
-            self.assertLessEqual(abs(payload["torque_extension_nm"]), 24.0)
-            self.assertAlmostEqual(payload["torque_extension_nm"], 24.0)
+            self.assertLessEqual(abs(payload["torque_extension_nm"]), limit)
+            self.assertAlmostEqual(payload["torque_extension_nm"], limit)
             self.assertAlmostEqual(payload["supervisor_command_nm"], 40.0)
         for row in telemetry:
-            self.assertLessEqual(abs(row["applied_torque_nm"]), 24.0)
-            self.assertLessEqual(abs(row["safe_extension_torque_nm"]), 24.0)
+            self.assertLessEqual(abs(row["applied_torque_nm"]), limit)
+            self.assertLessEqual(abs(row["safe_extension_torque_nm"]), limit)
             self.assertAlmostEqual(row["supervisor_command_nm"], 40.0)
 
     def test_ros_callback_publishes_the_clamped_value_without_rclpy(self):
@@ -121,7 +125,7 @@ class DeliveredTorqueTests(unittest.TestCase):
         published = on_assist_command(core, config, 0.0, 80.0)
         self.assertEqual(published.state, LIMITED_ASSIST)
         self.assertAlmostEqual(published.supervisor_command_nm, 40.0)
-        self.assertAlmostEqual(published.applied_torque_nm, 24.0)
+        self.assertAlmostEqual(published.applied_torque_nm, config["actuator_torque_limit_nm"])
         source = (
             pathlib.Path(__file__).resolve().parents[1]
             / "ros2_ws/src/ai_robotic_joint_ros2/scripts/joint_safety_node.py"

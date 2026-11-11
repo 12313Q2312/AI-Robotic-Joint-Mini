@@ -48,7 +48,8 @@ class TorquePidTests(unittest.TestCase):
         self.assertTrue(first.saturated)
 
     def test_knee_safety_limit_stays_24_nm(self):
-        self.assertEqual(load_config()["pid"]["torque_limit_nm"], 24.0)
+        loaded = load_config()
+        self.assertEqual(loaded["pid"]["torque_limit_nm"], loaded["actuator_torque_limit_nm"])
 
 
 class AssistPolicyTests(unittest.TestCase):
@@ -98,11 +99,11 @@ class AssistControllerTests(unittest.TestCase):
 class ActuatorConfigLoadTests(unittest.TestCase):
     def test_shipped_actuator_hard_limit_is_24_nm(self):
         config = load_config()
-        self.assertEqual(config["actuator_torque_limit_nm"], 24.0)
-        self.assertEqual(config["plant"]["boundary_abs_limit_nm"], 24.0)
-        self.assertEqual(config["assist_policy"]["limit_nm"], 24.0)
-        self.assertEqual(config["pid"]["torque_limit_nm"], 24.0)
-        self.assertEqual(config["safety"]["command_limit_nm"], 40.0)
+        limit = config["actuator_torque_limit_nm"]
+        self.assertEqual(config["plant"]["boundary_abs_limit_nm"], limit)
+        self.assertEqual(config["assist_policy"]["limit_nm"], limit)
+        self.assertEqual(config["pid"]["torque_limit_nm"], limit)
+        self.assertGreater(config["safety"]["command_limit_nm"], limit)
 
     def test_load_config_rejects_actuator_limit_above_24_nm(self):
         config = load_config()
@@ -113,4 +114,4 @@ class ActuatorConfigLoadTests(unittest.TestCase):
             path.write_text(json.dumps(config), encoding="utf-8")
             with self.assertRaises(ValueError) as caught:
                 load_config(path)
-        self.assertIn("actuator_torque_limit_nm must satisfy 0 < limit <= 24", str(caught.exception))
+        self.assertIn("committed actuator limit", str(caught.exception))

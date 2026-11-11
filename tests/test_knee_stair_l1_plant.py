@@ -46,7 +46,7 @@ class KneePlantTests(unittest.TestCase):
         limit = plant.actuator_limit
         plant.advance(0.0, 80.0, 0.005, 0.0)
         self.assertAlmostEqual(plant.last_motor_extension_nm, limit)
-        self.assertLessEqual(abs(plant.last_motor_extension_nm), 24.0)
+        self.assertLessEqual(abs(plant.last_motor_extension_nm), config["actuator_torque_limit_nm"])
         plant.advance(0.0, -80.0, 0.005, 0.01)
         self.assertAlmostEqual(plant.last_motor_extension_nm, -limit)
         with self.assertRaises(BoundaryError):

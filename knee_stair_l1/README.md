@@ -12,7 +12,7 @@
 | 有界人体力矩 | `human.py` | 跟踪上述轨迹，并被 `human.torque_limit_nm` 截断 |
 | 助力 | `admittance.py`、`torque_pid.py`、`assist_policy.py`、`controller.py` | 期望运动和 `/knee_stair/assist_command_raw`。PID 抗饱和上限保持 24 Nm |
 | 安全监督 | `safety.py` | 发出监督后命令，并发布只读的 `/joint/safety_state`。40 Nm 是命令合理性检查，不是力矩上限 |
-| 执行器上限 | `actuator.py` | `clamp_actuator_torque`。用于 `knee_stair_l1` 的关闭、导纳、AssistPolicy，以及 `joint_safety_node`。默认 24 Nm。历史 C++ 控制器不调用，见 [issue #11](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11) |
+| 执行器上限 | `actuator.py`，`include/actuator_torque.hpp` | 唯一数字定义是 `actuator_torque_limit_nm`。Python 与四个 C++ 控制器都读它。见 [issue #11](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11) |
 | 植物 | `plant.py` | 人体小腿、外骨骼连杆、重力矩和弹簧阻尼绑带。边界等于执行器上限 |
 | 遥测 | `telemetry.py`、`../scripts/run_knee_stair_l1_metrics.py` | 仓库里是汇总和小样本。逐步原始 JSON 只在 CI artifact `knee-stair-l1-metrics-raw` |
 
@@ -61,7 +61,7 @@ self.weight_share * self.body_mass * self.gravity * self.moment_arm * math.sin(f
 
 ## 力矩限幅分层表
 
-最终硬上限只有一处：`clamp_actuator_torque`，配置键 `actuator_torque_limit_nm`，当前值 24 Nm。关闭、导纳、AssistPolicy 进入植物之前都走 `torque_to_motor`（`loop.py` 第 158–162 行）。`joint_safety_node` 发布到 `/knee_stair/assist_command_safe` 的也是钳位后的 `applied_torque_nm`（`joint_safety_node.py` 第 96 行）。历史 C++ 控制器不调用这个函数，后续记在 [issue #11](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11)。
+最终硬上限只有一处数字定义：`knee_stair_l1/config/default.json` 的 `actuator_torque_limit_nm`。Python 的 `clamp_actuator_torque` 和 C++ 的 `actuator_torque::Gate::apply` 都读这个键。关闭、导纳、AssistPolicy 进入植物之前走 `torque_to_motor`。`joint_safety_node` 发到 `/knee_stair/assist_command_safe` 的是钳位后的力矩。四个历史 C++ 控制器在负载力矩加上之后再经过同一个门。这是 [issue #11](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11)。
 
 | 层 | 值 | 作用 | 代码 |
 |---|---|---|---|
@@ -71,7 +71,11 @@ self.weight_share * self.body_mass * self.gravity * self.moment_arm * math.sin(f
 | PID 抗饱和上限 | 24 Nm | 只约束导纳内环的提案，不是唯一的最终出口 | `config/default.json` 第 67 行；`torque_pid.py` 第 80–83 行；`controller.py` 第 53 行 |
 | AssistPolicy 内部上限 | 24 Nm | 策略目标钳在 ±24 Nm。PR #3 抄来的头文件是 80 Nm；PR #10 起本树改为 24 Nm。绕过策略直接注入的命令仍由 `clamp_actuator_torque` 截住 | `config/default.json` 第 54 行；`assist_policy.py` 第 42–45 行；`controller.py` 第 55 行 |
 | 植物边界 | 24 Nm | 必须等于 `actuator_torque_limit_nm` | `config/default.json` 第 90 行；`plant.py` 第 51–54 行；`config.py` 第 72–73 行 |
-| Webots 单膝电机 | 24 Nm | 可选几何的 `maxTorque`。该世界没有绑带动力学，CI 不运行它 | `webots/generate_world.py` 第 53 行；`webots/worlds/knee_stair_l1.wbt` 第 36 行 |
+| Webots 单膝电机 | 同一配置值 | `generate_world.py` 把该键写成 `maxTorque`。该世界没有绑带动力学，CI 不运行它 | `webots/generate_world.py`；`webots/worlds/knee_stair_l1.wbt` |
+| `joint_controller.cpp` | 同一配置值 | 控制器内环仍是 0.10 Nm，负载加上之后 `Gate::apply` 再钳一次。非有限输入输出 0 并锁存 `E_STOP` | `simulation/webots/controllers/joint_controller/joint_controller.cpp` |
+| `JointControllerPlugin.cpp` | 同一配置值 | 同上，钳位在 `control + load` 之后、`wb_motor_set_torque` 之前 | `ros2_ws/.../JointControllerPlugin.cpp` |
+| `ManualJointControllerPlugin.cpp` | 同一配置值 | 内环 `limit_` 之后再加上 `load_`，然后进入共享门 | `ros2_ws/.../ManualJointControllerPlugin.cpp` |
+| `StudyJointControllerPlugin.cpp` | 同一配置值 | 两个电机的 `commanded_torque_nm` 在写出前进入各自的门。连杆上的 `wb_supervisor_node_add_torque` 是研究扰动，不是电机命令，没有改 | `ros2_ws/.../StudyJointControllerPlugin.cpp` |
 
 PR #10 合并之前，AssistPolicy 内 cap 是 80 Nm，植物边界等于监督器的 40 Nm，文档曾把 AssistPolicy 到植物的命令写成不超过 40 Nm。那是合并前的历史。当前三条 `knee_stair_l1` 路径和 `joint_safety_node` 的最终硬上限都是 24 Nm。
 
@@ -101,7 +105,7 @@ PR #10 合并之前，AssistPolicy 内 cap 是 80 Nm，植物边界等于监督�
 | 30 种子汇总、`criteria`、延迟图和敏感性扫描 | experimental |
 | 重力矩公式、15 Nm 舒适假设、固定髋的单自由度 | theoretical |
 
-历史 C++ 控制器不在上表的 implemented 钳位里。那是 [issue #11](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11)，不是已完成项。
+上表的四个 C++ 控制器已经接入共享门，对应 [issue #11](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11)。仓库里没有另带的第三方 Webots 示例控制器。C++ 侧 NaN、+inf 和 -inf 的结果是输出 0 并锁存 `E_STOP`，与 Python 发布路径一致；Python 的 `clamp_actuator_torque` 本身仍然抛出 `ValueError`，不改成返回 0。
 
 ## 复现
 

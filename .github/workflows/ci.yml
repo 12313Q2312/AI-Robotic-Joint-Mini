@@ -49,6 +49,10 @@ jobs:
           if-no-files-found: error
       - name: Knee stair L1 latency and sensitivity sweeps
         run: python scripts/run_knee_stair_l1_sweeps.py --check
+      - name: Actuator torque C++ clamp tests
+        run: |
+          g++ -std=c++17 -O2 -Wall -Wextra -I knee_stair_l1/include tests/actuator_torque_test.cpp -o "$RUNNER_TEMP/actuator_torque_test"
+          "$RUNNER_TEMP/actuator_torque_test"
       - name: Run offline Python, C++ and frontend verification
         run: python scripts/verify_joint_study.py --output data/verification/ci-check.json
       - name: Summarize verification

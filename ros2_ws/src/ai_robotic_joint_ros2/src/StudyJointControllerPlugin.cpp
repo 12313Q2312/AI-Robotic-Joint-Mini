@@ -119,6 +119,7 @@ void StudyJointControllerPlugin::init(webots_ros2_driver::WebotsNode* node,
   const std::array<const char*, 2> link_defs = {"STUDY_BASELINE_LINK", "STUDY_CANDIDATE_LINK"};
   const int step_ms = static_cast<int>(wb_robot_get_basic_time_step());
   if (!node_ || step_ms <= 0 || !wb_robot_get_supervisor()) throw std::runtime_error("Study requires a supervisor Robot");
+  for (auto& gate : actuator_gates_) gate = actuator_torque::gate_from_default_config();
   for (std::size_t side = 0; side < 2; ++side) {
     motors_[side] = wb_robot_get_device((sides[side] + "_motor").c_str());
     sensors_[side] = wb_robot_get_device((sides[side] + "_sensor").c_str());
@@ -129,7 +130,7 @@ void StudyJointControllerPlugin::init(webots_ros2_driver::WebotsNode* node,
     physical_[side].physics = wb_supervisor_field_get_sf_node(wb_supervisor_node_get_field(physical_[side].link, "physics"));
     if (!physical_[side].physics) throw std::runtime_error("Study physical body missing");
     wb_position_sensor_enable(sensors_[side], step_ms);
-    wb_motor_set_torque(motors_[side], 0);
+    wb_motor_set_torque(motors_[side], actuator_gates_[side].apply(0.0));
     applyBody(side, payload_);
   }
   const auto prefix = value("topicPrefix", "/joint_study");
@@ -176,7 +177,7 @@ void StudyJointControllerPlugin::startReset(const msg::StudyCommand& command) {
   payload_ = command.payload_index;
   for (std::size_t side = 0; side < 2; ++side) {
     applyBody(side, payload_);
-    wb_motor_set_torque(motors_[side], 0);
+    wb_motor_set_torque(motors_[side], actuator_gates_[side].apply(0.0));
     wb_supervisor_node_set_joint_position(physical_[side].joint, 0, 1);
     wb_supervisor_node_reset_physics(physical_[side].link);
     const auto parameters = wb_supervisor_field_get_sf_node(wb_supervisor_node_get_field(physical_[side].joint, "jointParameters"));
@@ -238,7 +239,8 @@ void StudyJointControllerPlugin::step() {
     if (plugin_fault_ || pair_->faulted()) throw std::runtime_error("Latched study fault");
     passive = curves_[payload_]->sample(reset_started ? 0 : angles[1]);
     loss = equivalentLoss(output.sides[1].velocity_rad_s, loss_nm_);
-    for (std::size_t side = 0; side < 2; ++side) wb_motor_set_torque(motors_[side], output.sides[side].commanded_torque_nm);
+    for (std::size_t side = 0; side < 2; ++side)
+      wb_motor_set_torque(motors_[side], actuator_gates_[side].apply(output.sides[side].commanded_torque_nm));
     const double external[3] = {0, -(passive.torque_nm + loss), 0};
     wb_supervisor_node_add_torque(physical_[1].link, external, false);
     if (reset_pending_) output.status = "resetting_verify_physics";
@@ -248,7 +250,7 @@ void StudyJointControllerPlugin::step() {
     output.sim_time_s = time;
     passive = {}; loss = 0;
     for (std::size_t side = 0; side < 2; ++side) {
-      wb_motor_set_torque(motors_[side], 0);
+      wb_motor_set_torque(motors_[side], actuator_gates_[side].apply(0.0));
       output.sides[side].commanded_torque_nm = 0;
       output.sides[side].actual_angle_rad = angles[side];
     }

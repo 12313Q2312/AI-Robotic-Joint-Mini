@@ -50,6 +50,9 @@ def main():
             errors.append(f'Unresolved merge marker: {rel}')
         if any(pattern.search(text) for pattern in SECRET_PATTERNS):
             errors.append(f'Potential credential: {rel} (value withheld)')
+    literal = subprocess.run([sys.executable, str(ROOT / 'scripts/check_actuator_limit_literal.py')], cwd=ROOT, check=False)
+    if literal.returncode != 0:
+        errors.append('Duplicated actuator torque-limit literal')
     try:
         ET.parse(ROOT / 'ros2_ws/src/ai_robotic_joint_ros2/package.xml')
     except (ET.ParseError, OSError) as exc:

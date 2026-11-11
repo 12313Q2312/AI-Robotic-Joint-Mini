@@ -80,6 +80,7 @@ void JointControllerPlugin::init(
       motor_torque_limit_nm_ * gear_ratio_ * transmission_efficiency_;
 
   wb_position_sensor_enable(sensor_, time_step_ms_);
+  actuator_gate_ = actuator_torque::gate_from_default_config();
 
   target_subscription_ = node_->create_subscription<std_msgs::msg::Float64>(
       "joint/safe_target_angle", 10,
@@ -165,7 +166,7 @@ void JointControllerPlugin::step() {
       p_torque_nm + i_torque_nm + d_torque_nm;
   const double control_torque_nm = std::clamp(
       raw_control_torque_nm, -output_torque_limit_nm_, output_torque_limit_nm_);
-  const double applied_torque_nm = control_torque_nm + load_torque_nm_;
+  const double applied_torque_nm = actuator_gate_.apply(control_torque_nm + load_torque_nm_);
 
   wb_motor_set_torque(motor_, applied_torque_nm);
 

@@ -9,13 +9,22 @@ The closed loop under test is the headless plant in knee_stair_l1.plant.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 WORLD_PATH = Path(__file__).resolve().parent / "worlds" / "knee_stair_l1.wbt"
+CONFIG_PATH = Path(__file__).resolve().parents[1] / "config" / "default.json"
+
+
+def actuator_torque_limit_nm() -> float:
+    """Read the one hard-limit definition. Do not write that number here."""
+    config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    return float(config["actuator_torque_limit_nm"])
 
 
 def generate_world() -> str:
-    return """#VRML_SIM R2025a utf8
+    limit = actuator_torque_limit_nm()
+    text = """#VRML_SIM R2025a utf8
 # Optional visualization only. Trimmed from PR #3 mobility_demo/prepare.py leg().
 # Single-side knee. Not the 10-joint model. Not executed by CI.
 # DEF HUMAN_SHANK is the human leg body. DEF EXO_LINK is the exoskeleton body.
@@ -50,7 +59,7 @@ Robot {
     DEF EXO_KNEE HingeJoint {
       jointParameters HingeJointParameters { axis 0 1 0 anchor 0 0 -0.14 minStop 0.05 maxStop 2.2 dampingConstant 0.2 }
       device [
-        RotationalMotor { name "exo_knee" maxTorque 24 maxVelocity 6 }
+        RotationalMotor { name "exo_knee" maxTorque LIMIT_TOKEN maxVelocity 6 }
         PositionSensor { name "exo_knee_sensor" }
       ]
       endPoint DEF HUMAN_SHANK Solid {
@@ -75,6 +84,8 @@ Robot {
   supervisor FALSE
 }
 """
+    rendered = f"{limit:.0f}" if limit == int(limit) else str(limit)
+    return text.replace("LIMIT_TOKEN", rendered)
 
 
 def write_world(path: Path = WORLD_PATH) -> Path:

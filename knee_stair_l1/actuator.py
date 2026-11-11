@@ -1,9 +1,10 @@
 """Actuator torque clamp for the knee-stair Python path and joint_safety_node.
 
 Controller proposals and the supervisor output are not motor torque.
-clamp_actuator_torque is the function those two paths use before torque
-reaches KneePlant or /knee_stair/assist_command_safe. Legacy C++ controllers
-do not call it. The supervisor's command_limit_nm (40 Nm) is a plausibility
+clamp_actuator_torque is the function the knee-stair Python path uses before
+torque reaches KneePlant or /knee_stair/assist_command_safe. The C++ controllers
+read the same actuator_torque_limit_nm key through actuator_torque.hpp and clamp
+again after load torque. The supervisor's command_limit_nm (40 Nm) is a plausibility
 check: a finite command outside it enters LIMITED_ASSIST. It is not this limit.
 """
 

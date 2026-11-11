@@ -1,5 +1,12 @@
 # 变更记录
 
+## 2026-11-10 — 历史 C++ 控制器接入同一执行器硬上限
+
+- `joint_controller.cpp`、`JointControllerPlugin.cpp`、`ManualJointControllerPlugin.cpp`、`StudyJointControllerPlugin.cpp` 在负载加上之后调用 `actuator_torque::Gate::apply`。数字只定义在 `actuator_torque_limit_nm`。见 https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11 。
+- C++ 对 NaN、+inf、-inf 输出 0 并锁存 `E_STOP`。Python 的 `clamp_actuator_torque` 仍抛出 `ValueError`。
+- 研究场景加在连杆上的外力矩不是电机命令，保持原样。仓库里没有第三方 Webots 示例控制器。
+- CI 用 g++ 编译并运行 `tests/actuator_torque_test.cpp`。
+
 ## 2026-11-10 — 文档与 PR #10 的执行器硬上限对齐
 
 - 力矩分层表改为最终硬上限 `clamp_actuator_torque`（`actuator_torque_limit_nm` = 24）。它覆盖 `knee_stair_l1` 的关闭、导纳、AssistPolicy，以及 `joint_safety_node`。

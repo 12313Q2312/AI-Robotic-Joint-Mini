@@ -27,7 +27,7 @@ TOPIC_ASSIST_COMMAND_SAFE = "/knee_stair/assist_command_safe"
 # Float64 on the ROS topic: torque after clamp_actuator_torque, the value the
 # knee-stair plant may apply. The in-process payload also carries
 # supervisor_command_nm, which can still be the 40 Nm plausibility clamp.
-# Legacy C++ controllers do not publish this topic and do not use this clamp.
+# Legacy C++ controllers clamp with actuator_torque::Gate before setTorque. They do not publish this topic.
 
 TOPIC_PLANT_STATE = "/knee_stair/plant_state"
 # ROS: sensor_msgs/JointState. header.stamp is the source time, not receipt time.
