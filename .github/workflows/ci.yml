@@ -97,13 +97,13 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             python3-colcon-common-extensions \
-            ros-jazzy-webots-ros2 \
+            ros-jazzy-webots-ros2-driver \
             ros-jazzy-rosidl-default-generators \
             ros-jazzy-pluginlib
       - name: Build ROS 2 package and run CTest
         shell: bash
         run: |
-          set -euo pipefail
+          set -eo pipefail
           source /opt/ros/jazzy/setup.bash
           cd ros2_ws
           colcon build --packages-select ai_robotic_joint_ros2 --event-handlers console_direct+
