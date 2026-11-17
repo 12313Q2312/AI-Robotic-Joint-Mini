@@ -58,6 +58,11 @@ install(
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY launch resource worlds DESTINATION share/${PROJECT_NAME})
 install(PROGRAMS scripts/ros2_joint_experiment.py DESTINATION lib/${PROJECT_NAME})
+install(PROGRAMS scripts/rj_int_01_smoke.py DESTINATION lib/${PROJECT_NAME})
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../scripts/rj_int_01_assess.py
+  DESTINATION lib/${PROJECT_NAME})
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../knee_stair_l1/config/default.json
+  DESTINATION share/${PROJECT_NAME}/config)
 install(PROGRAMS scripts/joint_safety_node.py DESTINATION lib/${PROJECT_NAME})
 install(PROGRAMS scripts/manual_panel_server.py DESTINATION lib/${PROJECT_NAME})
 install(FILES scripts/manual_panel_core.py DESTINATION lib/${PROJECT_NAME})
