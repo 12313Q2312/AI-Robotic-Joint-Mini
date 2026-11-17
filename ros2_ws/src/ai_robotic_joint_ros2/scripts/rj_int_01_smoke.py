@@ -42,12 +42,16 @@ class JointIntegrationSmoke(Node):
     def on_joint(self, msg):
         if not msg.position:
             return
+        def safe_number(value):
+            value = float(value)
+            return value if math.isfinite(value) else None
+
         self.observations["joint_states"].append({
             "phase": self.phase,
             "elapsed_wall_s": round(time.monotonic() - self.started_wall, 6),
-            "angle_rad": float(msg.position[0]),
-            "velocity_rad_s": float(msg.velocity[0]) if msg.velocity else 0.0,
-            "effort_nm": float(msg.effort[0]) if msg.effort else 0.0,
+            "angle_rad": safe_number(msg.position[0]),
+            "velocity_rad_s": safe_number(msg.velocity[0]) if msg.velocity else None,
+            "effort_nm": safe_number(msg.effort[0]) if msg.effort else None,
             "ros_stamp_sec": int(msg.header.stamp.sec),
             "ros_stamp_nanosec": int(msg.header.stamp.nanosec),
         })
@@ -120,7 +124,7 @@ def execute(args):
         }
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(
-            json.dumps(report, ensure_ascii=False, indent=2, allow_nan=True) + "\n",
+            json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
             encoding="utf-8",
         )
         print(f"RJ-INT-01 {report['status']} | {args.output} | {result}")
