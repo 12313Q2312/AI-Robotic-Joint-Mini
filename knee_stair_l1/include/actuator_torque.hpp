@@ -8,6 +8,7 @@
 // substitute for a non-finite input.
 
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -65,6 +66,10 @@ inline double limit_from_file(const std::string& path) {
 }
 
 inline std::string find_default_config() {
+  // Explicit launch-time path takes priority. A bad configured path must
+  // fail closed rather than silently loading an unrelated working-tree file.
+  const char* configured = std::getenv("AI_ROBOTIC_JOINT_CONFIG");
+  if (configured != nullptr) return configured;
   const char* candidates[] = {
       "knee_stair_l1/config/default.json",
       "../knee_stair_l1/config/default.json",
