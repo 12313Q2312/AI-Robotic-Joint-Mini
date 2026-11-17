@@ -1,5 +1,19 @@
 # ROS 2 集成入口
 
+## RJ-INT-01A: Linux native Webots + ROS 2 smoke
+
+The new `joint_native_launch.py` brings up the legacy single-axis Webots
+world, driver and safety supervisor together. Use the separately installed
+`rj_int_01_smoke.py` command to capture actual position, torque-command,
+safe-reference and timeout-state messages.
+
+**[Full setup and acceptance instructions](../docs/RJ-INT-01.md)**
+
+This is not yet the knee-assistance physics integration. ROS 2 build passing
+alone does not prove Webots motion. The original WSL/Windows remote controller
+launch remains available unchanged.
+
+
 包：`ai_robotic_joint_ros2`。历史环境为 ROS 2 Humble、Ubuntu22.04 与 Webots R2025a。包依赖见 `src/ai_robotic_joint_ros2/package.xml`。本轮未重新构建或启动ROS 2/Webots。
 
 | 场景 | Launch/世界 |
