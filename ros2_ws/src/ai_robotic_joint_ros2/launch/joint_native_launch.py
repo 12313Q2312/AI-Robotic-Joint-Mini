@@ -27,7 +27,12 @@ def generate_launch_description():
     config = SetEnvironmentVariable(
         name="AI_ROBOTIC_JOINT_CONFIG", value=config_path
     )
-    webots = WebotsLauncher(world=world_path)
+    headless = os.environ.get("RJ_WEBOTS_HEADLESS") == "1"
+    webots = WebotsLauncher(
+        world=world_path,
+        gui=not headless,
+        mode="fast" if headless else "realtime",
+    )
     driver = WebotsController(
         robot_name="joint_base",
         parameters=[{"robot_description": urdf_path}],
