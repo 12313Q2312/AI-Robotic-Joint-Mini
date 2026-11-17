@@ -110,6 +110,45 @@ jobs:
           source install/setup.bash
           colcon test --packages-select ai_robotic_joint_ros2 --event-handlers console_direct+
           colcon test-result --verbose
+      - name: Install Webots R2025a and headless display
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl xvfb xauth
+          curl --fail --location --retry 3 \
+            --output /tmp/webots_2025a_amd64.deb \
+            https://github.com/cyberbotics/webots/releases/download/R2025a/webots_2025a_amd64.deb
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends /tmp/webots_2025a_amd64.deb
+          test -x /usr/local/webots/webots
+      - name: RJ-INT-01 live Webots joint movement and timeout smoke
+        shell: bash
+        env:
+          WEBOTS_HOME: /usr/local/webots
+          RJ_WEBOTS_HEADLESS: '1'
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          QTWEBENGINE_DISABLE_SANDBOX: '1'
+        run: |
+          set -eo pipefail
+          mkdir -p local
+          xvfb-run -a -s "-screen 0 1280x800x24" bash -c '
+            set -eo pipefail
+            source /opt/ros/jazzy/setup.bash
+            source ros2_ws/install/setup.bash
+            ros2 launch ai_robotic_joint_ros2 joint_native_launch.py > local/webots-launch.log 2>&1 &
+            launch_pid=$!
+            trap "kill $launch_pid 2>/dev/null || true" EXIT
+            timeout 90s ros2 run ai_robotic_joint_ros2 rj_int_01_smoke.py \
+              --startup-seconds 50 --move-seconds 8 --timeout-seconds 2.2 \
+              --output local/rj_int_01_smoke.json
+          '
+      - name: Upload Webots integration evidence (even if failed)
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: rj-int-01-webots-evidence
+          path: |
+            local/rj_int_01_smoke.json
+            local/webots-launch.log
+          if-no-files-found: warn
       - name: State exact test scope
         if: always()
-        run: echo "ROS 2 C++ build and CTest only. Webots motion requires RJ-INT-01 live smoke run, and is NOT claimed by this job." >> "$GITHUB_STEP_SUMMARY"
+        run: echo "ROS 2 build + CTest and headless Webots smoke are separate steps; only the live smoke PASS and uploaded evidence support simulation-motion claims. No hardware or knee-assistance validation." >> "$GITHUB_STEP_SUMMARY"
