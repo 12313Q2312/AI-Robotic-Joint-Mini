@@ -140,6 +140,11 @@ jobs:
               --startup-seconds 50 --move-seconds 8 --timeout-seconds 2.2 \
               --output local/rj_int_01_smoke.json
           '
+      - name: Print Webots launch diagnostics
+        if: always()
+        run: |
+          echo "===== Webots and ROS launch diagnostics ====="
+          if test -f local/webots-launch.log; then tail -n 180 local/webots-launch.log; fi
       - name: Upload Webots integration evidence (even if failed)
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
