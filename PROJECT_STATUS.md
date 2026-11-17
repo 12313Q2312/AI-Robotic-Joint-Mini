@@ -1,5 +1,8 @@
 # 工程展示状态
 
+2026-11-17 RJ-INT-01A: GitHub CI 实际构建 ROS 2 Jazzy，并在 Webots R2025a 无界面仿真中验证了独立的旧单关节角度路径（65,038 个关节状态样本、最大目标方向位移 0.754 rad、391 条安全目标与 391 条安全状态消息）。[验收说明](docs/RJ-INT-01.md) · [通过的 CI](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/runs/44046498775)。这**不是** `knee_stair_l1` 的助力模型集成或硬件验证。
+
+
 更新：2026-11-10。文档与 PR #10 对齐：`knee_stair_l1` 和 `joint_safety_node` 的最终硬上限是 `clamp_actuator_torque`（24 Nm）。监督器 40 Nm 只是合理性检查。四个历史 C++ 控制器已接入同一硬上限，见 issue #11。L1 仍是合成意图仿真，不是人体验证。
 
 更新：2026-11-09。单侧膝关节仿真闭环仍在 `knee_stair_l1`。报告用 30 个配对随机种子。逐步原始 JSON 不入库，由 CI artifact 携带。24 Nm 内环上限未放宽。`E_STOP` 不改写安全角度。这些仍是合成仿真，不是真人、真实肌电或防跌倒结果。可选 Webots 几何没有在这里运行。
@@ -16,14 +19,14 @@
 - 缓震与跌倒冲击保护为核心需求之一，需同时评价预测、实际响应和物理能量吸收。
 - 穿戴系统上的常驻本地控制与独立保护仍是设计建议，不是已实现能力。`clamp_actuator_torque` 与 C++ `actuator_torque::Gate` 共用 `actuator_torque_limit_nm`（issue #11）。具体动作、人体/接触模型、传感器、算法、执行器和缓冲机构尚未冻结。
 - `knee_stair_l1` 已实现合成意图和有界人体力矩的离线仿真。未接入真实肌电，也不是人体验证。
-- 研究状态仍只用 implemented、verified、experimental、theoretical。L1 的指标保持 experimental。没有模型训练、ROS 2/Webots 运动验收或真人试验。
+- 研究状态仍只用 implemented、verified、experimental、theoretical。L1 的指标保持 experimental。没有膝助力模型训练、膝助力的 ROS 2/Webots 运动验收或真人试验；另有独立单关节角度入口 RJ-INT-01A 已通过 ROS 2/Webots CI。
 
 ## 已有工程资产
 
 - 单关节 C++ 控制、ROS 2 通信、人工面板、日志与部分历史数据已整理。
 - 几何补偿配对夹具和理想固定轴动力学回归已有代码；未完成当前双侧 Webots 实际运动验收。
 - T001 原生零件文件保留，名义参考图不是完整装配或加工图。
-- 本轮只运行离线软件检查，不启动 Webots/ROS 2 运动，不改变原项目。
+- 2026-11-04 的历史轮次只运行离线软件检查；2026-11-17 的 RJ-INT-01A 已在独立分支上完成旧单关节 ROS 2/Webots 集成验收，不改变膝助力的实验口径。
 - 历史环境故障未重新检查，不宣称已恢复。
 
 当前验证摘要见 `data/verification/software_baseline_20261104.json`；软件测试不证明实际运动、机械安全、测得节能或用户独立掌握。具体范围见 `docs/ENGINEERING_EVIDENCE.md` 与 `docs/LIMITATIONS.md`。

@@ -1,6 +1,9 @@
 # 已知局限
 
-- 软件测试通过只验证相应合成输入。当前配对夹具没有完成实际双侧 Webots 运动验收，ROS 2 插件也没有在本轮重新构建。
+2026-11-17 修订：RJ-INT-01A 已构建 ROS 2 并运行单关节 Webots 物理运动和超时验证；见 [单关节验收](RJ-INT-01.md)。**不包含**膝关节人体/绑带动力学、实际硬件或防跌倒效果。下文早期“本轮”的表述指历史离线工作，并不是当前 CI 的全部内容。
+
+
+- 软件测试通过只验证相应合成输入。当前配对夹具没有完成实际双侧 Webots 运动验收，旧单关节 ROS 2 插件现已在独立 CI job 中构建。
 - 几何势能补偿是名义模型，没有验证真实凸轮/滚子接触、摩擦滞回、制造误差或完整机械装配，不能称实测节能。
 - 参考轨迹的限速不保证实际关节全过程限速。已有理想模型曾暴露启动下垂和速度峰值，恢复实际运动前应独立检查启动、保持和复位瞬态。
 - 控制器写入的力矩命令与实测力矩不同；早期 `JointState.effort` 还包含扰动命令。不得把命令降低直接解释为真实能耗降低。
@@ -15,9 +18,9 @@
 - 髋关节固定，只有一个屈伸自由度。硬限位接触记为异常。一次仿真里接触数为 0，只说明这组参数没有顶到限位。
 - `knee_stair_l1` 的关闭、导纳、AssistPolicy 和 `joint_safety_node` 在进入植物或 `/knee_stair/assist_command_safe` 之前调用 `clamp_actuator_torque`。`actuator_torque_limit_nm` 为 24 Nm。监督器 40 Nm 只让有限越界命令进入 `LIMITED_ASSIST`。NaN 和 inf 让钳位函数抛出 `ValueError`，`safe_publish` 发布 0 并锁存 `E_STOP`。`joint_controller.cpp`、`JointControllerPlugin.cpp`、`ManualJointControllerPlugin.cpp` 和 `StudyJointControllerPlugin.cpp` 在负载加上之后调用同一个 `actuator_torque::Gate::apply`，见 https://github.com/12313Q2312/AI-Robotic-Joint-Mini/issues/11 。研究场景里加在连杆上的外力矩不是电机命令。PR #10 合并前，AssistPolicy 内 cap 是 80 Nm、植物边界是 40 Nm；那是当时的历史。当前内 cap、植物边界和 Webots `maxTorque` 都是 24 Nm。
 - 导纳内环 PID 抗饱和上限保持 24 Nm。这是安全参数，不靠放宽上限来降低饱和时间。导纳的正功降幅小于 AssistPolicy，这是结果，不是调参目标。
-- 全部结果都只是仿真。意图是合成的，CI 不运行 ROS 2 或 Webots。
+- 全部结果都只是仿真。意图是合成的，膝助力指标不依赖 ROS 2 或 Webots；独立的旧单关节角度路径已有 ROS 2/Webots 运动 CI。
 - 导纳在正功降幅上差于 AssistPolicy 基线，在力矩 RMS 上与它相当。
 - 即使 1.5 s 的延迟下助力仍然有效，说明合成意图太可预测，助力接近重力补偿。L2 必须加入意图突变和动作中途停止。
 - 固定两步队列的 p50/p95/max 是仿真环路时延，不是真实系统时延。意图和传感器在进入监督器之前被延迟时，稳态到 500 ms 仍是 `NORMAL`。本层监督器没有信号新鲜度检查。该检查是 L2 必做项，不在本层实现。
 - `E_STOP` 把仿真助力力矩置 0，外骨骼只剩被动阻尼，并锁存到手动复位。它不改写 `/joint/safe_target_angle`。这不是硬件急停。`/joint/safety_state` 只供读取。
-- 可选 Webots 世界只保留裁剪后的几何，没有绑带动力学。CI 不启动 Webots，也不把该文件当成运动已验收。
+- 可选 Webots 世界只保留裁剪后的几何，没有绑带动力学。这个膝关节几何世界仍未被 CI 运动验收；CI 只运行旧单关节 joint_minimal_ros2.wbt。

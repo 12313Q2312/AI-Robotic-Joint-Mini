@@ -77,15 +77,15 @@ no fixed timing claim is made until an actual run is captured.
 
 ## CI evidence boundaries
 
-- `validation`: existing synthetic/offline regressions, RJ-INT-01 assessment
-  regression tests and C++ config-path fail-closed test; Python source syntax.
-- `ros2-build-jazzy`: actual ROS 2 C++ package build and CTest.
-- **Not covered by CI:** Webots world launched, live motor movement,
-  ROS-to-Webots message round-trip or video capture.
+- `validation` runs existing synthetic/offline regressions, acceptance-logic unit tests and the C++ fail-closed configuration test.
+- `ros2-build-jazzy` performs an actual ROS 2 C++ build and CTest, installs Webots R2025a, starts a headless Webots world and runs the live movement/timeout smoke.
+- The CI step **fails** when no motor motion, no safe target, no DAMPING_ONLY state or non-finite measurements are detected. On success or failure it uploads `rj-int-01-webots-evidence` containing the full JSON and launch logs.
+- **Not tested:** the `knee_stair_l1` human/strap-assisted torque loop, the real robot, human subjects or physical emergency-stop hardware.
 
-The integration is only **fully verified** after a real ROS 2+Webots launch,
-the live smoke exits 0, and its report is reviewed. Failures should remain
-visible; do not relabel a passing ROS build as a successful Webots run.
+First actual PASS: [2026-11-17 CI run 44046498775](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/runs/44046498775).
+Evidence: 65,038 `/joint/state` samples, 0.754137 rad maximum positive target-direction motion, 391 safe-target and 391 safety-state messages, no acceptance failures.
+[Raw observation artifact](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/runs/44046498775/artifacts/14312136058).
+The `JointState.effort` field is controller commanded torque, **not** physical torque sensing.
 
 ## Next integration boundary
 
