@@ -32,12 +32,15 @@ def assess(observations, target_rad=0.6, minimum_motion_rad=0.03):
 
     angles = [item["angle_rad"] for item in samples]
     torques = [item["effort_nm"] for item in samples]
-    if any(not math.isfinite(x) for x in angles + torques):
+    def finite(value):
+        return isinstance(value, (int, float)) and math.isfinite(value)
+
+    if any(not finite(x) for x in angles + torques):
         failures.append("Non-finite joint state value")
     direction = 1.0 if target_rad >= 0.0 else -1.0
     motion_rad = (
         max(direction * (x - angles[0]) for x in angles)
-        if angles and all(math.isfinite(x) for x in angles) else 0.0
+        if angles and all(finite(x) for x in angles) else 0.0
     )
     if motion_rad < minimum_motion_rad:
         failures.append("Observed joint motion below threshold (no proven physical simulation)")
