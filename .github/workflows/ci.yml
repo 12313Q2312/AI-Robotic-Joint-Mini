@@ -144,7 +144,11 @@ jobs:
         if: always()
         run: |
           echo "===== Webots and ROS launch diagnostics ====="
-          if test -f local/webots-launch.log; then tail -n 180 local/webots-launch.log; fi
+          if test -f local/webots-launch.log; then
+            echo "===== STARTUP ====="; head -n 100 local/webots-launch.log
+            echo "===== ERROR MARKERS ====="; grep -E -i "traceback|exception|error|failed|joint_safety|not found|import" local/webots-launch.log | head -n 120 || true
+            echo "===== END ====="; tail -n 30 local/webots-launch.log
+          fi
       - name: Upload Webots integration evidence (even if failed)
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
