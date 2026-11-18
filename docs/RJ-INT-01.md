@@ -29,12 +29,26 @@ Install ROS 2 Jazzy and Webots using the official documentation:
 
 After dependencies are installed, from the repository root:
 
+These are the same packages the `ros2-build-jazzy` job installs, plus the pinned Webots R2025a image:
+
 ```bash
 source /opt/ros/jazzy/setup.bash
-sudo apt-get install ros-jazzy-webots-ros2 python3-colcon-common-extensions
+sudo apt-get update
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+  python3-colcon-common-extensions \
+  ros-jazzy-webots-ros2-driver \
+  ros-jazzy-rosidl-default-generators \
+  ros-jazzy-pluginlib \
+  curl xvfb xauth
+curl --fail --location --retry 3 \
+  --output /tmp/webots_2025a_amd64.deb \
+  https://github.com/cyberbotics/webots/releases/download/R2025a/webots_2025a_amd64.deb
+echo "6253d58c9b625a83ed7b62cd85a640fd0542d441c48d633a60932208b40b0657  /tmp/webots_2025a_amd64.deb" | sha256sum --check
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends /tmp/webots_2025a_amd64.deb
 cd ros2_ws
 colcon build --packages-select ai_robotic_joint_ros2
 source install/setup.bash
+export WEBOTS_HOME=/usr/local/webots
 ros2 launch ai_robotic_joint_ros2 joint_native_launch.py
 ```
 
@@ -61,10 +75,11 @@ at 10 Hz, then stops publishing and checks all of:
 
 1. At least one actual `/joint/state` message was received from the plugin.
 2. The angle moved at least 0.03 rad in the target direction.
-3. The safety supervisor forwarded the requested target (tolerance 0.02 rad).
-4. After the command timeout, the safe target became 0 rad.
-5. The safety state became `DAMPING_ONLY` after the timeout.
-6. Recorded angle/effort values are finite.
+3. The last move-phase angle is within 0.02 rad of the target. That is about 1.1 degrees, the same band used for forwarded targets. The recorded run ended the move at the commanded angle, so this rejects a joint that only twitched.
+4. Every recorded `effort_nm` stays within `actuator_torque_limit_nm` (24 Nm in the committed config).
+5. The safety supervisor forwarded the requested target (tolerance 0.02 rad).
+6. After commands stop, the safe target is 0 and the state is `DAMPING_ONLY` within 1.5 s. The supervisor timeout is 1.0 s (`legacy_timeout_s`); 1.5 s adds the 0.05 s publish timer and delivery, and is inside the 2.2 s observation window.
+7. Recorded angle/effort values are finite.
 
 It exits nonzero if a check fails and saves the complete observations,
 wall-clock timestamps, ROS timestamps, checks and limitations to a JSON report.

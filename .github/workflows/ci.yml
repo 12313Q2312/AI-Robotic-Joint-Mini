@@ -117,6 +117,8 @@ jobs:
           curl --fail --location --retry 3 \
             --output /tmp/webots_2025a_amd64.deb \
             https://github.com/cyberbotics/webots/releases/download/R2025a/webots_2025a_amd64.deb
+          # Webots R2025a, exact asset webots_2025a_amd64.deb (162910802 bytes).
+          echo "6253d58c9b625a83ed7b62cd85a640fd0542d441c48d633a60932208b40b0657  /tmp/webots_2025a_amd64.deb" | sha256sum --check
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends /tmp/webots_2025a_amd64.deb
           test -x /usr/local/webots/webots
       - name: RJ-INT-01 live Webots joint movement and timeout smoke

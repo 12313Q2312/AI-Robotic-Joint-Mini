@@ -23,6 +23,7 @@ class JointIntegrationSmoke(Node):
     def __init__(self):
         super().__init__("rj_int_01_smoke")
         self.phase = "startup"
+        self.started_wall = time.monotonic()
         self.observations = {
             "joint_states": [],
             "safe_targets": [],
@@ -56,14 +57,19 @@ class JointIntegrationSmoke(Node):
             "ros_stamp_nanosec": int(msg.header.stamp.nanosec),
         })
 
+    def _elapsed(self):
+        return round(time.monotonic() - self.started_wall, 6)
+
     def on_safe_target(self, msg):
         self.observations["safe_targets"].append({
             "phase": self.phase, "value": float(msg.data),
+            "elapsed_wall_s": self._elapsed(),
         })
 
     def on_safety_state(self, msg):
         self.observations["safety_states"].append({
             "phase": self.phase, "value": str(msg.data),
+            "elapsed_wall_s": self._elapsed(),
         })
 
     def send(self, target_rad):

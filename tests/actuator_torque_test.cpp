@@ -58,6 +58,26 @@ int main() {
   expect(gate.apply(limit / 2.0) == limit / 2.0 && gate.state() == actuator_torque::State::kNormal,
          "reset clears E_STOP");
 
+  auto rejects = [&](const std::string& json, const std::string& name) {
+    bool threw = false;
+    try {
+      actuator_torque::limit_from_json_text(json);
+    } catch (const std::exception&) {
+      threw = true;
+    }
+    expect(threw, name);
+  };
+  rejects("{\"actuator_torque_limit_nm\": -5}", "negative limit is rejected");
+  const double scientific = actuator_torque::limit_from_json_text(
+      "{\"actuator_torque_limit_nm\": 2.4e1}");
+  expect(std::abs(scientific - limit) < 1e-12, "2.4e1 is accepted as the committed limit");
+  rejects("{\"actuator_torque_limit_nm\": \"abc9\"}", "abc9 is rejected");
+  rejects("{\"actuator_torque_limit_nm\": 1000}", "1000 Nm is rejected");
+  rejects("{\"actuator_torque_limit_nm\": NaN}", "NaN limit is rejected");
+  rejects("{\"actuator_torque_limit_nm\": inf}", "inf limit is rejected");
+  rejects("{\"actuator_torque_limit_nm\": 0}", "zero limit is rejected");
+  rejects("{\"other\": 1}", "missing key is rejected");
+
   const int total = g_passed + g_failed;
   std::cout << "actuator_torque_tests: " << g_passed << " passed, " << g_failed
             << " failed, " << total << " total\n";
