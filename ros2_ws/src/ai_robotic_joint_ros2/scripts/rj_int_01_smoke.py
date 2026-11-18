@@ -14,7 +14,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Float64, String
+from std_msgs.msg import Bool, Float64, String
 
 from rj_int_01_assess import assess
 
@@ -28,6 +28,8 @@ class JointIntegrationSmoke(Node):
             "joint_states": [],
             "safe_targets": [],
             "safety_states": [],
+            "joint_field_lengths": [],
+            "faults": [],
         }
         self.publisher = self.create_publisher(Float64, "/joint/target_angle", 10)
         self.create_subscription(
@@ -39,8 +41,15 @@ class JointIntegrationSmoke(Node):
         self.create_subscription(
             String, "/joint/safety_state", self.on_safety_state, 10
         )
+        self.create_subscription(Bool, "/joint/fault", self.on_fault, 10)
 
     def on_joint(self, msg):
+        self.observations["joint_field_lengths"].append({
+            "name": len(msg.name),
+            "position": len(msg.position),
+            "velocity": len(msg.velocity),
+            "effort": len(msg.effort),
+        })
         if not msg.position:
             return
         def safe_number(value):
@@ -63,6 +72,13 @@ class JointIntegrationSmoke(Node):
     def on_safe_target(self, msg):
         self.observations["safe_targets"].append({
             "phase": self.phase, "value": float(msg.data),
+            "elapsed_wall_s": self._elapsed(),
+        })
+
+    def on_fault(self, msg):
+        self.observations["faults"].append({
+            "phase": self.phase,
+            "value": bool(msg.data),
             "elapsed_wall_s": self._elapsed(),
         })
 

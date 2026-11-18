@@ -111,6 +111,20 @@ def assess(observations, target_rad=0.6, minimum_motion_rad=0.03,
     )
     if motion_rad < minimum_motion_rad:
         failures.append("Observed joint motion below threshold (no proven physical simulation)")
+    lengths = observations.get("joint_field_lengths", [])
+    if not lengths:
+        failures.append("JointState field lengths were not recorded")
+    elif any(
+        item.get("name") != 1 or item.get("name") != item.get("position")
+        or item.get("name") != item.get("velocity") or item.get("name") != item.get("effort")
+        for item in lengths
+    ):
+        failures.append("JointState array lengths do not match name length")
+    faults = observations.get("faults", [])
+    if not faults:
+        failures.append("No /joint/fault samples")
+    elif any(item.get("value") for item in faults):
+        failures.append("/joint/fault was true during the nominal run")
     return {
         "passed": not failures,
         "failures": failures,

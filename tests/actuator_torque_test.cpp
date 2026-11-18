@@ -58,6 +58,47 @@ int main() {
   expect(gate.apply(limit / 2.0) == limit / 2.0 && gate.state() == actuator_torque::State::kNormal,
          "reset clears E_STOP");
 
+  const double sensors[] = {
+      std::numeric_limits<double>::quiet_NaN(),
+      std::numeric_limits<double>::infinity(),
+      -std::numeric_limits<double>::infinity(),
+  };
+  const char* sensor_names[] = {"NaN sensor", "+Inf sensor", "-Inf sensor"};
+  for (int index = 0; index < 3; ++index) {
+    actuator_torque::Gate sensor_gate;
+    sensor_gate.limit_nm = limit;
+    const double stopped = actuator_torque::motor_command_for_feedback(
+        sensor_gate, sensors[index], limit / 2.0);
+    expect(stopped == 0.0 && sensor_gate.state() == actuator_torque::State::kEStop,
+           std::string(sensor_names[index]) + " commands 0 and latches E_STOP");
+    const double held = actuator_torque::motor_command_for_feedback(
+        sensor_gate, 0.2, limit / 2.0);
+    expect(held == 0.0 && sensor_gate.estop_latched,
+           std::string(sensor_names[index]) + " stays latched after a finite sensor");
+    const auto invalid = actuator_torque::joint_feedback_sample(
+        sensor_gate, sensors[index], 0.1, stopped);
+    expect(invalid.fault && !std::isfinite(invalid.position_rad) && invalid.effort_nm == 0.0,
+           std::string(sensor_names[index]) + " publishes the fault flag and a NaN position");
+    expect(actuator_torque::joint_state_lengths_match(1, 1, 1, 1),
+           std::string(sensor_names[index]) + " keeps JointState arrays the same length");
+    const auto still_latched = actuator_torque::joint_feedback_sample(
+        sensor_gate, 0.2, 0.0, held);
+    expect(still_latched.fault && still_latched.position_rad == 0.2,
+           std::string(sensor_names[index]) + " keeps the fault flag after a finite sensor");
+    sensor_gate.reset();
+    const auto cleared_flag = actuator_torque::joint_feedback_sample(
+        sensor_gate, 0.2, 0.0, limit / 2.0);
+    expect(!cleared_flag.fault,
+           std::string(sensor_names[index]) + " clears the fault flag");
+    const double cleared = actuator_torque::motor_command_for_feedback(
+        sensor_gate, 0.2, limit / 2.0);
+    expect(cleared == limit / 2.0 && sensor_gate.state() == actuator_torque::State::kNormal,
+           std::string(sensor_names[index]) + " reset clears the latch");
+  }
+
+  expect(!actuator_torque::joint_state_lengths_match(2, 1, 1, 1),
+         "a longer JointState name than the value arrays is rejected");
+
   auto rejects = [&](const std::string& json, const std::string& name) {
     bool threw = false;
     try {

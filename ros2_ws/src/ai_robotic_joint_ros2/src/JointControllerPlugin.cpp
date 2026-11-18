@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 
@@ -91,6 +92,9 @@ void JointControllerPlugin::init(
 
   state_publisher_ = node_->create_publisher<sensor_msgs::msg::JointState>(
       "joint/state", rclcpp::SensorDataQoS());
+  // /joint/safety_state is the supervisor's String state. This bool is only the
+  // sensor latch, so it does not share that topic.
+  fault_publisher_ = node_->create_publisher<std_msgs::msg::Bool>("joint/fault", 10);
 
   RCLCPP_INFO(
       node_->get_logger(),
@@ -126,8 +130,21 @@ void JointControllerPlugin::onTargetAngle(
 
 void JointControllerPlugin::step() {
   const double actual_angle_rad = wb_position_sensor_get_value(sensor_);
-  if (!std::isfinite(actual_angle_rad))
+  if (!std::isfinite(actual_angle_rad)) {
+    // Do not return before the setter. The previous step's torque would stay applied.
+    // The gate stays latched until this plugin process or the simulation is restarted.
+    const bool already_latched = actuator_gate_.estop_latched;
+    const double stopped = actuator_torque::motor_command_for_feedback(
+        actuator_gate_, actual_angle_rad, 0.0);
+    wb_motor_set_torque(motor_, stopped);
+    if (!already_latched) {
+      RCLCPP_ERROR(
+          node_->get_logger(),
+          "Non-finite joint sensor. E_STOP is latched until the plugin or the simulation is restarted.");
+    }
+    publishFeedback(actual_angle_rad, std::numeric_limits<double>::quiet_NaN(), stopped);
     return;
+  }
 
   const double target_angle_rad = target_angle_rad_.load();
   const double error_rad = target_angle_rad - actual_angle_rad;
@@ -170,13 +187,7 @@ void JointControllerPlugin::step() {
 
   wb_motor_set_torque(motor_, applied_torque_nm);
 
-  sensor_msgs::msg::JointState state;
-  state.header.stamp = node_->get_clock()->now();
-  state.name = {"joint_axis"};
-  state.position = {actual_angle_rad};
-  state.velocity = {angular_velocity_rad_s};
-  state.effort = {applied_torque_nm};
-  state_publisher_->publish(std::move(state));
+  publishFeedback(actual_angle_rad, angular_velocity_rad_s, applied_torque_nm);
 
   if (log_counter_++ % 10 == 0) {
     RCLCPP_INFO(
@@ -192,6 +203,23 @@ void JointControllerPlugin::step() {
         applied_torque_nm,
         anti_windup_active ? 1 : 0);
   }
+}
+
+void JointControllerPlugin::publishFeedback(
+    double measured_position_rad, double velocity_rad_s, double effort_nm) {
+  const actuator_torque::JointFeedbackSample sample =
+      actuator_torque::joint_feedback_sample(
+          actuator_gate_, measured_position_rad, velocity_rad_s, effort_nm);
+  sensor_msgs::msg::JointState state;
+  state.header.stamp = node_->get_clock()->now();
+  state.name = {"joint_axis"};
+  state.position = {sample.position_rad};
+  state.velocity = {sample.velocity_rad_s};
+  state.effort = {sample.effort_nm};
+  state_publisher_->publish(std::move(state));
+  std_msgs::msg::Bool fault;
+  fault.data = sample.fault;
+  fault_publisher_->publish(fault);
 }
 
 }  // namespace ai_robotic_joint_ros2

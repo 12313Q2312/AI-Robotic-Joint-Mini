@@ -22,6 +22,12 @@ class IntegrationAssessmentTests(unittest.TestCase):
                 {"phase": "timeout", "value": "NORMAL", "elapsed_wall_s": 8.1},
                 {"phase": "timeout", "value": "DAMPING_ONLY", "elapsed_wall_s": 9.0},
             ],
+            "joint_field_lengths": [
+                {"name": 1, "position": 1, "velocity": 1, "effort": 1},
+            ],
+            "faults": [
+                {"phase": "move", "value": False, "elapsed_wall_s": 2.0},
+            ],
         }
 
     def test_complete_observations_are_accepted(self):
@@ -69,6 +75,22 @@ class IntegrationAssessmentTests(unittest.TestCase):
         result = assess(evidence)
         self.assertFalse(result["passed"])
         self.assertTrue(any("timeout bound" in item for item in result["failures"]))
+
+    def test_mismatched_joint_state_lengths_are_rejected(self):
+        evidence = self._evidence()
+        evidence["joint_field_lengths"] = [
+            {"name": 2, "position": 1, "velocity": 1, "effort": 1},
+        ]
+        result = assess(evidence)
+        self.assertFalse(result["passed"])
+        self.assertTrue(any("array lengths" in item for item in result["failures"]))
+
+    def test_nominal_fault_flag_must_stay_false(self):
+        evidence = self._evidence()
+        evidence["faults"] = [{"phase": "move", "value": True, "elapsed_wall_s": 2.0}]
+        result = assess(evidence)
+        self.assertFalse(result["passed"])
+        self.assertTrue(any("/joint/fault" in item for item in result["failures"]))
 
 
 if __name__ == "__main__":

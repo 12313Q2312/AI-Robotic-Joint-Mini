@@ -8,9 +8,11 @@
 // substitute for a non-finite input.
 
 #include <cctype>
+#include <cstddef>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -42,6 +44,49 @@ struct Gate {
 // AI_ROBOTIC_JOINT_CONFIG, may not exceed it. The digits are not written as 24
 // so the JSON key remains the only torque-limit literal of that value.
 constexpr double kMaxActuatorTorqueNm = 2.4e1;
+
+// Sensor feedback used for control. A non-finite reading commands 0 and
+// latches E_STOP on this call. A later finite reading stays at 0 until reset().
+inline double motor_command_for_feedback(Gate& gate, double feedback, double finite_command_nm) {
+  if (!std::isfinite(feedback)) {
+    return gate.apply(std::numeric_limits<double>::quiet_NaN());
+  }
+  return gate.apply(finite_command_nm);
+}
+
+// One JointState sample. name stays a single "joint_axis" so position, velocity
+// and effort stay the same length. The latch is a separate bool for /joint/fault.
+// /joint/safety_state remains the supervisor's String state and is not this flag.
+// Restarting the plugin or the simulation reconstructs the gate and is the only
+// way this controller clears the latch.
+struct JointFeedbackSample {
+  double position_rad = 0.0;
+  double velocity_rad_s = 0.0;
+  double effort_nm = 0.0;
+  bool fault = false;
+};
+
+inline JointFeedbackSample joint_feedback_sample(
+    const Gate& gate, double measured_position_rad, double velocity_rad_s, double effort_nm) {
+  JointFeedbackSample sample;
+  sample.effort_nm = effort_nm;
+  sample.fault = gate.estop_latched;
+  if (!std::isfinite(measured_position_rad)) {
+    sample.position_rad = std::numeric_limits<double>::quiet_NaN();
+    sample.velocity_rad_s = std::numeric_limits<double>::quiet_NaN();
+  } else {
+    sample.position_rad = measured_position_rad;
+    sample.velocity_rad_s = velocity_rad_s;
+  }
+  return sample;
+}
+
+inline bool joint_state_lengths_match(
+    std::size_t name_count, std::size_t position_count,
+    std::size_t velocity_count, std::size_t effort_count) {
+  return name_count > 0 && name_count == position_count &&
+         name_count == velocity_count && name_count == effort_count;
+}
 
 inline double limit_from_json_text(const std::string& text) {
   const std::string key = "\"actuator_torque_limit_nm\"";

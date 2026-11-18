@@ -16,6 +16,8 @@ launch remains available unchanged.
 
 包：`ai_robotic_joint_ros2`。当前 CI 的 `ros2-build-jazzy` 在 Ubuntu 24.04 容器 `ros:jazzy-ros-base` 里构建本包、跑 CTest，并安装校验过的 Webots R2025a 后做无头冒烟。历史环境记录仍是 ROS 2 Humble、Ubuntu 22.04 与 Webots R2025a。包依赖见 `src/ai_robotic_joint_ros2/package.xml`。
 
+`JointControllerPlugin` 在位置传感器不是有限值时把电机力矩写成 0，并锁存 `E_STOP`。这个锁存不会因为后来的有限读数而解除。清除它的方式只有重启该插件进程，或重启仿真（仿真重启会重新构造插件）。故障期间仍发布 `/joint/state`：`name` 只有 `joint_axis`，位置为 NaN。锁存标志在单独的 `std_msgs/Bool` 话题 `/joint/fault` 上，不占用监督器的 `/joint/safety_state`。
+
 | 场景 | Launch/世界 |
 |---|---|
 | 早期单关节 | `joint_launch.py` / `joint_minimal_ros2.wbt` |

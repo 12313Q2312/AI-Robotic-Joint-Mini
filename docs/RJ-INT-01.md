@@ -80,6 +80,8 @@ at 10 Hz, then stops publishing and checks all of:
 5. The safety supervisor forwarded the requested target (tolerance 0.02 rad).
 6. After commands stop, the safe target is 0 and the state is `DAMPING_ONLY` within 1.5 s. The supervisor timeout is 1.0 s (`legacy_timeout_s`); 1.5 s adds the 0.05 s publish timer and delivery, and is inside the 2.2 s observation window.
 7. Recorded angle/effort values are finite.
+8. Every `/joint/state` has `name`, `position`, `velocity` and `effort` the same length, and that length is 1 (`joint_axis` only).
+9. `/joint/fault` (`std_msgs/Bool`) is published and stays false for this nominal run. It is the sensor latch, separate from the supervisor's `/joint/safety_state` string.
 
 It exits nonzero if a check fails and saves the complete observations,
 wall-clock timestamps, ROS timestamps, checks and limitations to a JSON report.
