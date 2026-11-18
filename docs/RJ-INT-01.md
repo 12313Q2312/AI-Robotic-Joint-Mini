@@ -97,9 +97,10 @@ no fixed timing claim is made until an actual run is captured.
 - The CI step **fails** when no motor motion, no safe target, no DAMPING_ONLY state or non-finite measurements are detected. On success or failure it uploads `rj-int-01-webots-evidence` containing the full JSON and launch logs.
 - **Not tested:** the `knee_stair_l1` human/strap-assisted torque loop, the real robot, human subjects or physical emergency-stop hardware.
 
-First actual PASS: [2026-11-17 CI run 44046498775](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/runs/44046498775).
-Evidence: 65,038 `/joint/state` samples, 0.754137 rad maximum positive target-direction motion, 391 safe-target and 391 safety-state messages, no acceptance failures.
-[Raw observation artifact](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/runs/44046498775/artifacts/14312136058).
+PASS of this page's checks, including the strict actuator-limit parser, the 0.02 rad settle check, the 24 Nm torque bound, and the 1.5 s degradation bound: [2026-11-18 CI run 44239179029](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/runs/44239179029) at `202eceaab3d732e8378652ba36c42c0c5cbf77a3`.
+Evidence: 68,441 `/joint/state` samples, 0.754427 rad maximum positive target-direction motion, 390 safe-target and 390 safety-state messages, no acceptance failures.
+[Raw observation artifact](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/runs/44239179029/artifacts/14399036750).
+An earlier smoke, before those three assertions, passed on [run 44046498775](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/runs/44046498775). That run does not cover this head.
 The `JointState.effort` field is controller commanded torque, **not** physical torque sensing.
 
 ## Next integration boundary
