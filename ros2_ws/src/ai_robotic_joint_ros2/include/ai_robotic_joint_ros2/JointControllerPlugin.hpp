@@ -7,6 +7,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <webots/types.h>
 #include <webots_ros2_driver/PluginInterface.hpp>
@@ -29,6 +30,7 @@ class JointControllerPlugin final
 
  private:
   void onTargetAngle(const std_msgs::msg::Float64::SharedPtr message);
+  void publishFeedback(double measured_position_rad, double velocity_rad_s, double effort_nm);
 
   webots_ros2_driver::WebotsNode *node_ = nullptr;
   WbDeviceTag sensor_ = 0;
@@ -53,6 +55,7 @@ class JointControllerPlugin final
 
   rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr target_subscription_;
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr state_publisher_;
+  rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr fault_publisher_;
 };
 
 }  // namespace ai_robotic_joint_ros2
