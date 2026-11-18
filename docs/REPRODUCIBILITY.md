@@ -20,9 +20,9 @@ Linux 可用 `python3`。检查只使用 Python 标准库和 Node.js 内置模�
 
 ## ROS 2 与 Webots
 
-已有工程曾使用 Windows/Webots R2025a 与 WSL Ubuntu22.04/ROS 2 Humble。本次没有重建或运行这些组件，也未重新验证历史环境问题。实际启动需要准备兼容的 Webots、ROS 2、webots_ros2_driver 及包依赖，先阅读 [ROS 2入口](../ros2_ws/README.md) 和 [局限](LIMITATIONS.md)。
+**已验收（2026-11-17）：** Ubuntu 24.04 + ROS 2 Jazzy + Webots R2025a 上的旧单关节角度控制链路（不是膝关节助力模型）。CI `validation` 执行离线回归，`ros2-build-jazzy` 实际运行 colcon 构建、CTest 及无界面 Webots 运动/超时实验。测试报告与操作步骤见 [RJ-INT-01](RJ-INT-01.md)，原始证据见 [通过的工作流](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/runs/44046498775)。
 
-基础 CI 只验证离线逻辑，不把 ROS 2 插件构建、Webots 联通或机械运动写成已通过。当前仓库不是一键运行整机演示。
+**仍未验收：** 历史 Windows/Webots R2025a + WSL Ubuntu22.04/ROS 2 Humble 配置、膝关节 L1/L2 人体/绑带动力学的 Webots 集成、硬件与真人试验。不能用旧单关节角度链路通过来证明这些项目通过。[ROS 2入口](../ros2_ws/README.md)和[局限](LIMITATIONS.md)有说明。
 
 ## 单侧膝上楼助力闭环
 
