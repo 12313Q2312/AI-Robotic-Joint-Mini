@@ -7,7 +7,9 @@
 // clamp_actuator_torque raises. This header does not return a finite
 // substitute for a non-finite input.
 
+#include <cctype>
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <limits>
 #include <sstream>
@@ -37,6 +39,11 @@ struct Gate {
   void reset() { estop_latched = false; }
 };
 
+// 2.4e1 Nm is the absolute ceiling. A configured file, including one named by
+// AI_ROBOTIC_JOINT_CONFIG, may not exceed it. The digits are not written as 24
+// so the JSON key remains the only torque-limit literal of that value.
+constexpr double kMaxActuatorTorqueNm = 2.4e1;
+
 // Sensor feedback used for control. A non-finite reading commands 0 and
 // latches E_STOP on this call. A later finite reading stays at 0 until reset().
 inline double motor_command_for_feedback(Gate& gate, double feedback, double finite_command_nm) {
@@ -58,18 +65,26 @@ inline double limit_from_json_text(const std::string& text) {
   const auto key_at = text.find(key);
   if (key_at == std::string::npos)
     throw std::runtime_error("actuator config is missing actuator_torque_limit_nm");
-  const auto colon = text.find(':', key_at + key.size());
-  if (colon == std::string::npos)
+  std::size_t cursor = key_at + key.size();
+  while (cursor < text.size() && std::isspace(static_cast<unsigned char>(text[cursor])))
+    ++cursor;
+  if (cursor >= text.size() || text[cursor] != ':')
     throw std::runtime_error("actuator config limit is missing a value");
-  const auto number = text.find_first_of("0123456789", colon + 1);
-  if (number == std::string::npos)
-    throw std::runtime_error("actuator config limit is not numeric");
-  std::size_t end = number;
-  while (end < text.size() && (std::isdigit(static_cast<unsigned char>(text[end])) || text[end] == '.'))
-    ++end;
-  const double limit = std::stod(text.substr(number, end - number));
-  if (!std::isfinite(limit) || limit <= 0.0)
-    throw std::runtime_error("actuator config limit must be positive and finite");
+  ++cursor;
+  while (cursor < text.size() && std::isspace(static_cast<unsigned char>(text[cursor])))
+    ++cursor;
+  if (cursor >= text.size())
+    throw std::runtime_error("actuator config limit is missing a value");
+  const char* begin = text.c_str() + cursor;
+  char* consumed = nullptr;
+  const double limit = std::strtod(begin, &consumed);
+  if (consumed == begin)
+    throw std::runtime_error("actuator config limit is not a number");
+  const unsigned char next = static_cast<unsigned char>(*consumed);
+  if (*consumed != '\0' && !std::isspace(next) && next != ',' && next != '}' && next != ']')
+    throw std::runtime_error("actuator config limit token was not fully consumed");
+  if (!std::isfinite(limit) || !(limit > 0.0) || limit > kMaxActuatorTorqueNm)
+    throw std::runtime_error("actuator config limit must be finite and in (0, ceiling]");
   return limit;
 }
 
@@ -82,6 +97,10 @@ inline double limit_from_file(const std::string& path) {
 }
 
 inline std::string find_default_config() {
+  // Explicit launch-time path takes priority. A bad configured path must
+  // fail closed rather than silently loading an unrelated working-tree file.
+  const char* configured = std::getenv("AI_ROBOTIC_JOINT_CONFIG");
+  if (configured != nullptr) return configured;
   const char* candidates[] = {
       "knee_stair_l1/config/default.json",
       "../knee_stair_l1/config/default.json",

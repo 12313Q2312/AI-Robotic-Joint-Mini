@@ -90,7 +90,7 @@ class JointSafety(Node):
             self.core, message, now, float(self._config["safety"]["stamp_future_tolerance_s"]),
         )
         if reason is not None:
-            self.get_logger().warn("Plant stamp is stale (%s); using source time, not receipt time", reason)
+            self.get_logger().warning(f"Plant stamp is stale ({reason}); using source time, not receipt time")
         self.core.observe_sensor(message.position[0], message.velocity[0], now, packet_time=packet_time)
 
     def on_intent(self, message: JointState) -> None:
@@ -99,7 +99,7 @@ class JointSafety(Node):
             self.core, message, now, float(self._config["safety"]["stamp_future_tolerance_s"]),
         )
         if reason is not None:
-            self.get_logger().warn("Intent stamp is stale (%s); using source time, not receipt time", reason)
+            self.get_logger().warning(f"Intent stamp is stale ({reason}); using source time, not receipt time")
         self.core.observe_intent(packet_time, now)
 
     def publish_supervised(self) -> None:
@@ -117,7 +117,7 @@ class JointSafety(Node):
         self.safe_torque_publisher.publish(torque)
         if outcome.state != self._previous_state:
             self.get_logger().info(
-                "safety state %s reasons=%s", outcome.state, ",".join(outcome.reasons),
+                f"safety state {outcome.state} reasons={','.join(outcome.reasons)}"
             )
             self._previous_state = outcome.state
 

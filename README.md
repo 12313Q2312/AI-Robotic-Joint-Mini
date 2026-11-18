@@ -1,5 +1,8 @@
 # AI Robotic Joint Mini
 
+2026-11-17 RJ-INT-01A: GitHub CI 实际构建 ROS 2 Jazzy，并在 Webots R2025a 无界面仿真中验证了独立的旧单关节角度路径（65,038 个关节状态样本、最大目标方向位移 0.754 rad、391 条安全目标与 391 条安全状态消息）。[验收说明](docs/RJ-INT-01.md) · [通过的 CI](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/runs/44046498775)。这**不是** `knee_stair_l1` 的助力模型集成或硬件验证。
+
+
 [![Repository CI](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/workflows/ci.yml/badge.svg)](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/workflows/ci.yml)
 
 **面向老年人下肢行走与上楼助力、危险提前识别及冲击缓冲的外骨骼仿真研究。**
@@ -79,7 +82,7 @@ AI负责估计与决策，缓震需要可验证的物理能量吸收路径；弹
 | 模块 | 已有资产 | 验证边界 |
 |---|---|---|
 | 独立控制 | Webots C++ 力矩 PID、P/PD/PID 与抗饱和示例数据 | 历史实验配置各自独立，不代表当前全系统验收 |
-| ROS 2 集成 | C++ 插件、消息、监督、启动与采集代码 | 本次 CI 不构建 ROS 2 或启动 Webots |
+| ROS 2 集成 | C++ 插件、消息、监督、启动与采集代码 | RJ-INT-01A 已针对旧单关节角度路径运行 ROS 2 构建、Webots 仿真运动与超时验收（不包含膝助力模型） |
 | 人工面板 | 角度/键盘输入、控制权、心跳、状态与日志 | 合成 HTTP/前端测试不替代真实反馈验收 |
 | 配对夹具 | 同参考、同参 PID、几何势能等效补偿 | 理想固定轴模型；实际双侧 Webots 运动未验收 |
 | CAD | T001 原生 SolidWorks 测试零件及名义参考图 | 不是完整装配、质量/惯量认证或加工图 |
@@ -121,7 +124,7 @@ AI负责估计与决策，缓震需要可验证的物理能量吸收路径；弹
 
 必须单独记下的限制：
 
-- 全部结果都只是仿真。意图是合成的，CI 不运行 ROS 2 或 Webots。
+- 全部结果都只是仿真。意图是合成的，膝助力 L1/L2 仍是离线合成仿真；RJ-INT-01A 的 ROS 2/Webots 测试仅覆盖另一条旧单关节角度链路。
 - 导纳在正功降幅上差于 AssistPolicy，在力矩 RMS 上与它相当。没有为了让导纳反超而调参。
 - 即使 1.5 s 的延迟下助力仍然有效，说明合成意图太可预测，助力接近重力补偿。L2 必须加入意图突变和动作中途停止。
 
