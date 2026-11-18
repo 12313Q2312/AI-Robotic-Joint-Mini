@@ -2,6 +2,8 @@
 
 包：`ai_robotic_joint_ros2`。历史环境为 ROS 2 Humble、Ubuntu22.04 与 Webots R2025a。包依赖见 `src/ai_robotic_joint_ros2/package.xml`。本轮未重新构建或启动ROS 2/Webots。
 
+`JointControllerPlugin` 在位置传感器不是有限值时把电机力矩写成 0，并锁存 `E_STOP`。这个锁存不会因为后来的有限读数而解除。清除它的方式只有重启该插件进程，或重启仿真（仿真重启会重新构造插件）。故障期间仍发布 `/joint/state`：位置为 NaN，`name` 在 `joint_axis` 之后带有 `fault`。
+
 | 场景 | Launch/世界 |
 |---|---|
 | 早期单关节 | `joint_launch.py` / `joint_minimal_ros2.wbt` |

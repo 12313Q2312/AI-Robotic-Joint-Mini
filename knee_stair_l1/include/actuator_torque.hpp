@@ -46,6 +46,13 @@ inline double motor_command_for_feedback(Gate& gate, double feedback, double fin
   return gate.apply(finite_command_nm);
 }
 
+// sensor_msgs/JointState has no status field. While E_STOP is latched, publishers
+// append this token to JointState.name. Restarting the plugin or the simulation
+// reconstructs the gate and is the only way this controller clears the latch.
+inline const char* fault_name_marker(const Gate& gate) {
+  return gate.estop_latched ? "fault" : nullptr;
+}
+
 inline double limit_from_json_text(const std::string& text) {
   const std::string key = "\"actuator_torque_limit_nm\"";
   const auto key_at = text.find(key);

@@ -75,7 +75,12 @@ int main() {
         sensor_gate, 0.2, limit / 2.0);
     expect(held == 0.0 && sensor_gate.estop_latched,
            std::string(sensor_names[index]) + " stays latched after a finite sensor");
+    const char* marker = actuator_torque::fault_name_marker(sensor_gate);
+    expect(marker != nullptr && std::string(marker) == "fault",
+           std::string(sensor_names[index]) + " uses the fault name marker");
     sensor_gate.reset();
+    expect(actuator_torque::fault_name_marker(sensor_gate) == nullptr,
+           std::string(sensor_names[index]) + " clears the fault name marker");
     const double cleared = actuator_torque::motor_command_for_feedback(
         sensor_gate, 0.2, limit / 2.0);
     expect(cleared == limit / 2.0 && sensor_gate.state() == actuator_torque::State::kNormal,

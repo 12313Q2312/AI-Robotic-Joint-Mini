@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 
@@ -128,9 +129,23 @@ void JointControllerPlugin::step() {
   const double actual_angle_rad = wb_position_sensor_get_value(sensor_);
   if (!std::isfinite(actual_angle_rad)) {
     // Do not return before the setter. The previous step's torque would stay applied.
-    wb_motor_set_torque(
-        motor_,
-        actuator_torque::motor_command_for_feedback(actuator_gate_, actual_angle_rad, 0.0));
+    // The gate stays latched until this plugin process or the simulation is restarted.
+    const bool already_latched = actuator_gate_.estop_latched;
+    const double stopped = actuator_torque::motor_command_for_feedback(
+        actuator_gate_, actual_angle_rad, 0.0);
+    wb_motor_set_torque(motor_, stopped);
+    if (!already_latched) {
+      RCLCPP_ERROR(
+          node_->get_logger(),
+          "Non-finite joint sensor. E_STOP is latched until the plugin or the simulation is restarted.");
+    }
+    sensor_msgs::msg::JointState state;
+    state.header.stamp = node_->get_clock()->now();
+    state.name = {"joint_axis", actuator_torque::fault_name_marker(actuator_gate_)};
+    state.position = {std::numeric_limits<double>::quiet_NaN()};
+    state.velocity = {std::numeric_limits<double>::quiet_NaN()};
+    state.effort = {stopped};
+    state_publisher_->publish(std::move(state));
     return;
   }
 
@@ -178,6 +193,8 @@ void JointControllerPlugin::step() {
   sensor_msgs::msg::JointState state;
   state.header.stamp = node_->get_clock()->now();
   state.name = {"joint_axis"};
+  if (const char* marker = actuator_torque::fault_name_marker(actuator_gate_))
+    state.name.push_back(marker);
   state.position = {actual_angle_rad};
   state.velocity = {angular_velocity_rad_s};
   state.effort = {applied_torque_nm};
