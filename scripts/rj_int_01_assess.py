@@ -21,8 +21,19 @@ DEGRADE_WITHIN_S = 1.5
 
 
 def _committed_actuator_limit_nm():
-    path = Path(__file__).resolve().parents[1] / "knee_stair_l1" / "config" / "default.json"
-    return float(json.loads(path.read_text(encoding="utf-8"))["actuator_torque_limit_nm"])
+    # The checker is installed beside the smoke client. The same JSON is the
+    # source-tree file, the copy under the installed package, or the share/
+    # config file. A missing file is an error; there is no substitute number.
+    here = Path(__file__).resolve()
+    candidates = (
+        here.parents[1] / "knee_stair_l1" / "config" / "default.json",
+        here.parent / "knee_stair_l1" / "config" / "default.json",
+        here.parents[2] / "share" / "ai_robotic_joint_ros2" / "config" / "default.json",
+    )
+    for path in candidates:
+        if path.is_file():
+            return float(json.loads(path.read_text(encoding="utf-8"))["actuator_torque_limit_nm"])
+    raise FileNotFoundError("committed actuator config default.json was not found")
 
 
 def assess(observations, target_rad=0.6, minimum_motion_rad=0.03,

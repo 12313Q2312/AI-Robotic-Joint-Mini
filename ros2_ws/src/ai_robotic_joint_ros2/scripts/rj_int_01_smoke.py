@@ -111,7 +111,27 @@ def execute(args):
             node.phase = "timeout"
             spin_for(node, args.timeout_seconds)
 
-        result = assess(node.observations, target_rad=args.target_rad)
+        try:
+            result = assess(node.observations, target_rad=args.target_rad)
+        except Exception as exc:
+            # Keep the captured samples if the checker cannot read its config.
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(
+                    {
+                        "experiment": "RJ-INT-01 / existing single-joint angle interface",
+                        "status": "FAIL",
+                        "error": f"{type(exc).__name__}: {exc}",
+                        "observations": node.observations,
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                    allow_nan=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            raise
         report = {
             "experiment": "RJ-INT-01 / existing single-joint angle interface",
             "status": "PASS" if result["passed"] else "FAIL",
