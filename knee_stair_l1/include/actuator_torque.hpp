@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -35,6 +36,15 @@ struct Gate {
 
   void reset() { estop_latched = false; }
 };
+
+// Sensor feedback used for control. A non-finite reading commands 0 and
+// latches E_STOP on this call. A later finite reading stays at 0 until reset().
+inline double motor_command_for_feedback(Gate& gate, double feedback, double finite_command_nm) {
+  if (!std::isfinite(feedback)) {
+    return gate.apply(std::numeric_limits<double>::quiet_NaN());
+  }
+  return gate.apply(finite_command_nm);
+}
 
 inline double limit_from_json_text(const std::string& text) {
   const std::string key = "\"actuator_torque_limit_nm\"";

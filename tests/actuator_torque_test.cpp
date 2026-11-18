@@ -58,6 +58,30 @@ int main() {
   expect(gate.apply(limit / 2.0) == limit / 2.0 && gate.state() == actuator_torque::State::kNormal,
          "reset clears E_STOP");
 
+  const double sensors[] = {
+      std::numeric_limits<double>::quiet_NaN(),
+      std::numeric_limits<double>::infinity(),
+      -std::numeric_limits<double>::infinity(),
+  };
+  const char* sensor_names[] = {"NaN sensor", "+Inf sensor", "-Inf sensor"};
+  for (int index = 0; index < 3; ++index) {
+    actuator_torque::Gate sensor_gate;
+    sensor_gate.limit_nm = limit;
+    const double stopped = actuator_torque::motor_command_for_feedback(
+        sensor_gate, sensors[index], limit / 2.0);
+    expect(stopped == 0.0 && sensor_gate.state() == actuator_torque::State::kEStop,
+           std::string(sensor_names[index]) + " commands 0 and latches E_STOP");
+    const double held = actuator_torque::motor_command_for_feedback(
+        sensor_gate, 0.2, limit / 2.0);
+    expect(held == 0.0 && sensor_gate.estop_latched,
+           std::string(sensor_names[index]) + " stays latched after a finite sensor");
+    sensor_gate.reset();
+    const double cleared = actuator_torque::motor_command_for_feedback(
+        sensor_gate, 0.2, limit / 2.0);
+    expect(cleared == limit / 2.0 && sensor_gate.state() == actuator_torque::State::kNormal,
+           std::string(sensor_names[index]) + " reset clears the latch");
+  }
+
   const int total = g_passed + g_failed;
   std::cout << "actuator_torque_tests: " << g_passed << " passed, " << g_failed
             << " failed, " << total << " total\n";

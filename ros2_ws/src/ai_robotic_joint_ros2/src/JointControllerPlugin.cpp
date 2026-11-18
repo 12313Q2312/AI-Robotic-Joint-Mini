@@ -126,8 +126,13 @@ void JointControllerPlugin::onTargetAngle(
 
 void JointControllerPlugin::step() {
   const double actual_angle_rad = wb_position_sensor_get_value(sensor_);
-  if (!std::isfinite(actual_angle_rad))
+  if (!std::isfinite(actual_angle_rad)) {
+    // Do not return before the setter. The previous step's torque would stay applied.
+    wb_motor_set_torque(
+        motor_,
+        actuator_torque::motor_command_for_feedback(actuator_gate_, actual_angle_rad, 0.0));
     return;
+  }
 
   const double target_angle_rad = target_angle_rad_.load();
   const double error_rad = target_angle_rad - actual_angle_rad;
