@@ -1,5 +1,7 @@
 # AI Robotic Joint Mini
 
+> **维护状态（2026-11-18）：阶段冻结。** 当前已完成的软件/仿真验证不等于硬件验收；后续恢复开发前请先阅读 [冻结交接与重新启动条件](docs/FREEZE_HANDOFF_20261118.md)。
+
 2026-11-17 RJ-INT-01A: GitHub CI 实际构建 ROS 2 Jazzy，并在 Webots R2025a 无界面仿真中验证了独立的旧单关节角度路径（65,038 个关节状态样本、最大目标方向位移 0.754 rad、391 条安全目标与 391 条安全状态消息）。[验收说明](docs/RJ-INT-01.md) · [通过的 CI](https://github.com/12313Q2312/AI-Robotic-Joint-Mini/actions/runs/44046498775)。这**不是** `knee_stair_l1` 的助力模型集成或硬件验证。
 
 
